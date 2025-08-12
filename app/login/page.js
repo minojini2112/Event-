@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { supabase } from '../../lib/supabase';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -8,6 +9,8 @@ export default function LoginPage() {
     email: '',
     password: ''
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -17,10 +20,31 @@ export default function LoginPage() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log('Login attempt:', formData);
+    setLoading(true);
+    setError('');
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (error) {
+        setError(error.message);
+        return;
+      }
+
+      if (data.user) {
+        // Redirect to main page after successful login
+        router.push('/main');
+      }
+    } catch (error) {
+      setError('An unexpected error occurred. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSignupRedirect = () => {
@@ -58,6 +82,11 @@ export default function LoginPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl">
+                {error}
+              </div>
+            )}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                 Email Address
@@ -69,7 +98,7 @@ export default function LoginPage() {
                 required
                 value={formData.email}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-black placeholder-gray-500"
                 placeholder="Enter your email"
               />
             </div>
@@ -85,16 +114,17 @@ export default function LoginPage() {
                 required
                 value={formData.password}
                 onChange={handleInputChange}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-black placeholder-gray-500"
                 placeholder="Enter your password"
               />
             </div>
 
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-6 rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-6 rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Login
+              {loading ? 'Signing in...' : 'Login'}
             </button>
           </form>
 

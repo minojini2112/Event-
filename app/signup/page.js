@@ -1,15 +1,20 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { supabase } from '../../lib/supabase';
+import { insertUserToCustomTable } from '../../lib/userUtils';
 
 export default function SignupPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({
     email: '',
+    username: '',
     password: '',
     confirmPassword: '',
-    userType: 'participant'
+    role: 'participant'
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -19,20 +24,56 @@ export default function SignupPage() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     // Validate passwords match
     if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match!');
+      setError('Passwords do not match!');
       return;
     }
 
-    // Handle signup logic here
-    console.log('Signup attempt:', formData);
-    
-    // Navigate to username page after successful signup
-    router.push('/name');
+    setLoading(true);
+    setError('');
+
+    try {
+      // Sign up the user with Supabase
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            username: formData.username,
+            role: formData.role
+          }
+        }
+      });
+
+      if (error) {
+        setError(error.message);
+        return;
+      }
+
+      if (data.user) {
+        try {
+          // Insert user data into custom users table
+          await insertUserToCustomTable(data.user.id, formData.username, formData.role);
+          
+          // Store username and role in localStorage for later use
+          localStorage.setItem('username', formData.username);
+          localStorage.setItem('role', formData.role);
+          
+          // Redirect to main page after successful signup
+          router.push('/main');
+        } catch (insertError) {
+          setError('Account created but failed to save additional details. Please contact support.');
+        }
+      }
+    } catch (error) {
+      setError('An unexpected error occurred. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleLoginRedirect = () => {
@@ -70,100 +111,123 @@ export default function SignupPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Two Column Layout */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Left Column */}
-              <div className="space-y-6">
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                    Email Address
-                  </label>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    required
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200"
-                    placeholder="Enter your email"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                    Password
-                  </label>
-                  <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    required
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200"
-                    placeholder="Enter your password"
-                  />
-                </div>
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl">
+                {error}
               </div>
+            )}
+                         {/* Two Column Layout */}
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+               {/* Left Column */}
+               <div className="space-y-6">
+                 <div>
+                   <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                     Email Address
+                   </label>
+                   <input
+                     id="email"
+                     name="email"
+                     type="email"
+                     required
+                     value={formData.email}
+                     onChange={handleInputChange}
+                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-black placeholder-gray-500"
+                     placeholder="Enter your email"
+                   />
+                 </div>
 
-              {/* Right Column */}
-              <div className="space-y-6">
-                <div>
-                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                    Confirm Password
-                  </label>
-                  <input
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    type="password"
-                    required
-                    value={formData.confirmPassword}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200"
-                    placeholder="Confirm your password"
-                  />
-                </div>
+                 <div>
+                   <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
+                     Username
+                   </label>
+                   <input
+                     id="username"
+                     name="username"
+                     type="text"
+                     required
+                     value={formData.username}
+                     onChange={handleInputChange}
+                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-black placeholder-gray-500"
+                     placeholder="Choose a username"
+                   />
+                 </div>
+               </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Account Type
-                  </label>
-                  <div className="space-y-3">
-                    <label className="flex items-center p-3 border-2 border-gray-200 rounded-xl hover:border-blue-300 transition-colors cursor-pointer">
-                      <input
-                        type="radio"
-                        name="userType"
-                        value="participant"
-                        checked={formData.userType === 'participant'}
-                        onChange={handleInputChange}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                      />
-                      <span className="ml-3 text-gray-700 font-medium">Participant</span>
-                    </label>
-                    <label className="flex items-center p-3 border-2 border-gray-200 rounded-xl hover:border-blue-300 transition-colors cursor-pointer">
-                      <input
-                        type="radio"
-                        name="userType"
-                        value="admin"
-                        checked={formData.userType === 'admin'}
-                        onChange={handleInputChange}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                      />
-                      <span className="ml-3 text-gray-700 font-medium">Admin</span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-            </div>
+               {/* Right Column */}
+               <div className="space-y-6">
+                 <div>
+                   <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                     Password
+                   </label>
+                   <input
+                     id="password"
+                     name="password"
+                     type="password"
+                     required
+                     value={formData.password}
+                     onChange={handleInputChange}
+                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-black placeholder-gray-500"
+                     placeholder="Enter your password"
+                   />
+                 </div>
+
+                 <div>
+                   <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
+                     Confirm Password
+                   </label>
+                   <input
+                     id="confirmPassword"
+                     name="confirmPassword"
+                     type="password"
+                     required
+                     value={formData.confirmPassword}
+                     onChange={handleInputChange}
+                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-black placeholder-gray-500"
+                     placeholder="Confirm your password"
+                   />
+                 </div>
+               </div>
+             </div>
+
+             {/* Full Width Role Selection */}
+             <div>
+               <label className="block text-sm font-medium text-gray-700 mb-3">
+                 Account Role
+               </label>
+               <div className="grid grid-cols-2 gap-4">
+                 <label className="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-blue-300 transition-colors cursor-pointer">
+                   <input
+                     type="radio"
+                     name="role"
+                     value="participant"
+                     checked={formData.role === 'participant'}
+                     onChange={handleInputChange}
+                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                   />
+                   <span className="ml-3 text-gray-700 font-medium">Participant</span>
+                 </label>
+                 <label className="flex items-center p-4 border-2 border-gray-200 rounded-xl hover:border-blue-300 transition-colors cursor-pointer">
+                   <input
+                     type="radio"
+                     name="role"
+                     value="admin"
+                     checked={formData.role === 'admin'}
+                     onChange={handleInputChange}
+                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                   />
+                   <span className="ml-3 text-gray-700 font-medium">Admin</span>
+                 </label>
+               </div>
+             </div>
 
             {/* Full Width Submit Button */}
             <div className="pt-4">
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-6 rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-6 rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Sign Up
+                {loading ? 'Creating Account...' : 'Sign Up'}
               </button>
             </div>
           </form>
