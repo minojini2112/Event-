@@ -12,12 +12,18 @@ export default function MainPage() {
   // Profile dropdown state
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileRef = useRef(null);
+  // Track active/hovered menu item for visual highlight
+  const [activeMenu, setActiveMenu] = useState(null);
 
   // Sample user data - replace with real user data
   const userData = {
     username: 'John Doe',
     email: 'john.doe@example.com',
-    userType
+    userType,
+    // Sample progress counts; replace with real values from backend
+    eventsRegistered: 7,
+    eventsWon: 2,
+    wishlistCount: 9
   };
 
   // Close dropdown when clicking outside
@@ -157,6 +163,32 @@ export default function MainPage() {
     setFilterTitle('');
   };
 
+  // Badge tiers (same logic as participant profile)
+  const tiers = [
+    { name: 'Bronze', min: 5, gradient: 'from-amber-500 to-amber-700' },
+    { name: 'Silver', min: 10, gradient: 'from-gray-400 to-gray-600' },
+    { name: 'Gold', min: 20, gradient: 'from-yellow-500 to-yellow-700' },
+    { name: 'Platinum', min: 40, gradient: 'from-indigo-500 to-purple-600' }
+  ];
+
+  const getTier = (count) => {
+    let current = null;
+    for (const t of tiers) {
+      if (count >= t.min) current = t;
+    }
+    const next = tiers.find((t) => count < t.min) || null;
+    const locked = count < tiers[0].min;
+    return { current, next, locked };
+  };
+
+  const tierPillClassMap = {
+    Bronze: 'bg-amber-100 text-amber-800 border border-amber-200',
+    Silver: 'bg-gray-100 text-gray-800 border border-gray-300',
+    Gold: 'bg-yellow-100 text-yellow-800 border border-yellow-200',
+    Platinum: 'bg-indigo-100 text-indigo-800 border border-indigo-200',
+    None: 'bg-gray-100 text-gray-700 border border-gray-200'
+  };
+
   // Compute filtered events
   const filteredEvents = useMemo(() => {
     const selectedDateObj = parseLocalYmd(filterDate);
@@ -252,40 +284,8 @@ export default function MainPage() {
       ];
     }
 
-    // Participant-specific options
-    return [
-      {
-        icon: (
-          <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        ),
-        label: 'Registered Events',
-        route: '/participant/registered-events',
-        highlight: true
-      },
-      {
-        icon: (
-          <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-          </svg>
-        ),
-        label: 'Won Events',
-        route: '/participant/won-events',
-        highlight: true
-      },
-      {
-        icon: (
-          <svg className="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-          </svg>
-        ),
-        label: 'Wishlist Events',
-        route: '/participant/wishlist-events',
-        highlight: true
-      },
-      ...baseOptions
-    ];
+    // Participant-specific options: keep the menu minimal; badges are shown above
+    return [...baseOptions];
   };
 
   return (
@@ -329,24 +329,95 @@ export default function MainPage() {
                   </div>
                 </div>
 
+                {/* Participant Badges Summary */}
+                {userData.userType === 'participant' && (
+                  <div className="px-4 py-3 border-b border-gray-200 bg-white/80">
+                    <div className="text-xs font-semibold text-gray-700 mb-2">Badges</div>
+                    <div className="space-y-2">
+                      {/* Registered */}
+                      {(() => {
+                        const t = getTier(userData.eventsRegistered).current;
+                        const name = t?.name || 'None';
+                        const pill = tierPillClassMap[name];
+                        return (
+                          <div className="flex items-center justify-between bg-gray-50 rounded-md px-3 py-2">
+                            <div className="flex items-center gap-2 text-gray-800">
+                              <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                              <span className="text-xs">Registered</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className={`text-[10px] px-2 py-0.5 rounded-full ${pill}`}>{name}</span>
+                              <span className="text-xs text-gray-700">{userData.eventsRegistered}</span>
+                            </div>
+                          </div>
+                        );
+                      })()}
+
+                      {/* Wins */}
+                      {(() => {
+                        const t = getTier(userData.eventsWon).current;
+                        const name = t?.name || 'None';
+                        const pill = tierPillClassMap[name];
+                        return (
+                          <div className="flex items-center justify-between bg-gray-50 rounded-md px-3 py-2">
+                            <div className="flex items-center gap-2 text-gray-800">
+                              <svg className="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+                              <span className="text-xs">Wins</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className={`text-[10px] px-2 py-0.5 rounded-full ${pill}`}>{name}</span>
+                              <span className="text-xs text-gray-700">{userData.eventsWon}</span>
+                            </div>
+                          </div>
+                        );
+                      })()}
+
+                      {/* Wishlist */}
+                      {(() => {
+                        const t = getTier(userData.wishlistCount).current;
+                        const name = t?.name || 'None';
+                        const pill = tierPillClassMap[name];
+                        return (
+                          <div className="flex items-center justify-between bg-gray-50 rounded-md px-3 py-2">
+                            <div className="flex items-center gap-2 text-gray-800">
+                              <svg className="w-4 h-4 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                              <span className="text-xs">Wishlist</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className={`text-[10px] px-2 py-0.5 rounded-full ${pill}`}>{name}</span>
+                              <span className="text-xs text-gray-700">{userData.wishlistCount}</span>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                )}
+
                 {/* Menu Options */}
                 <div className="p-2">
-                  {getProfileOptions().map((option, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleProfileNavigation(option.route)}
-                      className={`w-full text-left px-4 py-3 rounded-md transition-colors duration-150 flex items-center space-x-3 ${
-                        option.highlight 
-                          ? 'hover:bg-blue-50 border-l-4 border-blue-500 bg-blue-50/50' 
-                          : 'hover:bg-gray-50'
-                      }`}
-                    >
-                      {option.icon}
-                      <span className={option.highlight ? 'text-blue-700 font-medium' : 'text-gray-700'}>
-                        {option.label}
-                      </span>
-                    </button>
-                  ))}
+                  {getProfileOptions().map((option, index) => {
+                    const isActive = activeMenu === option.route;
+                    return (
+                      <button
+                        key={index}
+                        onClick={() => { setActiveMenu(option.route); handleProfileNavigation(option.route); }}
+                        onMouseEnter={() => setActiveMenu((prev) => prev ?? option.route)}
+                        onMouseLeave={() => setActiveMenu((prev) => (prev === option.route ? null : prev))}
+                        className={`group w-full text-left px-4 py-3 rounded-md transition-all duration-150 flex items-center space-x-3 border-l-4 ${
+                          isActive
+                            ? 'bg-indigo-50 border-indigo-500'
+                            : 'border-transparent hover:bg-indigo-50 hover:border-indigo-400'
+                        }`}
+                        aria-current={isActive ? 'page' : undefined}
+                      >
+                        {option.icon}
+                        <span className={`font-medium ${isActive ? 'text-indigo-700' : option.highlight ? 'text-blue-700' : 'text-gray-700'} group-hover:text-indigo-700`}>
+                          {option.label}
+                        </span>
+                      </button>
+                    );
+                  })}
 
                   <hr className="my-2 border-gray-200" />
 
