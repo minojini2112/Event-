@@ -421,8 +421,7 @@ function ParticipantProfileContent() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <div className="flex items-center justify-center gap-3 mb-2">
-                <h3 className="text-xl font-bold text-gray-800">Registered Events</h3>
+              <div className="flex items-center justify-center gap-2 mb-1">
                 {(() => {
                   const t = getTier(participantData.eventsRegistered).current;
                   const name = t?.name || 'None';
@@ -435,6 +434,7 @@ function ParticipantProfileContent() {
                   {participantData.eventsRegistered}
                 </span>
               </div>
+              <h3 className="text-xl font-bold text-gray-800 text-center mb-2">Registered Events</h3>
               <p className="text-gray-600 mb-4">View all events you&apos;ve registered for</p>
               <button 
                 onClick={() => handleNavigation('/participant/registered-events')}
@@ -453,8 +453,7 @@ function ParticipantProfileContent() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                 </svg>
               </div>
-              <div className="flex items-center justify-center gap-3 mb-2">
-                <h3 className="text-xl font-bold text-gray-800">Won Events</h3>
+              <div className="flex items-center justify-center gap-2 mb-1">
                 {(() => {
                   const t = getTier(participantData.eventsWon).current;
                   const name = t?.name || 'None';
@@ -467,6 +466,7 @@ function ParticipantProfileContent() {
                   {participantData.eventsWon}
                 </span>
               </div>
+              <h3 className="text-xl font-bold text-gray-800 text-center mb-2">Won Events</h3>
               <p className="text-gray-600 mb-4">Celebrate your victories and achievements</p>
               <button 
                 onClick={() => handleNavigation('/participant/won-events')}
@@ -485,8 +485,7 @@ function ParticipantProfileContent() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
               </div>
-              <div className="flex items-center justify-center gap-3 mb-2">
-                <h3 className="text-xl font-bold text-gray-800">Wishlist Events</h3>
+              <div className="flex items-center justify-center gap-2 mb-1">
                 {(() => {
                   const t = getTier(participantData.wishlistCount).current;
                   const name = t?.name || 'None';
@@ -499,6 +498,7 @@ function ParticipantProfileContent() {
                   {participantData.wishlistCount}
                 </span>
               </div>
+              <h3 className="text-xl font-bold text-gray-800 text-center mb-2">Wishlist Events</h3>
               <p className="text-gray-600 mb-4">Events you&apos;re interested in attending</p>
               <button 
                 onClick={() => handleNavigation('/participant/wishlist-events')}

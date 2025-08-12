@@ -228,8 +228,15 @@ function ParticipantMainPageContent() {
   }, [events, filterMonth, filterDay, filterDate, filterTitle]);
 
   const handleViewMore = (eventId) => {
-    console.log('View more clicked for event:', eventId);
-    // Add navigation or modal logic here
+    try {
+      if (typeof window !== 'undefined') {
+        const event = events.find((e) => e.id === eventId);
+        if (event) {
+          window.localStorage.setItem('selected_event', JSON.stringify(event));
+        }
+      }
+    } catch {}
+    router.push(`/particularevent?id=${eventId}`);
   };
 
   const handleProfileNavigation = (route) => {
