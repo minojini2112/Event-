@@ -1,18 +1,29 @@
 'use client';
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 
 export default function MainPage() {
   const router = useRouter();
+  const routeParams = useParams();
+  const roleParamRaw = routeParams?.role;
+  const roleParam = Array.isArray(roleParamRaw) ? roleParamRaw[0] : roleParamRaw;
+  const userType = roleParam === '1' ? 'admin' : 'participant';
+
   // Profile dropdown state
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileRef = useRef(null);
+  // Track active/hovered menu item for visual highlight
+  const [activeMenu, setActiveMenu] = useState(null);
 
   // Sample user data - replace with real user data
   const userData = {
-    username: "John Doe",
-    email: "john.doe@example.com",
-    userType: "participant" // or "admin" - this should come from your auth system
+    username: 'John Doe',
+    email: 'john.doe@example.com',
+    userType,
+    // Sample progress counts; replace with real values from backend
+    eventsRegistered: 7,
+    eventsWon: 2,
+    wishlistCount: 9
   };
 
   // Close dropdown when clicking outside
@@ -33,59 +44,59 @@ export default function MainPage() {
   const [events] = useState([
     {
       id: 1,
-      title: "Tech Conference 2024",
-      date: "March 15, 2024",
-      image: "/api/placeholder/300/200",
-      description: "Join us for the biggest tech conference of the year"
+      title: 'Tech Conference 2024',
+      date: 'March 15, 2024',
+      image: '/api/placeholder/300/200',
+      description: 'Join us for the biggest tech conference of the year'
     },
     {
       id: 2,
-      title: "Music Festival",
-      date: "April 20, 2024",
-      image: "/api/placeholder/300/200",
-      description: "Three days of amazing music and entertainment"
+      title: 'Music Festival',
+      date: 'April 20, 2024',
+      image: '/api/placeholder/300/200',
+      description: 'Three days of amazing music and entertainment'
     },
     {
       id: 3,
-      title: "Food & Wine Expo",
-      date: "May 8, 2024",
-      image: "/api/placeholder/300/200",
-      description: "Taste the finest cuisine from around the world"
+      title: 'Food & Wine Expo',
+      date: 'May 8, 2024',
+      image: '/api/placeholder/300/200',
+      description: 'Taste the finest cuisine from around the world'
     },
     {
       id: 4,
-      title: "Art Gallery Opening",
-      date: "June 12, 2024",
-      image: "/api/placeholder/300/200",
-      description: "Contemporary art exhibition featuring local artists"
+      title: 'Art Gallery Opening',
+      date: 'June 12, 2024',
+      image: '/api/placeholder/300/200',
+      description: 'Contemporary art exhibition featuring local artists'
     },
     {
       id: 5,
-      title: "Business Summit",
-      date: "July 5, 2024",
-      image: "/api/placeholder/300/200",
-      description: "Network with industry leaders and entrepreneurs"
+      title: 'Business Summit',
+      date: 'July 5, 2024',
+      image: '/api/placeholder/300/200',
+      description: 'Network with industry leaders and entrepreneurs'
     },
     {
       id: 6,
-      title: "Sports Championship",
-      date: "August 18, 2024",
-      image: "/api/placeholder/300/200",
-      description: "Watch the best athletes compete for the title"
+      title: 'Sports Championship',
+      date: 'August 18, 2024',
+      image: '/api/placeholder/300/200',
+      description: 'Watch the best athletes compete for the title'
     },
     {
       id: 7,
-      title: "Science Fair",
-      date: "September 22, 2024",
-      image: "/api/placeholder/300/200",
-      description: "Discover innovative scientific breakthroughs"
+      title: 'Science Fair',
+      date: 'September 22, 2024',
+      image: '/api/placeholder/300/200',
+      description: 'Discover innovative scientific breakthroughs'
     },
     {
       id: 8,
-      title: "Cultural Festival",
-      date: "October 10, 2024",
-      image: "/api/placeholder/300/200",
-      description: "Celebrate diversity through music, dance, and food"
+      title: 'Cultural Festival',
+      date: 'October 10, 2024',
+      image: '/api/placeholder/300/200',
+      description: 'Celebrate diversity through music, dance, and food'
     }
   ]);
 
@@ -152,6 +163,32 @@ export default function MainPage() {
     setFilterTitle('');
   };
 
+  // Badge tiers (same logic as participant profile)
+  const tiers = [
+    { name: 'Bronze', min: 5, gradient: 'from-amber-500 to-amber-700' },
+    { name: 'Silver', min: 10, gradient: 'from-gray-400 to-gray-600' },
+    { name: 'Gold', min: 20, gradient: 'from-yellow-500 to-yellow-700' },
+    { name: 'Platinum', min: 40, gradient: 'from-indigo-500 to-purple-600' }
+  ];
+
+  const getTier = (count) => {
+    let current = null;
+    for (const t of tiers) {
+      if (count >= t.min) current = t;
+    }
+    const next = tiers.find((t) => count < t.min) || null;
+    const locked = count < tiers[0].min;
+    return { current, next, locked };
+  };
+
+  const tierPillClassMap = {
+    Bronze: 'bg-amber-100 text-amber-800 border border-amber-200',
+    Silver: 'bg-gray-100 text-gray-800 border border-gray-300',
+    Gold: 'bg-yellow-100 text-yellow-800 border border-yellow-200',
+    Platinum: 'bg-indigo-100 text-indigo-800 border border-indigo-200',
+    None: 'bg-gray-100 text-gray-700 border border-gray-200'
+  };
+
   // Compute filtered events
   const filteredEvents = useMemo(() => {
     const selectedDateObj = parseLocalYmd(filterDate);
@@ -196,8 +233,8 @@ export default function MainPage() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
         ),
-        label: "My Profile",
-        route: userData.userType === "admin" ? "/admin/profile" : "/participant/profile"
+        label: 'My Profile',
+        route: userData.userType === 'admin' ? '/admin/profile' : '/participant/profile'
       },
       {
         icon: (
@@ -206,8 +243,8 @@ export default function MainPage() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
         ),
-        label: "Settings",
-        route: "/settings"
+        label: 'Settings',
+        route: '/settings'
       },
       {
         icon: (
@@ -215,13 +252,13 @@ export default function MainPage() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         ),
-        label: "Help & Support",
-        route: "/help"
+        label: 'Help & Support',
+        route: '/help'
       }
     ];
 
     // Admin-specific options
-    if (userData.userType === "admin") {
+    if (userData.userType === 'admin') {
       return [
         {
           icon: (
@@ -229,8 +266,8 @@ export default function MainPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
           ),
-          label: "Add New Event",
-          route: "/admin/add-event",
+          label: 'Add New Event',
+          route: '/admin/add-event',
           highlight: true
         },
         {
@@ -239,48 +276,16 @@ export default function MainPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
             </svg>
           ),
-          label: "My Posted Events",
-          route: "/admin/my-events",
+          label: 'My Posted Events',
+          route: '/admin/my-events',
           highlight: true
         },
         ...baseOptions
       ];
     }
 
-    // Participant-specific options
-    return [
-      {
-        icon: (
-          <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        ),
-        label: "Registered Events",
-        route: "/participant/registered-events",
-        highlight: true
-      },
-      {
-        icon: (
-          <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-          </svg>
-        ),
-        label: "Won Events",
-        route: "/participant/won-events",
-        highlight: true
-      },
-      {
-        icon: (
-          <svg className="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-          </svg>
-        ),
-        label: "Wishlist Events",
-        route: "/participant/wishlist-events",
-        highlight: true
-      },
-      ...baseOptions
-    ];
+    // Participant-specific options: keep the menu minimal; badges are shown above
+    return [...baseOptions];
   };
 
   return (
@@ -306,55 +311,126 @@ export default function MainPage() {
               </svg>
             </button>
 
-                         {/* Profile Dropdown */}
-             {isProfileOpen && (
-               <div className="absolute top-14 right-0 w-[22rem] bg-white/95 backdrop-blur rounded-xl shadow-xl ring-1 ring-gray-200 z:[99999] overflow-hidden">
-                 {/* Header Section */}
-                 <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-6">
-                   <div className="flex items-center space-x-4">
-                     <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
-                       <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                       </svg>
-                     </div>
-                     <div className="flex-1">
-                       <h3 className="text-white font-semibold text-lg">{userData.username}</h3>
-                       <p className="text-white/80 text-sm">{userData.email}</p>
-                     </div>
-                   </div>
-                 </div>
+            {/* Profile Dropdown */}
+            {isProfileOpen && (
+              <div className="absolute top-14 right-0 w-[22rem] bg-white/95 backdrop-blur rounded-xl shadow-xl ring-1 ring-gray-200 z:[99999] overflow-hidden">
+                {/* Header Section */}
+                <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-6">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+                      <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-white font-semibold text-lg">{userData.username}</h3>
+                      <p className="text-white/80 text-sm">{userData.email}</p>
+                    </div>
+                  </div>
+                </div>
 
-                                 {/* Menu Options */}
-                 <div className="p-2">
-                   {getProfileOptions().map((option, index) => (
-                     <button
-                       key={index}
-                       onClick={() => handleProfileNavigation(option.route)}
-                       className={`w-full text-left px-4 py-3 rounded-md transition-colors duration-150 flex items-center space-x-3 ${
-                         option.highlight 
-                           ? 'hover:bg-blue-50 border-l-4 border-blue-500 bg-blue-50/50' 
-                           : 'hover:bg-gray-50'
-                       }`}
-                     >
-                       {option.icon}
-                       <span className={option.highlight ? 'text-blue-700 font-medium' : 'text-gray-700'}>
-                         {option.label}
-                       </span>
-                     </button>
-                   ))}
+                {/* Participant Badges Summary */}
+                {userData.userType === 'participant' && (
+                  <div className="px-4 py-3 border-b border-gray-200 bg-white/80">
+                    <div className="text-xs font-semibold text-gray-700 mb-2">Badges</div>
+                    <div className="space-y-2">
+                      {/* Registered */}
+                      {(() => {
+                        const t = getTier(userData.eventsRegistered).current;
+                        const name = t?.name || 'None';
+                        const pill = tierPillClassMap[name];
+                        return (
+                          <div className="flex items-center justify-between bg-gray-50 rounded-md px-3 py-2">
+                            <div className="flex items-center gap-2 text-gray-800">
+                              <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                              <span className="text-xs">Registered</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className={`text-[10px] px-2 py-0.5 rounded-full ${pill}`}>{name}</span>
+                              <span className="text-xs text-gray-700">{userData.eventsRegistered}</span>
+                            </div>
+                          </div>
+                        );
+                      })()}
 
-                   <hr className="my-2 border-gray-200" />
+                      {/* Wins */}
+                      {(() => {
+                        const t = getTier(userData.eventsWon).current;
+                        const name = t?.name || 'None';
+                        const pill = tierPillClassMap[name];
+                        return (
+                          <div className="flex items-center justify-between bg-gray-50 rounded-md px-3 py-2">
+                            <div className="flex items-center gap-2 text-gray-800">
+                              <svg className="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+                              <span className="text-xs">Wins</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className={`text-[10px] px-2 py-0.5 rounded-full ${pill}`}>{name}</span>
+                              <span className="text-xs text-gray-700">{userData.eventsWon}</span>
+                            </div>
+                          </div>
+                        );
+                      })()}
 
-                   <button 
-                     onClick={() => handleProfileNavigation('/logout')}
-                     className="w-full text-left px-4 py-3 hover:bg-red-50 rounded-md transition-colors duration-150 flex items-center space-x-3 text-red-600"
-                   >
-                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                     </svg>
-                     <span>Sign Out</span>
-                   </button>
-                 </div>
+                      {/* Wishlist */}
+                      {(() => {
+                        const t = getTier(userData.wishlistCount).current;
+                        const name = t?.name || 'None';
+                        const pill = tierPillClassMap[name];
+                        return (
+                          <div className="flex items-center justify-between bg-gray-50 rounded-md px-3 py-2">
+                            <div className="flex items-center gap-2 text-gray-800">
+                              <svg className="w-4 h-4 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                              <span className="text-xs">Wishlist</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className={`text-[10px] px-2 py-0.5 rounded-full ${pill}`}>{name}</span>
+                              <span className="text-xs text-gray-700">{userData.wishlistCount}</span>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                )}
+
+                {/* Menu Options */}
+                <div className="p-2">
+                  {getProfileOptions().map((option, index) => {
+                    const isActive = activeMenu === option.route;
+                    return (
+                      <button
+                        key={index}
+                        onClick={() => { setActiveMenu(option.route); handleProfileNavigation(option.route); }}
+                        onMouseEnter={() => setActiveMenu((prev) => prev ?? option.route)}
+                        onMouseLeave={() => setActiveMenu((prev) => (prev === option.route ? null : prev))}
+                        className={`group w-full text-left px-4 py-3 rounded-md transition-all duration-150 flex items-center space-x-3 border-l-4 ${
+                          isActive
+                            ? 'bg-indigo-50 border-indigo-500'
+                            : 'border-transparent hover:bg-indigo-50 hover:border-indigo-400'
+                        }`}
+                        aria-current={isActive ? 'page' : undefined}
+                      >
+                        {option.icon}
+                        <span className={`font-medium ${isActive ? 'text-indigo-700' : option.highlight ? 'text-blue-700' : 'text-gray-700'} group-hover:text-indigo-700`}>
+                          {option.label}
+                        </span>
+                      </button>
+                    );
+                  })}
+
+                  <hr className="my-2 border-gray-200" />
+
+                  <button 
+                    onClick={() => handleProfileNavigation('/logout')}
+                    className="w-full text-left px-4 py-3 hover:bg-red-50 rounded-md transition-colors duration-150 flex items-center space-x-3 text-red-600"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    <span>Sign Out</span>
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -515,7 +591,7 @@ export default function MainPage() {
                   >
                     <span>{f.label}</span>
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
                 ))}
@@ -600,3 +676,5 @@ export default function MainPage() {
     </div>
   );
 }
+
+
