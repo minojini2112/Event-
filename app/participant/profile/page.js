@@ -1,57 +1,206 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation'; // Added for redirect
+
+import { AuthGuard } from '../../../lib/authGuard';
 
 export default function ParticipantProfile() {
-  // Sample participant data - replace with real data from your backend
+  return (
+    <AuthGuard requiredRole="participant">
+      <ParticipantProfileContent />
+    </AuthGuard>
+  );
+}
+
+function ParticipantProfileContent() {
+  // Profile data state
   const [participantData, setParticipantData] = useState({
-    name: "Jane Smith",
-    email: "jane.smith@example.com",
+    name: "Not added",
+    email: "Loading...",
+    username: "Loading...",
     role: "Event Participant",
     joinDate: "February 2024",
-    eventsRegistered: 5,
-    eventsAttended: 3,
-    eventsWon: 1,
-    wishlistCount: 8,
-    department: "Computer Science",
-    year: "3",
-    registerNumber: "REG123456",
-    collegeName: "ABC College"
+    eventsRegistered: 0,
+    eventsAttended: 0,
+    eventsWon: 0,
+    wishlistCount: 0,
+    department: "Not added",
+    year: "Not added",
+    registerNumber: "Not added",
+    collegeName: "Not added"
   });
 
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [draftProfile, setDraftProfile] = useState({
-    name: "Jane Smith",
-    department: "Computer Science",
-    year: "3",
-    registerNumber: "REG123456",
-    collegeName: "ABC College"
+    name: "",
+    department: "",
+    year: "",
+    registerNumber: "",
+    collegeName: ""
   });
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  // Get user ID from localStorage (set during login/signup)
+  const [userId, setUserId] = useState(null);
+
+  const router = useRouter(); // Initialize useRouter
+
+  // Fetch profile data on component mount
+  useEffect(() => {
+    // Get user ID from localStorage
+    const storedUserId = localStorage.getItem('userId');
+    if (storedUserId) {
+      setUserId(storedUserId);
+      fetchProfileData(storedUserId);
+    }
+  }, []);
+
+  const fetchProfileData = async (id) => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      const response = await fetch(`/api/participants/profile?user_id=${id}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch profile');
+      }
+      
+      const data = await response.json();
+      
+      // Update user data (email and username)
+      if (data.user) {
+        setParticipantData(prev => ({
+          ...prev,
+          email: data.user.email || "Not available",
+          username: data.user.username || "User"
+        }));
+      }
+      
+      // Update profile data if it exists
+      if (data.profile) {
+        setParticipantData(prev => ({
+          ...prev,
+          name: data.profile.name || "Not added",
+          department: data.profile.department || "Not added",
+          year: data.profile.year || "Not added",
+          registerNumber: data.profile.register_number || "Not added",
+          collegeName: data.profile.college_name || "Not added",
+          eventsRegistered: data.profile.registered_events_count || 0,
+          eventsWon: data.profile.won_events_count || 0,
+          wishlistCount: data.profile.wishlisted_events_count || 0
+        }));
+      } else {
+        // Profile not found, use default values for profile fields
+        setParticipantData(prev => ({
+          ...prev,
+          name: "Not added",
+          department: "Not added",
+          year: "Not added",
+          registerNumber: "Not added",
+          collegeName: "Not added",
+          eventsRegistered: 0,
+          eventsWon: 0,
+          wishlistCount: 0
+        }));
+      }
+    } catch (err) {
+      console.error('Error fetching profile:', err);
+      setError('Failed to load profile data. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const startEdit = () => {
     setDraftProfile({
-      name: participantData.name || "",
-      department: participantData.department || "",
-      year: participantData.year || "",
-      registerNumber: participantData.registerNumber || "",
-      collegeName: participantData.collegeName || ""
+      name: participantData.name === "Not added" ? "" : participantData.name,
+      department: participantData.department === "Not added" ? "" : participantData.department,
+      year: participantData.year === "Not added" ? "" : participantData.year,
+      registerNumber: participantData.registerNumber === "Not added" ? "" : participantData.registerNumber,
+      collegeName: participantData.collegeName === "Not added" ? "" : participantData.collegeName
     });
     setIsEditingProfile(true);
   };
 
-  const saveProfile = () => {
-    setParticipantData((prev) => ({
-      ...prev,
-      name: draftProfile.name,
-      department: draftProfile.department,
-      year: draftProfile.year,
-      registerNumber: draftProfile.registerNumber,
-      collegeName: draftProfile.collegeName
-    }));
-    setIsEditingProfile(false);
+  const saveProfile = async () => {
+    try {
+      setSaving(true);
+      setError('');
+
+      // Validate required fields
+      if (!draftProfile.name || !draftProfile.department || !draftProfile.year || 
+          !draftProfile.registerNumber || !draftProfile.collegeName) {
+        setError('All fields are required');
+        return;
+      }
+
+      // Validate year (1-6)
+      const yearNum = parseInt(draftProfile.year);
+      if (isNaN(yearNum) || yearNum < 1 || yearNum > 6) {
+        setError('Year must be between 1 and 6');
+        return;
+      }
+
+      const profileData = {
+        user_id: userId,
+        name: draftProfile.name,
+        college_name: draftProfile.collegeName,
+        department: draftProfile.department,
+        register_number: draftProfile.registerNumber,
+        year: yearNum
+      };
+
+      const response = await fetch('/api/participants/profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(profileData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to save profile');
+      }
+
+      const result = await response.json();
+      
+      // Update local state with new data
+      setParticipantData(prev => ({
+        ...prev,
+        name: result.profile.name,
+        department: result.profile.department,
+        year: result.profile.year.toString(),
+        registerNumber: result.profile.register_number,
+        collegeName: result.profile.college_name
+      }));
+
+      setIsEditingProfile(false);
+      
+      // Show success message (you can add a toast notification here)
+      console.log(`Profile ${result.action} successfully`);
+      
+      // If this was a new profile creation, redirect to main page
+      if (result.action === 'created') {
+        // Redirect to participant main page after successful profile creation
+        router.push('/main/2');
+      }
+      
+    } catch (err) {
+      console.error('Error saving profile:', err);
+      setError(err.message || 'Failed to save profile. Please try again.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const cancelEdit = () => {
     setIsEditingProfile(false);
+    setError('');
   };
 
   // Badge tiers helper
@@ -80,12 +229,21 @@ export default function ParticipantProfile() {
     None: 'bg-gray-100 text-gray-700 border border-gray-200'
   };
 
-  // Stats removed from UI; state removed to keep file lean
-
   const handleNavigation = (route) => {
     console.log('Navigate to:', route);
     // Add your navigation logic here
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -100,6 +258,18 @@ export default function ParticipantProfile() {
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-8">
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="flex items-center">
+              <svg className="w-5 h-5 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+              <span className="text-red-800">{error}</span>
+            </div>
+          </div>
+        )}
+
         {/* Profile Section */}
         <div className="bg-white rounded-2xl shadow-lg border border-gray-200/60 overflow-hidden mb-8">
           <div className="bg-gradient-to-r from-green-500 to-blue-600 p-8">
@@ -110,7 +280,7 @@ export default function ParticipantProfile() {
                 </svg>
               </div>
               <div className="flex-1">
-                <h2 className="text-3xl font-bold text-white">{participantData.name}</h2>
+                <h2 className="text-3xl font-bold text-white">{participantData.username}</h2>
                 <p className="text-white/80 text-lg">{participantData.email}</p>
                 <p className="text-white/70">{participantData.role}</p>
               </div>
@@ -129,13 +299,15 @@ export default function ParticipantProfile() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={saveProfile}
-                  className="bg-gradient-to-r from-green-500 to-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-green-600 hover:to-blue-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  disabled={saving}
+                  className="bg-gradient-to-r from-green-500 to-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-green-600 hover:to-blue-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Save
+                  {saving ? 'Saving...' : 'Save'}
                 </button>
                 <button
                   onClick={cancelEdit}
-                  className="px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300"
+                  disabled={saving}
+                  className="px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
@@ -153,53 +325,60 @@ export default function ParticipantProfile() {
           {isEditingProfile ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
               <div className="flex flex-col">
-                <label htmlFor="pf-name" className="text-xs font-medium text-gray-900 mb-1">Name</label>
+                <label htmlFor="pf-name" className="text-xs font-medium text-gray-900 mb-1">Name *</label>
                 <input
                   id="pf-name"
                   type="text"
                   value={draftProfile.name}
                   onChange={(e) => setDraftProfile({ ...draftProfile, name: e.target.value })}
                   className="w-full text-sm text-gray-900 rounded-lg border border-gray-200 ring-1 ring-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none px-3 py-2 bg-white shadow-sm"
+                  placeholder="Enter your full name"
                 />
               </div>
               <div className="flex flex-col">
-                <label htmlFor="pf-dept" className="text-xs font-medium text-gray-900 mb-1">Department</label>
+                <label htmlFor="pf-dept" className="text-xs font-medium text-gray-900 mb-1">Department *</label>
                 <input
                   id="pf-dept"
                   type="text"
                   value={draftProfile.department}
                   onChange={(e) => setDraftProfile({ ...draftProfile, department: e.target.value })}
                   className="w-full text-sm text-gray-900 rounded-lg border border-gray-200 ring-1 ring-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none px-3 py-2 bg-white shadow-sm"
+                  placeholder="e.g., Computer Science"
                 />
               </div>
               <div className="flex flex-col">
-                <label htmlFor="pf-year" className="text-xs font-medium text-gray-900 mb-1">Year</label>
+                <label htmlFor="pf-year" className="text-xs font-medium text-gray-900 mb-1">Year * (1-6)</label>
                 <input
                   id="pf-year"
-                  type="text"
+                  type="number"
+                  min="1"
+                  max="6"
                   value={draftProfile.year}
                   onChange={(e) => setDraftProfile({ ...draftProfile, year: e.target.value })}
                   className="w-full text-sm text-gray-900 rounded-lg border border-gray-200 ring-1 ring-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none px-3 py-2 bg-white shadow-sm"
+                  placeholder="1-6"
                 />
               </div>
               <div className="flex flex-col">
-                <label htmlFor="pf-reg" className="text-xs font-medium text-gray-900 mb-1">Register Number</label>
+                <label htmlFor="pf-reg" className="text-xs font-medium text-gray-900 mb-1">Register Number *</label>
                 <input
                   id="pf-reg"
                   type="text"
                   value={draftProfile.registerNumber}
                   onChange={(e) => setDraftProfile({ ...draftProfile, registerNumber: e.target.value })}
                   className="w-full text-sm text-gray-900 rounded-lg border border-gray-200 ring-1 ring-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none px-3 py-2 bg-white shadow-sm"
+                  placeholder="Enter your register number"
                 />
               </div>
               <div className="md:col-span-2 flex flex-col">
-                <label htmlFor="pf-college" className="text-xs font-medium text-gray-900 mb-1">College Name</label>
+                <label htmlFor="pf-college" className="text-xs font-medium text-gray-900 mb-1">College Name *</label>
                 <input
                   id="pf-college"
                   type="text"
                   value={draftProfile.collegeName}
                   onChange={(e) => setDraftProfile({ ...draftProfile, collegeName: e.target.value })}
                   className="w-full text-sm text-gray-900 rounded-lg border border-gray-200 ring-1 ring-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none px-3 py-2 bg-white shadow-sm"
+                  placeholder="Enter your college name"
                 />
               </div>
             </div>
@@ -211,19 +390,19 @@ export default function ParticipantProfile() {
               </div>
               <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:bg-gray-100 transition-colors">
                 <div className="text-xs text-gray-600">Department</div>
-                <div className="text-sm font-medium text-gray-900">{participantData.department || '-'}</div>
+                <div className="text-sm font-medium text-gray-900">{participantData.department}</div>
               </div>
               <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:bg-gray-100 transition-colors">
                 <div className="text-xs text-gray-600">Year</div>
-                <div className="text-sm font-medium text-gray-900">{participantData.year || '-'}</div>
+                <div className="text-sm font-medium text-gray-900">{participantData.year}</div>
               </div>
               <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:bg-gray-100 transition-colors">
                 <div className="text-xs text-gray-600">Register Number</div>
-                <div className="text-sm font-medium text-gray-900">{participantData.registerNumber || '-'}</div>
+                <div className="text-sm font-medium text-gray-900">{participantData.registerNumber}</div>
               </div>
               <div className="md:col-span-2 bg-gray-50 rounded-lg p-4 border border-gray-200 hover:bg-gray-100 transition-colors">
                 <div className="text-xs text-gray-600">College Name</div>
-                <div className="text-sm font-medium text-gray-900">{participantData.collegeName || '-'}</div>
+                <div className="text-sm font-medium text-gray-900">{participantData.collegeName}</div>
               </div>
             </div>
           )}

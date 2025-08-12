@@ -2,7 +2,17 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 
+import { AuthGuard } from '../../../lib/authGuard';
+
 export default function ParticipantMainPage() {
+  return (
+    <AuthGuard requiredRole="participant">
+      <ParticipantMainPageContent />
+    </AuthGuard>
+  );
+}
+
+function ParticipantMainPageContent() {
   const router = useRouter();
   // Profile dropdown state
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -10,15 +20,53 @@ export default function ParticipantMainPage() {
   // Track active/hovered menu item for visual highlight
   const [activeMenu, setActiveMenu] = useState(null);
 
-  // Sample user data - replace with real user data
-  const userData = {
-    username: 'John Doe',
-    email: 'john.doe@example.com',
+  // User data from localStorage
+  const [userData, setUserData] = useState({
+    username: 'Loading...',
+    email: 'Loading...',
     userType: 'participant',
-    // Sample progress counts; replace with real values from backend
-    eventsRegistered: 7,
-    eventsWon: 2,
-    wishlistCount: 9
+    eventsRegistered: 0,
+    eventsWon: 0,
+    wishlistCount: 0
+  });
+
+  // Load user data and fetch profile
+  useEffect(() => {
+    const userId = localStorage.getItem('userId');
+    
+    // Load user data from localStorage
+    const username = localStorage.getItem('username') || 'User';
+    const email = localStorage.getItem('email') || 'No email';
+    
+    setUserData(prev => ({
+      ...prev,
+      username,
+      email
+    }));
+
+    // Fetch user profile data to get counts
+    if (userId) {
+      fetchUserProfile(userId);
+    }
+  }, []);
+
+  const fetchUserProfile = async (userId) => {
+    try {
+      const response = await fetch(`/api/participants/profile?user_id=${userId}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.profile) {
+          setUserData(prev => ({
+            ...prev,
+            eventsRegistered: data.profile.registered_events_count || 0,
+            eventsWon: data.profile.won_events_count || 0,
+            wishlistCount: data.profile.wishlisted_events_count || 0
+          }));
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+    }
   };
 
   // Close dropdown when clicking outside
@@ -35,81 +83,34 @@ export default function ParticipantMainPage() {
     };
   }, []);
 
-  // Sample event data - you can replace this with real data from your backend
-  const [events] = useState([
-    {
-      id: 1,
-      title: 'Tech Conference 2024',
-      date: 'March 15, 2024',
-      image: '/api/placeholder/300/200',
-      description: 'Join us for the biggest tech conference of the year',
-      isRegistered: true,
-      isWishlisted: false
-    },
-    {
-      id: 2,
-      title: 'Music Festival',
-      date: 'April 20, 2024',
-      image: '/api/placeholder/300/200',
-      description: 'Three days of amazing music and entertainment',
-      isRegistered: false,
-      isWishlisted: true
-    },
-    {
-      id: 3,
-      title: 'Food & Wine Expo',
-      date: 'May 8, 2024',
-      image: '/api/placeholder/300/200',
-      description: 'Taste the finest cuisine from around the world',
-      isRegistered: true,
-      isWishlisted: false
-    },
-    {
-      id: 4,
-      title: 'Art Gallery Opening',
-      date: 'June 12, 2024',
-      image: '/api/placeholder/300/200',
-      description: 'Contemporary art exhibition featuring local artists',
-      isRegistered: false,
-      isWishlisted: false
-    },
-    {
-      id: 5,
-      title: 'Business Summit',
-      date: 'July 5, 2024',
-      image: '/api/placeholder/300/200',
-      description: 'Network with industry leaders and entrepreneurs',
-      isRegistered: true,
-      isWishlisted: false
-    },
-    {
-      id: 6,
-      title: 'Sports Championship',
-      date: 'August 18, 2024',
-      image: '/api/placeholder/300/200',
-      description: 'Watch the best athletes compete for the title',
-      isRegistered: false,
-      isWishlisted: true
-    },
-    {
-      id: 7,
-      title: 'Science Fair',
-      date: 'September 22, 2024',
-      image: '/api/placeholder/300/200',
-      description: 'Discover innovative scientific breakthroughs',
-      isRegistered: true,
-      isWishlisted: false
-    },
-    {
-      id: 8,
-      title: 'Cultural Festival',
-      date: 'October 10, 2024',
-      image: '/api/placeholder/300/200',
-      description: 'Celebrate diversity through music, dance, and food',
-      isRegistered: false,
-      isWishlisted: false
-    }
-  ]);
+  // Events state - will be populated from API
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  // Fetch events from API
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/events');
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch events');
+        }
+        
+        const data = await response.json();
+        setEvents(data.events || []);
+      } catch (err) {
+        console.error('Error fetching events:', err);
+        setError('Failed to load events. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
 
   // Filters state (compact controls: month, day of week, exact date)
   const [filterMonth, setFilterMonth] = useState(''); // '' = All
@@ -204,11 +205,11 @@ export default function ParticipantMainPage() {
   const filteredEvents = useMemo(() => {
     const selectedDateObj = parseLocalYmd(filterDate);
     return events.filter((event) => {
-      const eventDate = new Date(event.date);
+      const eventDate = new Date(event.start_date);
       if (Number.isNaN(eventDate.getTime())) return false;
 
       if (filterTitle.trim()) {
-        const hay = `${event.title}`.toLowerCase();
+        const hay = `${event.event_name}`.toLowerCase();
         const needle = filterTitle.trim().toLowerCase();
         if (!hay.includes(needle)) return false;
       }
@@ -232,7 +233,16 @@ export default function ParticipantMainPage() {
   };
 
   const handleProfileNavigation = (route) => {
-    router.push(route);
+    if (route === '/logout') {
+      // Handle logout
+      localStorage.removeItem('userId');
+      localStorage.removeItem('username');
+      localStorage.removeItem('role');
+      localStorage.removeItem('email');
+      router.push('/login');
+    } else {
+      router.push(route);
+    }
   };
 
   // Participant-specific profile options
@@ -581,14 +591,30 @@ export default function ParticipantMainPage() {
 
         {/* Events Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredEvents.length === 0 && (
+          {loading && (
+            <div className="col-span-full text-center text-gray-900 bg-white rounded-xl border border-gray-200/60 py-10">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              Loading events...
+            </div>
+          )}
+          
+          {error && (
+            <div className="col-span-full text-center text-red-600 bg-red-50 rounded-xl border border-red-200 py-10">
+              <svg className="w-12 h-12 mx-auto mb-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+              {error}
+            </div>
+          )}
+          
+          {!loading && !error && filteredEvents.length === 0 && (
             <div className="col-span-full text-center text-gray-900 bg-white rounded-xl border border-gray-200/60 py-10">
               No events found. Try adjusting filters.
             </div>
           )}
-          {filteredEvents.map((event) => (
+          {!loading && !error && filteredEvents.map((event) => (
              <div
-               key={event.id}
+               key={event.event_id}
                className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] border border-gray-200/50 overflow-hidden relative z-10"
              >
               {/* Event Image */}
@@ -600,21 +626,11 @@ export default function ParticipantMainPage() {
                     </svg>
                   </div>
                 </div>
-                {/* Placeholder for actual image */}
+                {/* Event status info */}
                 <div className="absolute bottom-2 right-2 bg-black/20 text-white text-xs px-2 py-1 rounded">
-                  Event Image
+                  {event.registered_no || 0}/{event.total_participants_allowed || '∞'} spots
                 </div>
-                {/* Status badges */}
-                {event.isRegistered && (
-                  <div className="absolute top-2 left-2 bg-green-600 text-white text-xs px-2 py-1 rounded-full">
-                    Registered
-                  </div>
-                )}
-                {event.isWishlisted && (
-                  <div className="absolute top-2 right-2 bg-pink-600 text-white text-xs px-2 py-1 rounded-full">
-                    Wishlisted
-                  </div>
-                )}
+
               </div>
 
               {/* Event Details */}
@@ -623,33 +639,45 @@ export default function ParticipantMainPage() {
                   {/* Left side - Title and Date */}
                   <div className="flex-1">
                     <h3 className="font-bold text-gray-900 text-lg mb-2 line-clamp-2">
-                      {event.title}
+                      {event.event_name}
                     </h3>
                     <div className="flex items-center text-gray-900 mb-3">
                       <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
-                      <span className="text-sm">{event.date}</span>
+                      <span className="text-sm">
+                        {new Date(event.start_date).toLocaleDateString('en-US', { 
+                          month: 'long', 
+                          day: 'numeric', 
+                          year: 'numeric' 
+                        })}
+                      </span>
                     </div>
                   </div>
 
                   {/* Right side - Action Button */}
                   <button
-                    onClick={() => handleViewMore(event.id)}
-                    className={`ml-4 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 whitespace-nowrap ${
-                      event.isRegistered 
-                        ? 'bg-green-500 hover:bg-green-600 text-white' 
-                        : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white'
-                    }`}
+                    onClick={() => handleViewMore(event.event_id)}
+                    className="ml-4 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 whitespace-nowrap bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white"
                   >
-                    {event.isRegistered ? 'View Details' : 'View More'}
+                    View More
                   </button>
                 </div>
 
-                {/* Event Description */}
+                {/* Event Caption */}
                 <p className="text-gray-900 text-sm line-clamp-2 mt-2">
-                  {event.description}
+                  {event.caption || 'No caption available'}
                 </p>
+                
+                {/* Additional event info */}
+                <div className="mt-3 pt-3 border-t border-gray-100">
+                  <div className="flex items-center justify-between text-xs text-gray-600">
+                    <span>Ends: {new Date(event.end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                    <span className="text-blue-600 font-medium">
+                      {event.registered_no || 0} registered
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
            ))}

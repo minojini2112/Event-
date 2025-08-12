@@ -2,7 +2,17 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 
+import { AuthGuard } from '../../../lib/authGuard';
+
 export default function AdminMainPage() {
+  return (
+    <AuthGuard requiredRole="admin">
+      <AdminMainPageContent />
+    </AuthGuard>
+  );
+}
+
+function AdminMainPageContent() {
   const router = useRouter();
   // Profile dropdown state
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -10,16 +20,28 @@ export default function AdminMainPage() {
   // Track active/hovered menu item for visual highlight
   const [activeMenu, setActiveMenu] = useState(null);
 
-  // Sample user data - replace with real user data
-  const userData = {
-    username: 'Admin User',
-    email: 'admin@example.com',
+  // User data from localStorage
+  const [userData, setUserData] = useState({
+    username: 'Loading...',
+    email: 'Loading...',
     userType: 'admin',
-    // Sample admin stats; replace with real values from backend
-    eventsCreated: 15,
-    totalParticipants: 234,
-    activeEvents: 8
-  };
+    eventsCreated: 0,
+    totalParticipants: 0,
+    activeEvents: 0
+  });
+
+  // Load user data
+  useEffect(() => {
+    // Load user data from localStorage
+    const username = localStorage.getItem('username') || 'Admin';
+    const email = localStorage.getItem('email') || 'No email';
+    
+    setUserData(prev => ({
+      ...prev,
+      username,
+      email
+    }));
+  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -35,81 +57,34 @@ export default function AdminMainPage() {
     };
   }, []);
 
-  // Sample event data - you can replace this with real data from your backend
-  const [events] = useState([
-    {
-      id: 1,
-      title: 'Tech Conference 2024',
-      date: 'March 15, 2024',
-      image: '/api/placeholder/300/200',
-      description: 'Join us for the biggest tech conference of the year',
-      participants: 45,
-      status: 'active'
-    },
-    {
-      id: 2,
-      title: 'Music Festival',
-      date: 'April 20, 2024',
-      image: '/api/placeholder/300/200',
-      description: 'Three days of amazing music and entertainment',
-      participants: 120,
-      status: 'active'
-    },
-    {
-      id: 3,
-      title: 'Food & Wine Expo',
-      date: 'May 8, 2024',
-      image: '/api/placeholder/300/200',
-      description: 'Taste the finest cuisine from around the world',
-      participants: 78,
-      status: 'active'
-    },
-    {
-      id: 4,
-      title: 'Art Gallery Opening',
-      date: 'June 12, 2024',
-      image: '/api/placeholder/300/200',
-      description: 'Contemporary art exhibition featuring local artists',
-      participants: 32,
-      status: 'active'
-    },
-    {
-      id: 5,
-      title: 'Business Summit',
-      date: 'July 5, 2024',
-      image: '/api/placeholder/300/200',
-      description: 'Network with industry leaders and entrepreneurs',
-      participants: 89,
-      status: 'active'
-    },
-    {
-      id: 6,
-      title: 'Sports Championship',
-      date: 'August 18, 2024',
-      image: '/api/placeholder/300/200',
-      description: 'Watch the best athletes compete for the title',
-      participants: 156,
-      status: 'active'
-    },
-    {
-      id: 7,
-      title: 'Science Fair',
-      date: 'September 22, 2024',
-      image: '/api/placeholder/300/200',
-      description: 'Discover innovative scientific breakthroughs',
-      participants: 67,
-      status: 'active'
-    },
-    {
-      id: 8,
-      title: 'Cultural Festival',
-      date: 'October 10, 2024',
-      image: '/api/placeholder/300/200',
-      description: 'Celebrate diversity through music, dance, and food',
-      participants: 98,
-      status: 'active'
-    }
-  ]);
+  // Events state - will be populated from API
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  // Fetch events from API
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/events');
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch events');
+        }
+        
+        const data = await response.json();
+        setEvents(data.events || []);
+      } catch (err) {
+        console.error('Error fetching events:', err);
+        setError('Failed to load events. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
 
   // Filters state (compact controls: month, day of week, exact date)
   const [filterMonth, setFilterMonth] = useState(''); // '' = All
@@ -178,11 +153,11 @@ export default function AdminMainPage() {
   const filteredEvents = useMemo(() => {
     const selectedDateObj = parseLocalYmd(filterDate);
     return events.filter((event) => {
-      const eventDate = new Date(event.date);
+      const eventDate = new Date(event.start_date);
       if (Number.isNaN(eventDate.getTime())) return false;
 
       if (filterTitle.trim()) {
-        const hay = `${event.title}`.toLowerCase();
+        const hay = `${event.event_name}`.toLowerCase();
         const needle = filterTitle.trim().toLowerCase();
         if (!hay.includes(needle)) return false;
       }
@@ -206,7 +181,16 @@ export default function AdminMainPage() {
   };
 
   const handleProfileNavigation = (route) => {
-    router.push(route);
+    if (route === '/logout') {
+      // Handle logout
+      localStorage.removeItem('userId');
+      localStorage.removeItem('username');
+      localStorage.removeItem('role');
+      localStorage.removeItem('email');
+      router.push('/login');
+    } else {
+      router.push(route);
+    }
   };
 
   // Admin-specific profile options
@@ -561,28 +545,53 @@ export default function AdminMainPage() {
 
         {/* Events Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredEvents.length === 0 && (
+          {loading && (
+            <div className="col-span-full text-center text-gray-900 bg-white rounded-xl border border-gray-200/60 py-10">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              Loading events...
+            </div>
+          )}
+          
+          {error && (
+            <div className="col-span-full text-center text-red-600 bg-red-50 rounded-xl border border-red-200 py-10">
+              <svg className="w-12 h-12 mx-auto mb-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+              {error}
+            </div>
+          )}
+          
+          {!loading && !error && filteredEvents.length === 0 && (
             <div className="col-span-full text-center text-gray-900 bg-white rounded-xl border border-gray-200/60 py-10">
               No events found. Try adjusting filters.
             </div>
           )}
-          {filteredEvents.map((event) => (
+          
+          {!loading && !error && filteredEvents.map((event) => (
              <div
-               key={event.id}
+               key={event.event_id}
                className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] border border-gray-200/50 overflow-hidden relative z-10"
              >
               {/* Event Image */}
               <div className="relative h-48 bg-gradient-to-br from-blue-100 to-purple-100 overflow-hidden">
+                {event.image_url ? (
+                  <img 
+                    src={event.image_url} 
+                    alt={event.event_name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                     <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z" />
                     </svg>
                   </div>
                 </div>
-                {/* Placeholder for actual image */}
+                )}
+                {/* Event status info */}
                 <div className="absolute bottom-2 right-2 bg-black/20 text-white text-xs px-2 py-1 rounded">
-                  Event Image
+                  {event.registered_no || 0}/{event.total_participants_allowed || '∞'} spots
                 </div>
                 {/* Admin badge */}
                 <div className="absolute top-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
@@ -596,36 +605,52 @@ export default function AdminMainPage() {
                   {/* Left side - Title and Date */}
                   <div className="flex-1">
                     <h3 className="font-bold text-gray-900 text-lg mb-2 line-clamp-2">
-                      {event.title}
+                      {event.event_name}
                     </h3>
                     <div className="flex items-center text-gray-900 mb-3">
                       <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
-                      <span className="text-sm">{event.date}</span>
+                      <span className="text-sm">
+                        {new Date(event.start_date).toLocaleDateString('en-US', { 
+                          month: 'long', 
+                          day: 'numeric', 
+                          year: 'numeric' 
+                        })}
+                      </span>
                     </div>
                     {/* Participant count for admin view */}
                     <div className="flex items-center text-gray-600 mb-2">
                       <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                       </svg>
-                      <span className="text-sm">{event.participants} participants</span>
+                      <span className="text-sm">{event.registered_no || 0} participants</span>
                     </div>
                   </div>
 
                   {/* Right side - View More Button */}
                   <button
-                    onClick={() => handleViewMore(event.id)}
+                    onClick={() => handleViewMore(event.event_id)}
                     className="ml-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 whitespace-nowrap"
                   >
                     Manage
                   </button>
                 </div>
 
-                {/* Event Description */}
+                {/* Event Caption */}
                 <p className="text-gray-900 text-sm line-clamp-2 mt-2">
-                  {event.description}
+                  {event.caption || 'No caption available'}
                 </p>
+                
+                {/* Additional event info for admin */}
+                <div className="mt-3 pt-3 border-t border-gray-100">
+                  <div className="flex items-center justify-between text-xs text-gray-600">
+                    <span>Ends: {new Date(event.end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                    <span className="text-green-600 font-medium">
+                      {event.total_participants_allowed || '∞'} max capacity
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
            ))}
