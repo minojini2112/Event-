@@ -36,7 +36,7 @@ export default function AdminMainPage() {
   }, []);
 
   // Sample event data - you can replace this with real data from your backend
-  const [events] = useState([
+  const initialSampleEvents = [
     {
       id: 1,
       title: 'Tech Conference 2024',
@@ -109,7 +109,23 @@ export default function AdminMainPage() {
       participants: 98,
       status: 'active'
     }
-  ]);
+  ];
+
+  const [events, setEvents] = useState(initialSampleEvents);
+  useEffect(() => {
+    try {
+      if (typeof window === 'undefined') return;
+      const stored = window.localStorage.getItem('posted_events');
+      if (!stored) return;
+      const posted = JSON.parse(stored);
+      if (!Array.isArray(posted)) return;
+      const existingIds = new Set(initialSampleEvents.map((e) => e.id));
+      const merged = [...initialSampleEvents, ...posted.filter((e) => !existingIds.has(e.id))];
+      setEvents(merged);
+    } catch (e) {
+      console.error('Failed to load posted events:', e);
+    }
+  }, []);
 
   // Filters state (compact controls: month, day of week, exact date)
   const [filterMonth, setFilterMonth] = useState(''); // '' = All
@@ -201,8 +217,15 @@ export default function AdminMainPage() {
   }, [events, filterMonth, filterDay, filterDate, filterTitle]);
 
   const handleViewMore = (eventId) => {
-    console.log('View more clicked for event:', eventId);
-    // Add navigation or modal logic here
+    try {
+      if (typeof window !== 'undefined') {
+        const event = events.find((e) => e.id === eventId);
+        if (event) {
+          window.localStorage.setItem('selected_event', JSON.stringify(event));
+        }
+      }
+    } catch {}
+    router.push(`/particularevent?id=${eventId}`);
   };
 
   const handleProfileNavigation = (route) => {
@@ -219,7 +242,7 @@ export default function AdminMainPage() {
           </svg>
         ),
         label: 'Add New Event',
-        route: '/admin/add-event',
+        route: '/admin/addnewevent',
         highlight: true
       },
       {
@@ -229,7 +252,7 @@ export default function AdminMainPage() {
           </svg>
         ),
         label: 'My Posted Events',
-        route: '/admin/my-events',
+        route: '/admin/postedevent',
         highlight: true
       },
       {
