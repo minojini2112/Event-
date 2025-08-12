@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../../lib/supabase';
+import { getUserFromCustomTable } from '../../lib/userUtils';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -37,8 +38,17 @@ export default function LoginPage() {
       }
 
       if (data.user) {
-        // Redirect to main page after successful login
-        router.push('/main');
+        try {
+          // Get user role from custom table
+          const userData = await getUserFromCustomTable(data.user.id);
+          // Redirect to role-specific main page
+          const redirectRoute = userData.role === 'admin' ? '/main/1' : '/main/2';
+          router.push(redirectRoute);
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+          // Fallback to participant route if there's an error
+          router.push('/main/2');
+        }
       }
     } catch (error) {
       setError('An unexpected error occurred. Please try again.');

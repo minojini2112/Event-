@@ -63,8 +63,9 @@ export default function SignupPage() {
           localStorage.setItem('username', formData.username);
           localStorage.setItem('role', formData.role);
           
-          // Redirect to main page after successful signup
-          router.push('/main');
+          // Redirect to role-specific main page after successful signup
+          const redirectRoute = formData.role === 'admin' ? '/main/1' : '/main/2';
+          router.push(redirectRoute);
         } catch (insertError) {
           setError('Account created but failed to save additional details. Please contact support.');
         }
