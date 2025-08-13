@@ -68,17 +68,23 @@ export default function ParticularEventPage() {
   };
 
   const imageUrl = resolved.image || '/api/placeholder/800/500';
+  const formatYmd = (ymd) => {
+    if (!ymd) return '-';
+    const [y, m, d] = ymd.split('-').map(Number);
+    const date = new Date(y, (m || 1) - 1, d || 1);
+    if (Number.isNaN(date.getTime())) return ymd;
+    return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+  };
+  const dateRangeLabel = `${formatYmd(resolved.start_date || resolved.date)}${resolved.end_date ? ` — ${formatYmd(resolved.end_date)}` : ''}`;
 
-  // CTA states
+  // CTA state and handlers
   const [isRegistered, setIsRegistered] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
-  const [toast, setToast] = useState('');
 
-  // Initialize CTA states from localStorage
   useEffect(() => {
     try {
       if (typeof window === 'undefined') return;
-      const id = String(eventData?.id || searchParams.get('id') || '0');
+      const id = String(eventData?.id || searchParams.get('id') || '');
       const regRaw = window.localStorage.getItem('registered_event_ids');
       const wishRaw = window.localStorage.getItem('wishlist_event_ids');
       const reg = regRaw ? JSON.parse(regRaw) : [];
@@ -88,40 +94,51 @@ export default function ParticularEventPage() {
     } catch {}
   }, [eventData, searchParams]);
 
-  const showToast = (msg) => {
-    setToast(msg);
-    setTimeout(() => setToast(''), 1500);
-  };
-
   const handleRegister = () => {
     try {
       if (typeof window === 'undefined') return;
-      const id = String(eventData?.id || searchParams.get('id') || '0');
+      const id = String(eventData?.id || searchParams.get('id') || Date.now());
+      // 1) mark event id for this user
       const regRaw = window.localStorage.getItem('registered_event_ids');
-      const list = regRaw ? JSON.parse(regRaw) : [];
-      if (!Array.isArray(list)) return;
-      if (!list.includes(id)) list.push(id);
-      window.localStorage.setItem('registered_event_ids', JSON.stringify(list));
+      const regIds = regRaw ? JSON.parse(regRaw) : [];
+      if (!regIds.includes(id)) regIds.push(id);
+      window.localStorage.setItem('registered_event_ids', JSON.stringify(regIds));
+      // 2) store event object for listing later
+      const mapRaw = window.localStorage.getItem('registered_event_objects');
+      const objMap = mapRaw ? JSON.parse(mapRaw) : {};
+      objMap[id] = resolved;
+      window.localStorage.setItem('registered_event_objects', JSON.stringify(objMap));
+      // 3) append to admin-facing registrations_by_event
+      const regByEventRaw = window.localStorage.getItem('registrations_by_event');
+      const regByEvent = regByEventRaw ? JSON.parse(regByEventRaw) : {};
+      const dummyUser = {
+        name: 'Jane Smith',
+        email: 'jane.smith@example.com',
+        department: 'Computer Science',
+        registerNumber: 'REG123456',
+        registeredAt: new Date().toISOString()
+      };
+      regByEvent[id] = Array.isArray(regByEvent[id]) ? regByEvent[id] : [];
+      if (!regByEvent[id].some((u) => u.registerNumber === dummyUser.registerNumber)) {
+        regByEvent[id].push(dummyUser);
+      }
+      window.localStorage.setItem('registrations_by_event', JSON.stringify(regByEvent));
       setIsRegistered(true);
-      showToast("You're in! Registration saved");
     } catch {}
   };
 
   const handleWishlist = () => {
     try {
       if (typeof window === 'undefined') return;
-      const id = String(eventData?.id || searchParams.get('id') || '0');
+      const id = String(eventData?.id || searchParams.get('id') || '');
       const wishRaw = window.localStorage.getItem('wishlist_event_ids');
       let list = wishRaw ? JSON.parse(wishRaw) : [];
-      if (!Array.isArray(list)) list = [];
       if (list.includes(id)) {
         list = list.filter((x) => x !== id);
         setIsWishlisted(false);
-        showToast('Removed from wishlist');
       } else {
         list.push(id);
         setIsWishlisted(true);
-        showToast('Added to wishlist');
       }
       window.localStorage.setItem('wishlist_event_ids', JSON.stringify(list));
     } catch {}
@@ -143,26 +160,35 @@ export default function ParticularEventPage() {
       </header>
 
       <main className="max-w-6xl mx-auto px-6 py-8">
-        {/* Motivational Hero */}
-        <section className="mb-8 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl shadow-lg overflow-hidden">
-          <div className="p-6 md:p-8 grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
-            <div className="md:col-span-2">
-              <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Level up your skills. Meet mentors. Win prizes.</h2>
-              <p className="mt-2 text-white/90 text-sm md:text-base">Join a vibrant community of builders and creators. Hands-on workshops, exclusive swag, and certificates to boost your portfolio.</p>
-              <div className="mt-4 flex flex-wrap items-center gap-3">
-                <button onClick={handleRegister} disabled={isRegistered} className={`px-5 py-2.5 rounded-lg text-sm font-semibold shadow-md ${isRegistered ? 'bg-white/20 cursor-not-allowed' : 'bg-white text-blue-700 hover:bg-blue-50'} `}>
-                  {isRegistered ? 'Registered' : 'Register Now'}
-                </button>
-                <button onClick={handleWishlist} className={`px-5 py-2.5 rounded-lg text-sm font-semibold border shadow-md ${isWishlisted ? 'bg-pink-100/30 border-white/40' : 'bg-transparent border-white/40 hover:bg-white/10'}`}>
-                  {isWishlisted ? 'Wishlisted' : 'Add to Wishlist'}
-                </button>
+        {/* Highlight header without heavy imagery */}
+        <section className="mb-8">
+          <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 opacity-80" />
+            <div className="relative p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+              <div className="max-w-3xl">
+                <span className="inline-flex items-center gap-2 text-xs px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 border border-blue-200">Featured Event</span>
+                <h2 className="mt-2 text-2xl md:text-3xl font-bold tracking-tight text-gray-900">{resolved.title}</h2>
+                <p className="mt-2 text-gray-700 max-w-2xl">{resolved.description}</p>
+                <div className="mt-4 flex flex-wrap items-center gap-3">
+                  <span className="inline-flex items-center gap-2 text-xs bg-white border border-gray-200 px-3 py-1.5 rounded-full text-gray-900">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    {dateRangeLabel}
+                  </span>
+                  <span className="inline-flex items-center gap-2 text-xs bg-white border border-gray-200 px-3 py-1.5 rounded-full text-gray-900">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0"/></svg>
+                    Capacity: {resolved.total_participants_allowed || '200'}
+                  </span>
+                  <span className="inline-flex items-center gap-2 text-xs bg-white border border-gray-200 px-3 py-1.5 rounded-full text-gray-900">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Certificates • Mentorship • Workshops
+                  </span>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <button onClick={handleRegister} disabled={isRegistered} className={`px-5 py-2.5 rounded-lg text-sm font-semibold shadow-md ${isRegistered ? 'bg-gray-200 text-gray-600 cursor-not-allowed' : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700'}`}>{isRegistered ? 'Registered' : 'Register Now'}</button>
+                <button onClick={handleWishlist} className={`px-5 py-2.5 rounded-lg text-sm font-semibold border ${isWishlisted ? 'border-pink-400 text-pink-700 bg-pink-50' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}>{isWishlisted ? 'Wishlisted' : 'Add to Wishlist'}</button>
               </div>
             </div>
-            <ul className="md:col-span-1 space-y-3">
-              <li className="flex items-center gap-3"><span className="w-6 h-6 rounded-full bg-white/20 inline-flex items-center justify-center">🏆</span><span className="text-sm">Certificates & badges</span></li>
-              <li className="flex items-center gap-3"><span className="w-6 h-6 rounded-full bg-white/20 inline-flex items-center justify-center">🤝</span><span className="text-sm">Network with experts</span></li>
-              <li className="flex items-center gap-3"><span className="w-6 h-6 rounded-full bg-white/20 inline-flex items-center justify-center">🛠️</span><span className="text-sm">Hands‑on workshops</span></li>
-            </ul>
           </div>
         </section>
         <div className="bg-white rounded-2xl shadow-lg border border-gray-200/60 p-6">
@@ -205,13 +231,6 @@ export default function ParticularEventPage() {
           </div>
         </div>
       </main>
-
-      {/* Toast */}
-      {toast && (
-        <div className="fixed bottom-5 right-5 z-50 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg shadow-lg">
-          {toast}
-        </div>
-      )}
     </div>
   );
 }
