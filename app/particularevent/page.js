@@ -7,10 +7,16 @@ export default function ParticularEventPage() {
   const searchParams = useSearchParams();
   const idParam = searchParams.get('id');
   const [eventData, setEventData] = useState(null);
+  const [userRole, setUserRole] = useState(null);
 
   useEffect(() => {
     try {
       if (typeof window === 'undefined') return;
+      
+      // Get user role from localStorage
+      const role = localStorage.getItem('role');
+      setUserRole(role);
+      
       const idStr = idParam ? String(idParam) : null;
       // Try from posted events
       const postedRaw = window.localStorage.getItem('posted_events');
@@ -155,6 +161,15 @@ export default function ParticularEventPage() {
           <div className="flex items-center gap-2">
             <button onClick={() => router.back()} className="px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-50">Back</button>
             <button onClick={() => router.push('/main/1')} className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-blue-700 hover:to-purple-700">Go to Dashboard</button>
+            {/* Admin-only Edit Post button */}
+            {userRole === 'admin' && (
+              <button 
+                onClick={() => router.push(`/admin/addnewevent?id=${idParam}`)} 
+                className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-green-700 hover:to-emerald-700"
+              >
+                Edit Post
+              </button>
+            )}
           </div>
         </div>
       </header>
@@ -185,8 +200,13 @@ export default function ParticularEventPage() {
                 </div>
               </div>
               <div className="flex gap-3">
-                <button onClick={handleRegister} disabled={isRegistered} className={`px-5 py-2.5 rounded-lg text-sm font-semibold shadow-md ${isRegistered ? 'bg-gray-200 text-gray-600 cursor-not-allowed' : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700'}`}>{isRegistered ? 'Registered' : 'Register Now'}</button>
-                <button onClick={handleWishlist} className={`px-5 py-2.5 rounded-lg text-sm font-semibold border ${isWishlisted ? 'border-pink-400 text-pink-700 bg-pink-50' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}>{isWishlisted ? 'Wishlisted' : 'Add to Wishlist'}</button>
+                {/* Only show registration buttons for participants */}
+                {userRole === 'participant' && (
+                  <>
+                    <button onClick={handleRegister} disabled={isRegistered} className={`px-5 py-2.5 rounded-lg text-sm font-semibold shadow-md ${isRegistered ? 'bg-gray-200 text-gray-600 cursor-not-allowed' : 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700'}`}>{isRegistered ? 'Registered' : 'Register Now'}</button>
+                    <button onClick={handleWishlist} className={`px-5 py-2.5 rounded-lg text-sm font-semibold border ${isWishlisted ? 'border-pink-400 text-pink-700 bg-pink-50' : 'border-gray-300 text-gray-700 hover:bg-gray-50'}`}>{isWishlisted ? 'Wishlisted' : 'Add to Wishlist'}</button>
+                  </>
+                )}
               </div>
             </div>
           </div>
