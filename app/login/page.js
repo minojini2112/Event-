@@ -41,6 +41,12 @@ export default function LoginPage() {
         try {
           // Get user role from custom table
           const userData = await getUserFromCustomTable(data.user.id);
+          
+          // Store user data in localStorage
+          localStorage.setItem('userId', data.user.id);
+          localStorage.setItem('username', userData.username);
+          localStorage.setItem('role', userData.role);
+          
           // Redirect to role-specific main page
           const redirectRoute = userData.role === 'admin' ? '/main/1' : '/main/2';
           router.push(redirectRoute);

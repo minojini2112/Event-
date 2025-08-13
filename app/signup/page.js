@@ -59,13 +59,20 @@ export default function SignupPage() {
           // Insert user data into custom users table
           await insertUserToCustomTable(data.user.id, formData.username, formData.role);
           
-          // Store username and role in localStorage for later use
+          // Store user data in localStorage for immediate use
+          localStorage.setItem('userId', data.user.id);
           localStorage.setItem('username', formData.username);
           localStorage.setItem('role', formData.role);
           
-          // Redirect to role-specific main page after successful signup
-          const redirectRoute = formData.role === 'admin' ? '/main/1' : '/main/2';
-          router.push(redirectRoute);
+          // Redirect based on role:
+          // - Participants go to profile page to complete their profile
+          // - Admins go directly to main page
+          if (formData.role === 'admin') {
+            router.push('/main/1');
+          } else {
+            // For participants, redirect to profile page to complete their profile
+            router.push('/participant/profile');
+          }
         } catch (insertError) {
           setError('Account created but failed to save additional details. Please contact support.');
         }
