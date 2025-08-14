@@ -230,7 +230,7 @@ function ParticipantMainPageContent() {
   const handleViewMore = (eventId) => {
     try {
       if (typeof window !== 'undefined') {
-        const event = events.find((e) => e.id === eventId);
+        const event = events.find((e) => e.event_id === eventId);
         if (event) {
           window.localStorage.setItem('selected_event', JSON.stringify(event));
         }
@@ -255,6 +255,15 @@ function ParticipantMainPageContent() {
   // Participant-specific profile options
   const getProfileOptions = () => {
     return [
+      {
+        icon: (
+          <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg>
+        ),
+        label: 'Home',
+        route: '/main/2'
+      },
       {
         icon: (
           <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -626,7 +635,24 @@ function ParticipantMainPageContent() {
              >
               {/* Event Image */}
               <div className="relative h-48 bg-gradient-to-br from-blue-100 to-purple-100 overflow-hidden">
+                {event.image_url ? (
+                  <img 
+                    src={event.image_url} 
+                    alt={event.event_name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
                 <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                      <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Fallback placeholder - always present but hidden when image loads */}
+                <div className={`absolute inset-0 flex items-center justify-center ${event.image_url ? 'hidden' : 'flex'}`}>
                   <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                     <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -637,7 +663,6 @@ function ParticipantMainPageContent() {
                 <div className="absolute bottom-2 right-2 bg-black/20 text-white text-xs px-2 py-1 rounded">
                   {event.registered_no || 0}/{event.total_participants_allowed || '∞'} spots
                 </div>
-
               </div>
 
               {/* Event Details */}
