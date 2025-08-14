@@ -585,7 +585,7 @@ function ParticipantProfileContent() {
               <h3 className="text-xl font-bold text-gray-800 text-center mb-2">Registered Events</h3>
               <p className="text-gray-600 mb-4">View all events you&apos;ve registered for</p>
               <button 
-                onClick={() => handleNavigation('/participant/registered-events')}
+                onClick={() => handleNavigation('/participant/registered')}
                 className="bg-gradient-to-r from-green-500 to-blue-600 text-white px-6 py-3 rounded-xl font-medium hover:from-green-600 hover:to-blue-700 transition-all duration-200 shadow group-hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 View Events ({participantData.eventsRegistered})
@@ -617,7 +617,7 @@ function ParticipantProfileContent() {
               <h3 className="text-xl font-bold text-gray-800 text-center mb-2">Won Events</h3>
               <p className="text-gray-600 mb-4">Celebrate your victories and achievements</p>
               <button 
-                onClick={() => handleNavigation('/participant/won-events')}
+                onClick={() => handleNavigation('/participant/winners')}
                 className="bg-gradient-to-r from-yellow-500 to-orange-600 text-white px-6 py-3 rounded-xl font-medium hover:from-yellow-600 hover:to-orange-700 transition-all duration-200 shadow group-hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
               >
                 View Wins ({participantData.eventsWon})
@@ -649,7 +649,7 @@ function ParticipantProfileContent() {
               <h3 className="text-xl font-bold text-gray-800 text-center mb-2">Wishlist Events</h3>
               <p className="text-gray-600 mb-4">Events you&apos;re interested in attending</p>
               <button 
-                onClick={() => handleNavigation('/participant/wishlist-events')}
+                onClick={() => handleNavigation('/participant/wishlist')}
                 className="bg-gradient-to-r from-pink-500 to-red-600 text-white px-6 py-3 rounded-xl font-medium hover:from-pink-600 hover:to-red-700 transition-all duration-200 shadow group-hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500"
               >
                 View Wishlist ({participantData.wishlistCount})

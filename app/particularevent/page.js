@@ -69,14 +69,13 @@ export default function ParticularEventPage() {
     }
   }, [eventData]);
 
-  // CTA states
+  // CTA state and handlers
   const [isRegistered, setIsRegistered] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [toast, setToast] = useState('');
   const [showRegistrationModal, setShowRegistrationModal] = useState(false);
   const [isConfirmingRegistration, setIsConfirmingRegistration] = useState(false);
 
-  // Initialize CTA states from localStorage
   useEffect(() => {
     try {
       if (typeof window === 'undefined' || !idParam) return;
@@ -138,11 +137,6 @@ export default function ParticularEventPage() {
     checkRegistrationStatus();
   }, [idParam]);
 
-  const showToast = (msg) => {
-    setToast(msg);
-    setTimeout(() => setToast(''), 1500);
-  };
-
   const handleRegister = () => {
     // Open registration link in new tab if available
     if (eventData.registration_link) {
@@ -159,7 +153,6 @@ export default function ParticularEventPage() {
         if (!list.includes(idParam)) list.push(idParam);
       window.localStorage.setItem('registered_event_ids', JSON.stringify(list));
       setIsRegistered(true);
-      showToast("You're in! Registration saved");
     } catch {}
     }
   };
@@ -244,11 +237,9 @@ export default function ParticularEventPage() {
       if (list.includes(idParam)) {
         list = list.filter((x) => x !== idParam);
         setIsWishlisted(false);
-        showToast('Removed from wishlist');
       } else {
         list.push(idParam);
         setIsWishlisted(true);
-        showToast('Added to wishlist');
       }
       window.localStorage.setItem('wishlist_event_ids', JSON.stringify(list));
     } catch {}
@@ -338,11 +329,6 @@ export default function ParticularEventPage() {
                 </div>
               )}
             </div>
-            <ul className="md:col-span-1 space-y-3">
-              <li className="flex items-center gap-3"><span className="w-6 h-6 rounded-full bg-white/20 inline-flex items-center justify-center">🏆</span><span className="text-sm">Certificates & badges</span></li>
-              <li className="flex items-center gap-3"><span className="w-6 h-6 rounded-full bg-white/20 inline-flex items-center justify-center">🤝</span><span className="text-sm">Network with experts</span></li>
-              <li className="flex items-center gap-3"><span className="w-6 h-6 rounded-full bg-white/20 inline-flex items-center justify-center">🛠️</span><span className="text-sm">Hands‑on workshops</span></li>
-            </ul>
           </div>
         </section>
 

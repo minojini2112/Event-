@@ -1,8 +1,12 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function AddNewEventPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const eventId = searchParams.get('id');
+  const isEditMode = !!eventId;
 
   const [isEditing, setIsEditing] = useState(true);
   const [form, setForm] = useState({
@@ -14,16 +18,52 @@ export default function AddNewEventPage() {
     images: [], // File[]
     student_coordinators: [{ name: '', phone: '' }],
     staff_incharge: [{ name: '', department: '' }],
-    total_participants_allowed: ''
+    total_participants_allowed: '',
+    registration_link: '',
+    registration_type: 'individual' // 'individual' or 'team'
   });
 
   const [errors, setErrors] = useState({});
   const [saveStatus, setSaveStatus] = useState('idle'); // idle | saving | saved
   const [postStatus, setPostStatus] = useState('idle'); // idle | posting | posted
   const [isPostPopupOpen, setIsPostPopupOpen] = useState(false);
-  const router = useRouter();
 
-  useEffect(() => {}, []);
+  // Load existing event data if in edit mode
+  useEffect(() => {
+    if (isEditMode && typeof window !== 'undefined') {
+      loadExistingEvent();
+    }
+  }, [isEditMode]);
+
+  const loadExistingEvent = () => {
+    try {
+      // Try to load from posted events
+      const postedRaw = window.localStorage.getItem('posted_events');
+      if (postedRaw) {
+        const posted = JSON.parse(postedRaw);
+        const existingEvent = posted.find(e => String(e.id) === eventId);
+        
+        if (existingEvent) {
+          // Map the existing event data to our form structure
+          setForm({
+            registered_count: 6, // Keep default for now
+            event_name: existingEvent.title || existingEvent.event_name || '',
+            description: existingEvent.description || '',
+            start_date: existingEvent.start_date || existingEvent.date || '',
+            end_date: existingEvent.end_date || '',
+            images: [], // Reset images for now
+            student_coordinators: existingEvent.student_coordinators?.length ? existingEvent.student_coordinators : [{ name: '', phone: '' }],
+            staff_incharge: existingEvent.staff_incharge?.length ? existingEvent.staff_incharge : [{ name: '', department: '' }],
+            total_participants_allowed: existingEvent.total_participants_allowed || '',
+            registration_link: existingEvent.registration_link || '',
+            registration_type: existingEvent.registration_type || 'individual'
+          });
+        }
+      }
+    } catch (e) {
+      console.error('Failed to load existing event:', e);
+    }
+  };
 
   const updateField = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -49,7 +89,9 @@ export default function AddNewEventPage() {
       end_date: draft.end_date || '',
       total_participants_allowed: draft.total_participants_allowed || '',
       student_coordinators: Array.isArray(draft.student_coordinators) ? draft.student_coordinators : [],
-      staff_incharge: Array.isArray(draft.staff_incharge) ? draft.staff_incharge : []
+      staff_incharge: Array.isArray(draft.staff_incharge) ? draft.staff_incharge : [],
+      registration_link: draft.registration_link || '',
+      registration_type: draft.registration_type || 'individual'
     };
   };
 
@@ -75,6 +117,10 @@ export default function AddNewEventPage() {
     if (form.total_participants_allowed && Number.isNaN(Number(form.total_participants_allowed))) {
       nextErrors.total_participants_allowed = 'Must be a number';
     }
+    // Validate registration link if provided
+    if (form.registration_link && !isValidUrl(form.registration_link)) {
+      nextErrors.registration_link = 'Please enter a valid URL';
+    }
     // Basic validation for arrays
     form.student_coordinators.forEach((c, i) => {
       if (!c.name || !c.phone) {
@@ -88,6 +134,16 @@ export default function AddNewEventPage() {
     });
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
+  };
+
+  // Helper function to validate URLs
+  const isValidUrl = (string) => {
+    try {
+      new URL(string);
+      return true;
+    } catch (_) {
+      return false;
+    }
   };
 
   const handleSave = async () => {
@@ -105,12 +161,34 @@ export default function AddNewEventPage() {
       // Persist posted event to localStorage so both main pages can read it
       const key = 'posted_events';
       const nextEvent = buildEventForFeed(form);
-      const existing = typeof window !== 'undefined' ? window.localStorage.getItem(key) : null;
-      const list = existing ? JSON.parse(existing) : [];
-      list.push(nextEvent);
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem(key, JSON.stringify(list));
+      
+      if (isEditMode) {
+        // Update existing event
+        const existing = typeof window !== 'undefined' ? window.localStorage.getItem(key) : null;
+        const list = existing ? JSON.parse(existing) : [];
+        const eventIndex = list.findIndex(e => String(e.id) === eventId);
+        
+        if (eventIndex !== -1) {
+          // Preserve the original ID for editing
+          nextEvent.id = eventId;
+          list[eventIndex] = nextEvent;
+        } else {
+          list.push(nextEvent);
+        }
+        
+        if (typeof window !== 'undefined') {
+          window.localStorage.setItem(key, JSON.stringify(list));
+        }
+      } else {
+        // Create new event
+        const existing = typeof window !== 'undefined' ? window.localStorage.getItem(key) : null;
+        const list = existing ? JSON.parse(existing) : [];
+        list.push(nextEvent);
+        if (typeof window !== 'undefined') {
+          window.localStorage.setItem(key, JSON.stringify(list));
+        }
       }
+      
       // Simulate network delay
       await new Promise((r) => setTimeout(r, 500));
       setPostStatus('posted');
@@ -129,8 +207,12 @@ export default function AddNewEventPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <header className="w-full px-6 py-6 bg-white/80 backdrop-blur-sm border-b border-gray-200/50 shadow-sm">
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Add New Event</h1>
-          <p className="text-gray-600 mt-2">Create and publish a new event</p>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            {isEditMode ? 'Edit Event' : 'Add New Event'}
+          </h1>
+          <p className="text-gray-600 mt-2">
+            {isEditMode ? 'Update event information' : 'Create and publish a new event'}
+          </p>
         </div>
       </header>
 
@@ -290,6 +372,32 @@ export default function AddNewEventPage() {
                 />
                 {errors.total_participants_allowed && <span className="text-xs text-red-600 mt-1">{errors.total_participants_allowed}</span>}
               </div>
+
+              {/* Registration Link */}
+              <div className="flex flex-col">
+                <label className="text-sm text-gray-900 mb-1">Registration Link</label>
+                <input
+                  type="url"
+                  value={form.registration_link}
+                  onChange={(e) => updateField('registration_link', e.target.value)}
+                  placeholder="e.g., https://forms.gle/..."
+                  className={`text-sm rounded-lg border px-3 py-2 bg-white ring-1 text-gray-800 ${errors.registration_link ? 'border-red-300 ring-red-200' : 'border-gray-200 ring-gray-200'} focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+                />
+                {errors.registration_link && <span className="text-xs text-red-600 mt-1">{errors.registration_link}</span>}
+              </div>
+
+              {/* Registration Type */}
+              <div className="flex flex-col">
+                <label className="text-sm text-gray-900 mb-1">Registration Type</label>
+                <select
+                  value={form.registration_type}
+                  onChange={(e) => updateField('registration_type', e.target.value)}
+                  className="text-sm rounded-lg border border-gray-200 ring-1 ring-gray-200 px-3 py-2 bg-white text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="individual">Individual</option>
+                  <option value="team">Team</option>
+                </select>
+              </div>
             </div>
 
             <div className="flex items-center gap-3 mt-6">
@@ -307,7 +415,7 @@ export default function AddNewEventPage() {
                 <button onClick={() => setIsEditing(true)} className="px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-50">Edit</button>
                 {saveStatus === 'saved' && (
                   <button onClick={handleConfirmPost} disabled={postStatus === 'posting' || postStatus === 'posted'} className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-60">
-                    {postStatus === 'posted' ? 'Posted' : postStatus === 'posting' ? 'Posting...' : 'Confirm & Post'}
+                    {postStatus === 'posted' ? (isEditMode ? 'Updated' : 'Posted') : postStatus === 'posting' ? (isEditMode ? 'Updating...' : 'Posting...') : (isEditMode ? 'Confirm & Update' : 'Confirm & Post')}
                   </button>
                 )}
               </div>
@@ -349,9 +457,13 @@ export default function AddNewEventPage() {
                   ))}
                 </ul>
               </div>
+              <Detail label="Registration Link" value={form.registration_link || '-'} wide />
+              <Detail label="Registration Type" value={form.registration_type} wide />
             </div>
             {postStatus === 'posted' && (
-              <div className="mt-4 p-3 rounded-lg bg-green-50 text-green-700 border border-green-200 text-sm">Event has been posted successfully.</div>
+              <div className="mt-4 p-3 rounded-lg bg-green-50 text-green-700 border border-green-200 text-sm">
+                Event has been {isEditMode ? 'updated' : 'posted'} successfully.
+              </div>
             )}
           </div>
         )}
@@ -366,7 +478,9 @@ export default function AddNewEventPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <div className="text-lg font-semibold text-gray-900">Event posted</div>
+            <div className="text-lg font-semibold text-gray-900">
+              Event {isEditMode ? 'updated' : 'posted'}
+            </div>
             <div className="text-sm text-gray-700 mt-1">Redirecting to Admin Main...</div>
           </div>
         </div>

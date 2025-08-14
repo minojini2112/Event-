@@ -187,6 +187,11 @@ function AdminMainPageContent() {
     router.push(`/particularevent?id=${eventId}`);
   };
 
+  // When admin clicks participant count, navigate to registrations list for that event
+  const handleViewRegistrations = (eventId) => {
+    router.push(`/admin/registrations/${eventId}`);
+  };
+
   const handleProfileNavigation = (route) => {
     if (route === '/logout') {
       // Handle logout
