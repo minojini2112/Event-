@@ -3,6 +3,7 @@ import { useState, useRef, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { AuthGuard } from '../../../lib/authGuard';
+import { getEventStatus, getAvailableSlots, formatEventDate } from '../../../lib/eventUtils';
 
 export default function ParticipantMainPage() {
   return (
@@ -628,7 +629,11 @@ function ParticipantMainPageContent() {
               No events found. Try adjusting filters.
             </div>
           )}
-          {!loading && !error && filteredEvents.map((event) => (
+          {!loading && !error && filteredEvents.map((event) => {
+            const eventStatus = getEventStatus(event.start_date, event.end_date);
+            const availableSlots = getAvailableSlots(event.registered_no, event.total_participants_allowed);
+            
+            return (
              <div
                key={event.event_id}
                className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] border border-gray-200/50 overflow-hidden relative z-10"
@@ -659,7 +664,27 @@ function ParticipantMainPageContent() {
                     </svg>
                   </div>
                 </div>
-                {/* Event status info */}
+                {/* Event Status Badge */}
+                <div className={`absolute top-2 left-2 ${eventStatus.bgColor} ${eventStatus.textColor} ${eventStatus.borderColor} text-xs px-3 py-1.5 rounded-full font-medium border flex items-center gap-1`}>
+                  {eventStatus.status === 'live' && (
+                    <svg className="w-3 h-3 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M8 5v14l11-7z"/>
+                    </svg>
+                  )}
+                  {eventStatus.status === 'upcoming' && (
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  )}
+                  {eventStatus.status === 'ended' && (
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                  {eventStatus.label}
+                </div>
+                
+                {/* Available slots info */}
                 <div className="absolute bottom-2 right-2 bg-black/20 text-white text-xs px-2 py-1 rounded">
                   {event.registered_no || 0}/{event.total_participants_allowed || '∞'} spots
                 </div>
@@ -678,11 +703,7 @@ function ParticipantMainPageContent() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
                       <span className="text-sm">
-                        {new Date(event.start_date).toLocaleDateString('en-US', { 
-                          month: 'long', 
-                          day: 'numeric', 
-                          year: 'numeric' 
-                        })}
+                        {formatEventDate(event.start_date, 'long')}
                       </span>
                     </div>
                   </div>
@@ -701,18 +722,57 @@ function ParticipantMainPageContent() {
                   {event.caption || 'No caption available'}
                 </p>
                 
-                {/* Additional event info */}
+                {/* Event Status and Info */}
                 <div className="mt-3 pt-3 border-t border-gray-100">
-                  <div className="flex items-center justify-between text-xs text-gray-600">
-                    <span>Ends: {new Date(event.end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-                    <span className="text-blue-600 font-medium">
-                      {event.registered_no || 0} registered
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-gray-600">
+                      Ends: {formatEventDate(event.end_date)}
                     </span>
+                    <span className={`text-xs font-medium px-2 py-1 rounded-full ${eventStatus.bgColor} ${eventStatus.textColor} ${eventStatus.borderColor} border`}>
+                      {eventStatus.label}
+                    </span>
+                  </div>
+                  
+                  {/* Event-specific info */}
+                  <div className="mt-2 flex items-center justify-between text-xs">
+                    {eventStatus.status === 'upcoming' && (
+                      <>
+                        <span className="text-gray-600">
+                          Available slots: {availableSlots.available}
+                        </span>
+                        <span className="text-green-600 font-medium">
+                          Registration Open
+                        </span>
+                      </>
+                    )}
+                    
+                    {eventStatus.status === 'live' && (
+                      <>
+                        <span className="text-gray-600">
+                          Event in progress
+                        </span>
+                        <span className="text-green-600 font-medium">
+                          {event.registered_no || 0} participants
+                        </span>
+                      </>
+                    )}
+                    
+                    {eventStatus.status === 'ended' && (
+                      <>
+                        <span className="text-gray-600">
+                          Event completed
+                        </span>
+                        <span className="text-gray-600 font-medium">
+                          {event.registered_no || 0} total participants
+                        </span>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
-           ))}
+           );
+          })}
         </div>
 
         {/* Load More Section */}

@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { getEventStatus, getAvailableSlots, formatEventDate } from '../../lib/eventUtils';
 
 export default function ParticularEventPage() {
   const router = useRouter();
@@ -61,6 +62,17 @@ export default function ParticularEventPage() {
   const title = useMemo(() => eventData?.event_name || 'Event Details', [eventData]);
   const [showImageModal, setShowImageModal] = useState(false);
 
+  // Get event status and available slots
+  const eventStatus = useMemo(() => {
+    if (!eventData) return null;
+    return getEventStatus(eventData.start_date, eventData.end_date);
+  }, [eventData]);
+
+  const availableSlots = useMemo(() => {
+    if (!eventData) return null;
+    return getAvailableSlots(eventData.registered_no, eventData.total_participants_allowed);
+  }, [eventData]);
+
   // Debug: Log event data to see what we're working with
   useEffect(() => {
     if (eventData) {
@@ -75,6 +87,13 @@ export default function ParticularEventPage() {
   const [toast, setToast] = useState('');
   const [showRegistrationModal, setShowRegistrationModal] = useState(false);
   const [isConfirmingRegistration, setIsConfirmingRegistration] = useState(false);
+  const [isWishlistLoading, setIsWishlistLoading] = useState(false);
+
+  // Toast function
+  const showToast = (message) => {
+    setToast(message);
+    setTimeout(() => setToast(''), 3000);
+  };
 
   useEffect(() => {
     try {
@@ -88,9 +107,9 @@ export default function ParticularEventPage() {
     } catch {}
   }, [idParam]);
 
-  // Check if user is already registered for this event from database
+  // Check if user is already registered for this event from database and wishlist status
   useEffect(() => {
-    const checkRegistrationStatus = async () => {
+    const checkUserStatus = async () => {
       if (!idParam) return;
       
       try {
@@ -100,23 +119,24 @@ export default function ParticularEventPage() {
         // First, get the user's profile to get the correct user_id
         const profileResponse = await fetch(`/api/participants/profile?user_id=${supabaseUserId}`);
         if (!profileResponse.ok) {
-          console.error('Failed to fetch user profile for registration check');
+          console.error('Failed to fetch user profile for status check');
           return;
         }
 
         const profileData = await profileResponse.json();
         if (!profileData.profile || !profileData.profile.user_id) {
-          console.log('User profile not found, skipping registration check');
+          console.log('User profile not found, skipping status check');
           return;
         }
 
         const actualUserId = profileData.profile.user_id;
-        console.log('Checking registration with user_id:', actualUserId);
+        console.log('Checking status with user_id:', actualUserId);
 
-        const response = await fetch(`/api/participants/check-registration?event_id=${idParam}&participant_id=${actualUserId}`);
-        if (response.ok) {
-          const data = await response.json();
-          if (data.isRegistered) {
+        // Check registration status
+        const regResponse = await fetch(`/api/participants/check-registration?event_id=${idParam}&participant_id=${actualUserId}`);
+        if (regResponse.ok) {
+          const regData = await regResponse.json();
+          if (regData.isRegistered) {
             setIsRegistered(true);
             // Update localStorage to keep it in sync
             try {
@@ -126,15 +146,45 @@ export default function ParticularEventPage() {
                 if (!list.includes(idParam)) list.push(idParam);
                 window.localStorage.setItem('registered_event_ids', JSON.stringify(list));
               }
-        } catch {}
+            } catch {}
           }
         }
+
+        // Check wishlist status
+        const wishlistResponse = await fetch('/api/wishlist/check', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            event_id: idParam,
+            user_id: actualUserId
+          })
+        });
+
+        if (wishlistResponse.ok) {
+          const wishlistData = await wishlistResponse.json();
+          setIsWishlisted(wishlistData.isWishlisted);
+          // Update localStorage to keep it in sync
+          try {
+            if (typeof window !== 'undefined') {
+              const wishRaw = window.localStorage.getItem('wishlist_event_ids');
+              let list = wishRaw ? JSON.parse(wishRaw) : [];
+              if (wishlistData.isWishlisted && !list.includes(idParam)) {
+                list.push(idParam);
+              } else if (!wishlistData.isWishlisted && list.includes(idParam)) {
+                list = list.filter(id => id !== idParam);
+              }
+              window.localStorage.setItem('wishlist_event_ids', JSON.stringify(list));
+            }
+          } catch {}
+        }
       } catch (error) {
-        console.error('Error checking registration status:', error);
+        console.error('Error checking user status:', error);
       }
     };
 
-    checkRegistrationStatus();
+    checkUserStatus();
   }, [idParam]);
 
   const handleRegister = () => {
@@ -228,21 +278,102 @@ export default function ParticularEventPage() {
     showToast('Registration not confirmed. Please complete the registration process.');
   };
 
-  const handleWishlist = () => {
+  const handleWishlist = async () => {
     try {
       if (typeof window === 'undefined' || !idParam) return;
-      const wishRaw = window.localStorage.getItem('wishlist_event_ids');
-      let list = wishRaw ? JSON.parse(wishRaw) : [];
-      if (!Array.isArray(list)) list = [];
-      if (list.includes(idParam)) {
-        list = list.filter((x) => x !== idParam);
-        setIsWishlisted(false);
-      } else {
-        list.push(idParam);
-        setIsWishlisted(true);
+      
+      setIsWishlistLoading(true);
+      
+      const supabaseUserId = localStorage.getItem('userId');
+      console.log('Debug - supabaseUserId from localStorage:', supabaseUserId);
+      console.log('Debug - idParam:', idParam);
+      
+      if (!supabaseUserId) {
+        showToast('Please log in to manage your wishlist');
+        return;
       }
-      window.localStorage.setItem('wishlist_event_ids', JSON.stringify(list));
-    } catch {}
+
+      // Get user profile to get the correct user_id
+      const profileResponse = await fetch(`/api/participants/profile?user_id=${supabaseUserId}`);
+      if (!profileResponse.ok) {
+        showToast('Failed to fetch user profile. Please try again.');
+        return;
+      }
+
+      const profileData = await profileResponse.json();
+      console.log('Debug - Profile response:', profileData);
+      console.log('Debug - Profile data structure:', {
+        hasProfile: !!profileData.profile,
+        profileKeys: profileData.profile ? Object.keys(profileData.profile) : [],
+        userId: profileData.profile?.user_id
+      });
+      
+      if (!profileData.profile || !profileData.profile.user_id) {
+        showToast('User profile not found. Please complete your profile first.');
+        return;
+      }
+
+      const actualUserId = profileData.profile.user_id;
+      console.log('Debug - actualUserId:', actualUserId, 'idParam:', idParam);
+
+      if (isWishlisted) {
+        // Remove from wishlist
+        const response = await fetch('/api/wishlist/remove', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            event_id: idParam,
+            user_id: actualUserId
+          })
+        });
+
+        if (response.ok) {
+          setIsWishlisted(false);
+          // Update localStorage
+          const wishRaw = window.localStorage.getItem('wishlist_event_ids');
+          let list = wishRaw ? JSON.parse(wishRaw) : [];
+          list = list.filter((x) => x !== idParam);
+          window.localStorage.setItem('wishlist_event_ids', JSON.stringify(list));
+          showToast('Event removed from wishlist');
+        } else {
+          showToast('Failed to remove from wishlist. Please try again.');
+        }
+      } else {
+        // Add to wishlist
+        const requestBody = {
+          event_id: idParam,
+          user_id: actualUserId
+        };
+        console.log('Debug - Sending request body:', requestBody);
+        
+        const response = await fetch('/api/wishlist/add', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestBody)
+        });
+
+        if (response.ok) {
+          setIsWishlisted(true);
+          // Update localStorage
+          const wishRaw = window.localStorage.getItem('wishlist_event_ids');
+          let list = wishRaw ? JSON.parse(wishRaw) : [];
+          if (!list.includes(idParam)) list.push(idParam);
+          window.localStorage.setItem('wishlist_event_ids', JSON.stringify(list));
+          showToast('Event added to wishlist');
+        } else {
+          showToast('Failed to add to wishlist. Please try again.');
+        }
+      }
+    } catch (error) {
+      console.error('Error handling wishlist:', error);
+      showToast('An error occurred. Please try again.');
+    } finally {
+      setIsWishlistLoading(false);
+    }
   };
 
   if (loading) {
@@ -282,6 +413,18 @@ export default function ParticularEventPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed top-4 right-4 z-50 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 animate-in slide-in-from-top-2">
+          <div className="flex items-center gap-2">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span className="font-medium">{toast}</span>
+          </div>
+        </div>
+      )}
+
       <header className="w-full px-6 py-6 bg-white/80 backdrop-blur-sm border-b border-gray-200/50 shadow-sm">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div>
@@ -303,20 +446,60 @@ export default function ParticularEventPage() {
               <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Level up your skills. Meet mentors. Win prizes.</h2>
               <p className="mt-2 text-white/90 text-sm md:text-base">{eventData.caption || 'Join a vibrant community of builders and creators. Hands-on workshops, exclusive swag, and certificates to boost your portfolio.'}</p>
               <div className="mt-4 flex flex-wrap items-center gap-3">
-                <button onClick={handleRegister} disabled={isRegistered} className={`px-5 py-2.5 rounded-lg text-sm font-semibold shadow-md ${isRegistered ? 'bg-white/20 cursor-not-allowed' : 'bg-white text-blue-700 hover:bg-blue-50'} `}>
-                  {isRegistered ? 'Registered' : (
+                {/* Registration Button - Only show for upcoming events */}
+                {eventStatus?.showRegistration && (
+                  <button 
+                    onClick={handleRegister} 
+                    disabled={isRegistered} 
+                    className={`px-5 py-2.5 rounded-lg text-sm font-semibold shadow-md ${
+                      isRegistered 
+                        ? 'bg-white/20 cursor-not-allowed' 
+                        : 'bg-white text-blue-700 hover:bg-blue-50'
+                    }`}
+                  >
+                    {isRegistered ? 'Already Registered' : (
                     eventData.registration_link 
                       ? 'Register Now (External)' 
                       : 'Register Now (Contact Admin)'
                   )}
                 </button>
-                <button onClick={handleWishlist} className={`px-5 py-2.5 rounded-lg text-sm font-semibold border shadow-md ${isWishlisted ? 'bg-pink-100/30 border-white/40' : 'bg-transparent border-white/40 hover:bg-white/10'}`}>
-                  {isWishlisted ? 'Wishlisted' : 'Add to Wishlist'}
+                )}
+                
+                {/* Event Status Badge */}
+                {eventStatus && (
+                  <div className={`px-4 py-2.5 rounded-lg text-sm font-semibold border shadow-md ${
+                    eventStatus.status === 'upcoming' 
+                      ? 'bg-blue-100/30 border-blue-400/40 text-blue-200' 
+                      : eventStatus.status === 'live'
+                      ? 'bg-green-100/30 border-green-400/40 text-green-200'
+                      : 'bg-gray-100/30 border-gray-400/40 text-gray-200'
+                  }`}>
+                    {eventStatus.message}
+                  </div>
+                )}
+                
+                <button 
+                  onClick={handleWishlist} 
+                  disabled={isWishlistLoading}
+                  className={`px-5 py-2.5 rounded-lg text-sm font-semibold border shadow-md transition-all duration-200 ${
+                    isWishlisted 
+                      ? 'bg-pink-100/30 border-white/40' 
+                      : 'bg-transparent border-white/40 hover:bg-white/10'
+                  } ${isWishlistLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  {isWishlistLoading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      {isWishlisted ? 'Removing...' : 'Adding...'}
+                    </div>
+                  ) : (
+                    isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'
+                  )}
                 </button>
               </div>
               
-              {/* Info message when no registration link */}
-              {!eventData.registration_link && (
+              {/* Info message when no registration link - Only show for upcoming events */}
+              {!eventData.registration_link && eventStatus?.showRegistration && (
                 <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                   <div className="flex items-center gap-2 text-yellow-800">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -328,36 +511,41 @@ export default function ParticularEventPage() {
                   </div>
                 </div>
               )}
+              
+              {/* Status-specific messages */}
+              {eventStatus?.status === 'live' && (
+                <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-center gap-2 text-green-800">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-sm">
+                      <strong>Event is currently live!</strong> Registration is closed as the event is in progress.
+                    </span>
+                  </div>
+                </div>
+              )}
+              
+              {eventStatus?.status === 'ended' && (
+                <div className="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                  <div className="flex items-center gap-2 text-gray-800">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span className="text-sm">
+                      <strong>Event has ended.</strong> Registration is closed as this event has been completed.
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </section>
 
 
 
-        {/* Event Details */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200/60 p-6">
-          {/* Registration Link Section */}
-          {eventData.registration_link && (
-            <div className="mb-6 p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl border border-green-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Ready to Register?</h3>
-                  <p className="text-gray-600 text-sm mb-3">
-                    Click the button below to open the official registration form in a new tab.
-                  </p>
-                  <div className="text-xs text-gray-500 bg-white px-3 py-2 rounded border">
-                    <strong>Registration Link:</strong> {eventData.registration_link}
-                  </div>
-                </div>
-                <button
-                  onClick={() => window.open(eventData.registration_link, '_blank')}
-                  className="px-6 py-3 rounded-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 bg-gradient-to-r from-green-600 to-blue-600 text-white hover:from-green-700 hover:to-blue-700"
-                >
-                  Open Registration Form
-                </button>
-              </div>
-            </div>
-          )}
+                 {/* Event Details */}
+         <div className="bg-white rounded-2xl shadow-lg border border-gray-200/60 p-6">
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left: Event Image */}
@@ -429,22 +617,12 @@ export default function ParticularEventPage() {
             {/* Right: Details */}
             <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
               <Detail label="Event Name" value={eventData.event_name || 'N/A'} />
-              <Detail label="Start Date" value={eventData.start_date ? new Date(eventData.start_date).toLocaleDateString('en-US', { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-              }) : 'N/A'} />
-              <Detail label="End Date" value={eventData.end_date ? new Date(eventData.end_date).toLocaleDateString('en-US', { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-              }) : 'N/A'} />
+              <Detail label="Start Date" value={eventData.start_date ? formatEventDate(eventData.start_date, 'long') : 'N/A'} />
+              <Detail label="End Date" value={eventData.end_date ? formatEventDate(eventData.end_date, 'long') : 'N/A'} />
               <Detail label="Total Participants Allowed" value={eventData.total_participants_allowed || 'Unlimited'} />
               <Detail label="Currently Registered" value={`${eventData.registered_no || 0} participants`} />
-              <Detail label="Available Spots" value={eventData.total_participants_allowed ? 
-                `${Math.max(0, eventData.total_participants_allowed - (eventData.registered_no || 0))} spots remaining` : 
+              <Detail label="Available Spots" value={availableSlots ? 
+                `${availableSlots.available} spots remaining` : 
                 'Unlimited spots available'} />
               <Detail label="Description" value={eventData.description || eventData.caption || 'No description available'} wide />
               
@@ -454,17 +632,63 @@ export default function ParticularEventPage() {
               )}
               
               {/* Event Status */}
-              <div className="md:col-span-2 bg-blue-50 rounded-lg p-4 border border-blue-200">
-                <div className="text-xs text-blue-600 font-medium mb-2">Event Status</div>
+              <div className={`md:col-span-2 rounded-lg p-4 border ${
+                eventStatus?.status === 'upcoming' 
+                  ? 'bg-blue-50 border-blue-200' 
+                  : eventStatus?.status === 'live'
+                  ? 'bg-green-50 border-green-200'
+                  : 'bg-gray-50 border-gray-200'
+              }`}>
+                <div className={`text-xs font-medium mb-2 ${
+                  eventStatus?.status === 'upcoming' 
+                    ? 'text-blue-600' 
+                    : eventStatus?.status === 'live'
+                    ? 'text-green-600'
+                    : 'text-gray-600'
+                }`}>
+                  Event Status
+                </div>
                 <div className="flex items-center gap-4">
+                  {eventStatus?.status === 'upcoming' && (
+                    <>
                   <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                        <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
                     <span className="text-sm text-gray-700">Registration Open</span>
                   </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                        <span className="text-sm text-gray-700">
+                          {availableSlots?.available} spots available
+                        </span>
+                      </div>
+                    </>
+                  )}
+                  
+                  {eventStatus?.status === 'live' && (
+                    <>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                        <span className="text-sm text-gray-700">Event in Progress</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                        <span className="text-sm text-gray-700">{eventData.registered_no || 0} participants</span>
+                      </div>
+                    </>
+                  )}
+                  
+                  {eventStatus?.status === 'ended' && (
+                    <>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
+                        <span className="text-sm text-gray-700">Event Completed</span>
+                      </div>
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                    <span className="text-sm text-gray-700">{eventData.registered_no || 0} registered</span>
+                        <span className="text-sm text-gray-700">{eventData.registered_no || 0} total participants</span>
                   </div>
+                    </>
+                  )}
               </div>
               </div>
             </div>
