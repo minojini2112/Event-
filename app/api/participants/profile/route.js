@@ -29,6 +29,7 @@ export async function GET(request) {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
     // Fetch profile details by user_id
+    // Note: participants_profile table uses 'profile_id' (auto-generated UUID) and 'user_id' (Supabase auth ID)
     const { data: profileData, error: profileError } = await supabase
       .from('participants_profile')
       .select('*')
@@ -60,6 +61,12 @@ export async function GET(request) {
       user: {
         email: userData.user?.email || null,
         username: userData.user?.user_metadata?.full_name || userData.user?.email?.split('@')[0] || 'User'
+      },
+      // Add clear ID mapping for debugging
+      id_mapping: {
+        profile_id: profileData?.profile_id || null,
+        user_id: userId,
+        supabase_auth_id: userId
       }
     };
 
@@ -116,9 +123,10 @@ export async function POST(request) {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Check if profile already exists for this user
+    // Note: participants_profile table uses 'profile_id' (auto-generated UUID) and 'user_id' (Supabase auth ID)
     const { data: existingProfile, error: checkError } = await supabase
       .from('participants_profile')
-      .select('participant_id')
+      .select('profile_id')
       .eq('user_id', user_id)
       .single();
 
@@ -184,6 +192,13 @@ export async function POST(request) {
 
       result = { profile: data, action: 'created' };
     }
+
+    // Add clear ID mapping for debugging
+    result.id_mapping = {
+      profile_id: result.profile?.profile_id || null,
+      user_id: user_id,
+      supabase_auth_id: user_id
+    };
 
     return NextResponse.json(result);
   } catch (error) {
