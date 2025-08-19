@@ -237,7 +237,7 @@ function ParticipantProfileContent() {
 
   const handleNavigation = (route) => {
     console.log('Navigate to:', route);
-    // Add your navigation logic here
+    router.push(route);
   };
 
   // Close dropdown when clicking outside

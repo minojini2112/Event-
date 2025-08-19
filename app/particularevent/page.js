@@ -86,8 +86,11 @@ export default function ParticularEventPage() {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [toast, setToast] = useState('');
   const [showRegistrationModal, setShowRegistrationModal] = useState(false);
+  const [showTeamRegistrationModal, setShowTeamRegistrationModal] = useState(false);
   const [isConfirmingRegistration, setIsConfirmingRegistration] = useState(false);
   const [isWishlistLoading, setIsWishlistLoading] = useState(false);
+  const [teamName, setTeamName] = useState('');
+  const [eventRegistrationType, setEventRegistrationType] = useState(null);
 
   // Toast function
   const showToast = (message) => {
@@ -187,23 +190,34 @@ export default function ParticularEventPage() {
     checkUserStatus();
   }, [idParam]);
 
-  const handleRegister = () => {
-    // Open registration link in new tab if available
-    if (eventData.registration_link) {
-      window.open(eventData.registration_link, '_blank');
-      // Show confirmation popup
+  const handleRegister = async () => {
+    try {
+      // Always open registration link first if available
+      if (eventData.registration_link) {
+        window.open(eventData.registration_link, '_blank');
+      }
+      
+      // Get event registration info to determine if it's team or individual
+      const response = await fetch(`/api/events/registration-info?event_id=${idParam}`);
+      if (response.ok) {
+        const data = await response.json();
+        setEventRegistrationType(data.event.registration_type);
+        
+        if (data.event.registration_type === 'team') {
+          // Show team registration modal for team events
+          setShowTeamRegistrationModal(true);
+        } else {
+          // Individual event - show regular registration confirmation
+          setShowRegistrationModal(true);
+        }
+      } else {
+        // Fallback to regular registration confirmation if API fails
+        setShowRegistrationModal(true);
+      }
+    } catch (error) {
+      console.error('Error checking event registration type:', error);
+      // Fallback to regular registration confirmation
       setShowRegistrationModal(true);
-    } else {
-      // Fallback to old behavior if no registration link
-      try {
-        if (typeof window === 'undefined' || !idParam) return;
-      const regRaw = window.localStorage.getItem('registered_event_ids');
-      const list = regRaw ? JSON.parse(regRaw) : [];
-      if (!Array.isArray(list)) return;
-        if (!list.includes(idParam)) list.push(idParam);
-      window.localStorage.setItem('registered_event_ids', JSON.stringify(list));
-      setIsRegistered(true);
-    } catch {}
     }
   };
 
@@ -243,6 +257,8 @@ export default function ParticularEventPage() {
         body: JSON.stringify({
           event_id: idParam,
           participant_id: actualUserId, // Use the correct user_id from profile
+          registration_type: eventRegistrationType || 'individual',
+          team_name: eventRegistrationType === 'team' ? teamName : undefined,
         }),
       });
 
@@ -251,6 +267,12 @@ export default function ParticularEventPage() {
         setIsRegistered(true);
         showToast('Registration confirmed successfully!');
         setShowRegistrationModal(false);
+        
+        // Reset team registration state
+        if (eventRegistrationType === 'team') {
+          setTeamName('');
+          setEventRegistrationType(null);
+        }
         
         // Update localStorage
         try {
@@ -276,6 +298,28 @@ export default function ParticularEventPage() {
   const handleRegistrationCancel = () => {
     setShowRegistrationModal(false);
     showToast('Registration not confirmed. Please complete the registration process.');
+    
+    // Reset team registration state
+    if (eventRegistrationType === 'team') {
+      setTeamName('');
+      setEventRegistrationType(null);
+    }
+  };
+
+  const handleTeamRegistrationConfirm = async () => {
+    if (!teamName.trim()) {
+      showToast('Please enter a team name');
+      return;
+    }
+    
+    // Close team modal and show regular registration modal
+    setShowTeamRegistrationModal(false);
+    setShowRegistrationModal(true);
+  };
+
+  const handleTeamRegistrationCancel = () => {
+    setShowTeamRegistrationModal(false);
+    setTeamName('');
   };
 
   const handleWishlist = async () => {
@@ -771,6 +815,66 @@ export default function ParticularEventPage() {
         </div>
       )}
 
+      {/* Team Registration Modal */}
+      {showTeamRegistrationModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75" onClick={() => setShowTeamRegistrationModal(false)}>
+          <div className="bg-white rounded-lg p-6 shadow-xl max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
+            <div className="text-center mb-4">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900">Team Registration</h3>
+              <p className="text-sm text-green-600 font-medium">External form opened in new tab</p>
+            </div>
+            
+            <div className="text-center mb-6">
+              <p className="text-gray-700 mb-3">
+                This is a <strong>team event</strong>. The registration form has been opened in a new tab.
+              </p>
+              <p className="text-gray-600 text-sm mb-4">
+                Please complete the registration form in the new tab, then enter your team name below to confirm.
+              </p>
+              <div className="mt-4">
+                <label htmlFor="teamName" className="block text-sm font-medium text-gray-700 text-left mb-2">
+                  Team Name *
+                </label>
+                <input
+                  type="text"
+                  id="teamName"
+                  value={teamName}
+                  onChange={(e) => setTeamName(e.target.value)}
+                  placeholder="Enter your team name"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                />
+              </div>
+              <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
+                <p className="text-green-800 text-sm">
+                  <strong>Note:</strong> You will be registered as the team leader for this event. Make sure you've completed the external registration form first.
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={handleTeamRegistrationCancel}
+                className="px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors duration-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleTeamRegistrationConfirm}
+                className="bg-gradient-to-r from-green-600 to-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-green-700 hover:to-blue-700 transition-all duration-200"
+              >
+                Confirm Team Name
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Registration Confirmation Modal */}
       {showRegistrationModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75" onClick={() => setShowRegistrationModal(false)}>
@@ -788,8 +892,15 @@ export default function ParticularEventPage() {
               <p className="text-gray-700 mb-3">
                 You are about to register for <strong>"{eventData.event_name}"</strong>.
               </p>
+              {eventRegistrationType === 'team' && teamName && (
+                <div className="mb-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                  <p className="text-green-800 text-sm">
+                    <strong>Team Event:</strong> You will be registered as the team leader for <strong>"{teamName}"</strong>.
+                  </p>
+                </div>
+              )}
               <p className="text-gray-600 text-sm">
-                Please ensure you have completed the registration process on the external form that opened in the new tab.
+                The registration form has been opened in a new tab. Please ensure you have completed the registration process there.
               </p>
               <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
                 <p className="text-blue-800 text-sm">
@@ -816,7 +927,7 @@ export default function ParticularEventPage() {
                     Confirming...
                   </div>
                 ) : (
-                  'Confirm Registration'
+                  eventRegistrationType === 'team' ? 'Confirm Team Registration' : 'Confirm Registration'
                 )}
               </button>
             </div>

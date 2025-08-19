@@ -5,14 +5,43 @@ import { useRouter } from 'next/navigation';
 export default function ParticipantWinnersPage() {
   const router = useRouter();
   const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    // Dummy won events
-    const dummy = [
-      { id: 'w1', title: 'Code Sprint Finals', start_date: '2024-02-10' },
-      { id: 'w2', title: 'UI Design Challenge', start_date: '2024-04-25' }
-    ];
-    setEvents(dummy);
+    const fetchWonEvents = async () => {
+      try {
+        setLoading(true);
+        setError('');
+        
+        const userId = localStorage.getItem('userId');
+        if (!userId) {
+          setError('Please log in to view your won events');
+          setLoading(false);
+          return;
+        }
+
+        const response = await fetch(`/api/participants/won-events?user_id=${userId}`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch won events');
+        }
+        
+        const data = await response.json();
+        if (data.success) {
+          setEvents(data.events || []);
+        } else {
+          throw new Error(data.error || 'Failed to fetch events');
+        }
+      } catch (err) {
+        console.error('Error fetching won events:', err);
+        setError(err.message || 'Failed to load won events');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWonEvents();
   }, []);
 
   const formatYmd = (ymd) => {
@@ -49,7 +78,30 @@ export default function ParticipantWinnersPage() {
       </header>
 
       <main className="max-w-6xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="flex items-center">
+              <svg className="w-5 h-5 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+              <span className="text-red-800">{error}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Loading State */}
+        {loading && (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading your won events...</p>
+            </div>
+          </div>
+        )}
+
+        {!loading && !error && (
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
           <aside className="md:col-span-2">
             <div className="bg-white/90 backdrop-blur-sm border border-gray-200/60 rounded-2xl p-6 shadow-sm sticky top-4">
               <h2 className="text-sm font-semibold text-gray-900">Badge Journey</h2>
@@ -154,6 +206,7 @@ export default function ParticipantWinnersPage() {
             )}
           </section>
         </div>
+        )}
       </main>
     </div>
   );

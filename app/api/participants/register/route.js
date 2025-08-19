@@ -3,9 +3,11 @@ import { createClient } from '@supabase/supabase-js';
 
 export async function POST(request) {
   try {
-    const { event_id, participant_id } = await request.json();
+    const requestBody = await request.json();
+    const { event_id, participant_id, team_name } = requestBody;
+    let { registration_type } = requestBody;
 
-    console.log('Registration request received:', { event_id, supabase_user_id: participant_id });
+    console.log('Registration request received:', { event_id, supabase_user_id: participant_id, team_name, registration_type });
 
     if (!event_id || !participant_id) {
       return NextResponse.json({ 
@@ -98,10 +100,10 @@ export async function POST(request) {
 
     console.log('Checking event availability...');
 
-    // Check if the event exists and has available spots
+    // Check if the event exists and get its details
     const { data: eventData, error: eventError } = await supabase
       .from('all_events')
-      .select('total_participants_allowed, registered_no')
+      .select('total_participants_allowed, registered_no, registration_type')
       .eq('event_id', event_id)
       .single();
 
@@ -121,6 +123,29 @@ export async function POST(request) {
       }, { status: 400 });
     }
 
+    // Validate team registration requirements
+    if (eventData.registration_type === 'team') {
+      if (!team_name || team_name.trim() === '') {
+        return NextResponse.json({ 
+          error: 'Team name is required for team events' 
+        }, { status: 400 });
+      }
+      
+      if (registration_type !== 'team') {
+        return NextResponse.json({ 
+          error: 'Registration type must be "team" for team events' 
+        }, { status: 400 });
+      }
+    } else if (eventData.registration_type === 'individual') {
+      if (registration_type && registration_type !== 'individual') {
+        return NextResponse.json({ 
+          error: 'Registration type must be "individual" for individual events' 
+        }, { status: 400 });
+      }
+      // Set default registration type for individual events
+      registration_type = 'individual';
+    }
+
     console.log('Starting registration process...');
 
     // Start a transaction to ensure data consistency
@@ -138,7 +163,8 @@ export async function POST(request) {
         .from('registrations')
         .insert({
           event_id: event_id,
-          registration_type: 'individual', // Default to individual registration
+          registration_type: registration_type,
+          team_name: team_name || null, // Include team name if provided
           registered_at: new Date().toISOString()
         })
         .select()

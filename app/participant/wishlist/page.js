@@ -5,15 +5,44 @@ import { useRouter } from 'next/navigation';
 export default function ParticipantWishlistPage() {
   const router = useRouter();
   const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [toast, setToast] = useState('');
 
   useEffect(() => {
-    // Dummy wishlist events
-    const dummy = [
-      { id: 's1', title: 'Data Science Bootcamp', start_date: '2024-06-05' },
-      { id: 's2', title: 'Cloud Native Summit', start_date: '2024-07-12' },
-      { id: 's3', title: 'Product Design Jam', start_date: '2024-08-03' }
-    ];
-    setEvents(dummy);
+    const fetchWishlistedEvents = async () => {
+      try {
+        setLoading(true);
+        setError('');
+        
+        const userId = localStorage.getItem('userId');
+        if (!userId) {
+          setError('Please log in to view your wishlist');
+          setLoading(false);
+          return;
+        }
+
+        const response = await fetch(`/api/participants/wishlisted-events?user_id=${userId}`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch wishlisted events');
+        }
+        
+        const data = await response.json();
+        if (data.success) {
+          setEvents(data.events || []);
+        } else {
+          throw new Error(data.error || 'Failed to fetch events');
+        }
+      } catch (err) {
+        console.error('Error fetching wishlisted events:', err);
+        setError(err.message || 'Failed to load wishlisted events');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWishlistedEvents();
   }, []);
 
   const formatYmd = (ymd) => {
@@ -37,8 +66,67 @@ export default function ParticipantWishlistPage() {
 
   const viewDetails = (id) => router.push(`/particularevent?id=${id}`);
 
+  const showToast = (message) => {
+    setToast(message);
+    setTimeout(() => setToast(''), 3000);
+  };
+
+  const removeFromWishlist = async (eventId) => {
+    try {
+      const userId = localStorage.getItem('userId');
+      if (!userId) {
+        setError('Please log in to manage your wishlist');
+        return;
+      }
+
+      const response = await fetch('/api/wishlist/remove', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          event_id: eventId,
+          user_id: userId
+        })
+      });
+
+      if (response.ok) {
+        // Remove from local state
+        setEvents(prev => prev.filter(event => event.id !== eventId));
+        
+        // Update localStorage
+        const wishRaw = localStorage.getItem('wishlist_event_ids');
+        if (wishRaw) {
+          const wishlist = JSON.parse(wishRaw);
+          const updatedWishlist = wishlist.filter(id => id !== eventId);
+          localStorage.setItem('wishlist_event_ids', JSON.stringify(updatedWishlist));
+        }
+        
+        showToast('Event removed from wishlist successfully!');
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || 'Failed to remove from wishlist');
+      }
+    } catch (error) {
+      console.error('Error removing from wishlist:', error);
+      setError('Failed to remove from wishlist. Please try again.');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed top-4 right-4 z-50 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 animate-in slide-in-from-top-2">
+          <div className="flex items-center gap-2">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span className="font-medium">{toast}</span>
+          </div>
+        </div>
+      )}
+
       <header className="w-full px-6 py-6 bg-white/80 backdrop-blur-sm border-b border-gray-200/50 shadow-sm">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div>
@@ -50,7 +138,30 @@ export default function ParticipantWishlistPage() {
       </header>
 
       <main className="max-w-6xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="flex items-center">
+              <svg className="w-5 h-5 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+              <span className="text-red-800">{error}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Loading State */}
+        {loading && (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading your wishlist...</p>
+            </div>
+          </div>
+        )}
+
+        {!loading && !error && (
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
           <aside className="md:col-span-2">
             <div className="bg-white/90 backdrop-blur-sm border border-gray-200/60 rounded-2xl p-6 shadow-sm sticky top-4">
               <h2 className="text-sm font-semibold text-gray-900">Badge Journey</h2>
@@ -142,10 +253,22 @@ export default function ParticipantWishlistPage() {
                           </span>
                         </td>
                         <td className="px-6 py-4 text-right">
-                          <button onClick={(ev) => { ev.stopPropagation(); viewDetails(e.id); }} className="inline-flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-3 py-1.5 rounded-md text-xs font-medium hover:from-blue-700 hover:to-purple-700">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            View
-                          </button>
+                          <div className="flex items-center gap-2 justify-end">
+                            <button onClick={(ev) => { ev.stopPropagation(); viewDetails(e.id); }} className="inline-flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-3 py-1.5 rounded-md text-xs font-medium hover:from-blue-700 hover:to-purple-700">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                              View
+                            </button>
+                            <button 
+                              onClick={(ev) => { 
+                                ev.stopPropagation(); 
+                                removeFromWishlist(e.id); 
+                              }} 
+                              className="inline-flex items-center gap-1.5 bg-red-600 text-white px-3 py-1.5 rounded-md text-xs font-medium hover:bg-red-700"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                              Remove
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -155,6 +278,7 @@ export default function ParticipantWishlistPage() {
             )}
           </section>
         </div>
+        )}
       </main>
     </div>
   );
