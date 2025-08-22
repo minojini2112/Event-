@@ -27,29 +27,8 @@ export async function GET(request) {
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // First, get the profile_id from participants_profile table using the user_id
-    const { data: userProfile, error: profileError } = await supabase
-      .from('participants_profile')
-      .select('profile_id')
-      .eq('user_id', user_id)
-      .single();
-
-    if (profileError) {
-      console.error('Error fetching user profile:', profileError);
-      return NextResponse.json(
-        { error: 'Failed to fetch user profile' },
-        { status: 500 }
-      );
-    }
-
-    if (!userProfile) {
-      return NextResponse.json(
-        { error: 'User profile not found' },
-        { status: 404 }
-      );
-    }
-
-    const profileId = userProfile.profile_id;
+    // Use user_id directly - no need to lookup profile_id
+    console.log('Fetching registered events for user_id:', user_id);
 
     // Get all events that the user has registered for through registration_members
     const { data: registrations, error: regError } = await supabase
@@ -71,7 +50,7 @@ export async function GET(request) {
           )
         )
       `)
-      .eq('participant_id', profileId);
+      .eq('participant_id', user_id); // Use user_id directly instead of profileId
 
     if (regError) {
       console.error('Error fetching registrations:', regError);

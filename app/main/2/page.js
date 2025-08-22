@@ -31,6 +31,9 @@ function ParticipantMainPageContent() {
     wishlistCount: 0
   });
 
+  // Loading state for event counts
+  const [countsLoading, setCountsLoading] = useState(false);
+
   // Load user data and fetch profile
   useEffect(() => {
     const userId = localStorage.getItem('userId');
@@ -53,20 +56,44 @@ function ParticipantMainPageContent() {
 
   const fetchUserProfile = async (userId) => {
     try {
-      const response = await fetch(`/api/participants/profile?user_id=${userId}`);
-      if (response.ok) {
-        const data = await response.json();
-        if (data.profile) {
+      setCountsLoading(true);
+      
+      // Fetch real-time event counts from the actual APIs
+      const [registeredResponse, wonResponse, wishlistResponse] = await Promise.all([
+        fetch(`/api/participants/registered-events?user_id=${userId}`),
+        fetch(`/api/participants/won-events?user_id=${userId}`),
+        fetch(`/api/participants/wishlisted-events?user_id=${userId}`)
+      ]);
+
+      let registeredCount = 0;
+      let wonCount = 0;
+      let wishlistCount = 0;
+
+      if (registeredResponse.ok) {
+        const registeredData = await registeredResponse.json();
+        registeredCount = registeredData.count || 0;
+      }
+
+      if (wonResponse.ok) {
+        const wonData = await wonResponse.json();
+        wonCount = wonData.count || 0;
+      }
+
+      if (wishlistResponse.ok) {
+        const wishlistData = await wishlistResponse.json();
+        wishlistCount = wishlistData.count || 0;
+      }
+
           setUserData(prev => ({
             ...prev,
-            eventsRegistered: data.profile.registered_events_count || 0,
-            eventsWon: data.profile.won_events_count || 0,
-            wishlistCount: data.profile.wishlisted_events_count || 0
-          }));
-        }
-      }
+        eventsRegistered: registeredCount,
+        eventsWon: wonCount,
+        wishlistCount: wishlistCount
+      }));
     } catch (error) {
-      console.error('Error fetching user profile:', error);
+      console.error('Error fetching event counts:', error);
+    } finally {
+      setCountsLoading(false);
     }
   };
 
@@ -113,11 +140,12 @@ function ParticipantMainPageContent() {
     fetchEvents();
   }, []);
 
-  // Filters state (compact controls: month, day of week, exact date)
+  // Filters state (compact controls: month, day of week, exact date, status)
   const [filterMonth, setFilterMonth] = useState(''); // '' = All
   const [filterDay, setFilterDay] = useState(''); // '' = All, 0-6 = Sun-Sat
   const [filterDate, setFilterDate] = useState(''); // '' = All, 'YYYY-MM-DD'
   const [filterTitle, setFilterTitle] = useState(''); // title substring
+  const [filterStatus, setFilterStatus] = useState(''); // '' = All, 'upcoming', 'live', 'ended'
 
   // Helpers
   const months = useMemo(
@@ -153,6 +181,16 @@ function ParticipantMainPageContent() {
     []
   );
 
+  const statuses = useMemo(
+    () => [
+      { value: '', label: 'All statuses' },
+      { value: 'upcoming', label: 'Upcoming' },
+      { value: 'live', label: 'Live' },
+      { value: 'ended', label: 'Past' }
+    ],
+    []
+  );
+
   const parseLocalYmd = (ymd) => {
     if (!ymd) return null;
     const [y, m, d] = ymd.split('-').map(Number);
@@ -174,6 +212,7 @@ function ParticipantMainPageContent() {
     setFilterDay('');
     setFilterDate('');
     setFilterTitle('');
+    setFilterStatus('');
   };
 
   // Badge tiers
@@ -224,9 +263,18 @@ function ParticipantMainPageContent() {
       if (selectedDateObj && !isSameLocalDate(eventDate, selectedDateObj)) {
         return false;
       }
+
+      // Filter by event status
+      if (filterStatus !== '') {
+        const eventStatus = getEventStatus(event.start_date, event.end_date);
+        if (eventStatus.status !== filterStatus) {
+          return false;
+        }
+      }
+
       return true;
     });
-  }, [events, filterMonth, filterDay, filterDate, filterTitle]);
+  }, [events, filterMonth, filterDay, filterDate, filterTitle, filterStatus]);
 
   const handleViewMore = (eventId) => {
     try {
@@ -250,6 +298,14 @@ function ParticipantMainPageContent() {
       router.push('/login');
     } else {
       router.push(route);
+    }
+  };
+
+  // Refresh event counts
+  const refreshEventCounts = () => {
+    const userId = localStorage.getItem('userId');
+    if (userId) {
+      fetchUserProfile(userId);
     }
   };
 
@@ -339,7 +395,25 @@ function ParticipantMainPageContent() {
 
                 {/* Participant Badges Summary */}
                 <div className="px-4 py-3 border-b border-gray-200 bg-white/80">
-                  <div className="text-xs font-semibold text-gray-700 mb-2">Badges</div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-xs font-semibold text-gray-700">Badges</div>
+                    <button
+                      onClick={refreshEventCounts}
+                      disabled={countsLoading}
+                      className="text-xs text-blue-600 hover:text-blue-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Refresh counts"
+                    >
+                      {countsLoading ? (
+                        <svg className="w-3 h-3 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.001 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                      ) : (
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.001 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
                   <div className="space-y-2">
                     {/* Registered */}
                     {(() => {
@@ -354,7 +428,13 @@ function ParticipantMainPageContent() {
                           </div>
                           <div className="flex items-center gap-2">
                             <span className={`text-[10px] px-2 py-0.5 rounded-full ${pill}`}>{name}</span>
-                            <span className="text-xs text-gray-700">{userData.eventsRegistered}</span>
+                            <span className="text-xs text-gray-700">
+                              {countsLoading ? (
+                                <div className="w-3 h-3 border border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
+                              ) : (
+                                userData.eventsRegistered
+                              )}
+                            </span>
                           </div>
                         </div>
                       );
@@ -373,7 +453,13 @@ function ParticipantMainPageContent() {
                           </div>
                           <div className="flex items-center gap-2">
                             <span className={`text-[10px] px-2 py-0.5 rounded-full ${pill}`}>{name}</span>
-                            <span className="text-xs text-gray-700">{userData.eventsWon}</span>
+                            <span className="text-xs text-gray-700">
+                              {countsLoading ? (
+                                <div className="w-3 h-3 border border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
+                              ) : (
+                                userData.eventsWon
+                              )}
+                            </span>
                           </div>
                         </div>
                       );
@@ -392,7 +478,13 @@ function ParticipantMainPageContent() {
                           </div>
                           <div className="flex items-center gap-2">
                             <span className={`text-[10px] px-2 py-0.5 rounded-full ${pill}`}>{name}</span>
-                            <span className="text-xs text-gray-700">{userData.wishlistCount}</span>
+                            <span className="text-xs text-gray-700">
+                              {countsLoading ? (
+                                <div className="w-3 h-3 border border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
+                              ) : (
+                                userData.wishlistCount
+                              )}
+                            </span>
                           </div>
                         </div>
                       );
@@ -467,7 +559,7 @@ function ParticipantMainPageContent() {
           </div>
 
           {/* Controls Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             {/* Title */}
             <div className="flex flex-col">
               <label htmlFor="title" className="text-xs font-medium text-gray-900 mb-1">Title</label>
@@ -564,6 +656,34 @@ function ParticipantMainPageContent() {
                 />
               </div>
             </div>
+
+            {/* Event Status */}
+            <div className="flex flex-col">
+              <label htmlFor="status" className="text-xs font-medium text-gray-900 mb-1">Event Status</label>
+              <div className="relative">
+                <span className="pointer-events-none absolute inset-y-0 left-3 inline-flex items-center">
+                  <svg className="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </span>
+                <select
+                  id="status"
+                  aria-label="Filter by event status"
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                  className="w-full appearance-none text-sm text-gray-900 rounded-lg border border-gray-200 ring-1 ring-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none pl-9 pr-8 py-2 bg-white"
+                >
+                  {statuses.map((s) => (
+                    <option key={s.value} value={s.value}>{s.label}</option>
+                  ))}
+                </select>
+                <span className="pointer-events-none absolute inset-y-0 right-2 inline-flex items-center">
+                  <svg className="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </span>
+              </div>
+            </div>
           </div>
 
           {/* Active filter chips */}
@@ -579,12 +699,17 @@ function ParticipantMainPageContent() {
               active.push({ key: 'day', label: `Day: ${label}` });
             }
             if (filterDate) active.push({ key: 'date', label: `Date: ${filterDate}` });
+            if (filterStatus !== '') {
+              const label = statuses.find((s) => s.value === filterStatus)?.label || '';
+              active.push({ key: 'status', label: `Status: ${label}` });
+            }
 
             const clearOne = (key) => {
               if (key === 'title') setFilterTitle('');
               if (key === 'month') setFilterMonth('');
               if (key === 'day') setFilterDay('');
               if (key === 'date') setFilterDate('');
+              if (key === 'status') setFilterStatus('');
             };
 
             return active.length ? (

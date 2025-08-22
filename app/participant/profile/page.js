@@ -42,6 +42,7 @@ function ParticipantProfileContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [countsLoading, setCountsLoading] = useState(false);
 
   // Get user ID from localStorage (set during login/signup)
   const [userId, setUserId] = useState(null);
@@ -61,6 +62,7 @@ function ParticipantProfileContent() {
     if (storedUserId) {
       setUserId(storedUserId);
       fetchProfileData(storedUserId);
+      fetchEventCounts(storedUserId); // Fetch real-time event counts
     }
   }, []);
 
@@ -94,10 +96,7 @@ function ParticipantProfileContent() {
           department: data.profile.department || "Not added",
           year: data.profile.year || "Not added",
           registerNumber: data.profile.register_number || "Not added",
-          collegeName: data.profile.college_name || "Not added",
-          eventsRegistered: data.profile.registered_events_count || 0,
-          eventsWon: data.profile.won_events_count || 0,
-          wishlistCount: data.profile.wishlisted_events_count || 0
+          collegeName: data.profile.college_name || "Not added"
         }));
       } else {
         // Profile not found, use default values for profile fields
@@ -107,10 +106,7 @@ function ParticipantProfileContent() {
           department: "Not added",
           year: "Not added",
           registerNumber: "Not added",
-          collegeName: "Not added",
-          eventsRegistered: 0,
-          eventsWon: 0,
-          wishlistCount: 0
+          collegeName: "Not added"
         }));
       }
     } catch (err) {
@@ -118,6 +114,48 @@ function ParticipantProfileContent() {
       setError('Failed to load profile data. Please try again later.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Fetch real-time event counts
+  const fetchEventCounts = async (id) => {
+    try {
+      setCountsLoading(true);
+      
+      // Fetch registered events count
+      const registeredResponse = await fetch(`/api/participants/registered-events?user_id=${id}`);
+      if (registeredResponse.ok) {
+        const registeredData = await registeredResponse.json();
+        setParticipantData(prev => ({
+          ...prev,
+          eventsRegistered: registeredData.count || 0
+        }));
+      }
+
+      // Fetch won events count
+      const wonResponse = await fetch(`/api/participants/won-events?user_id=${id}`);
+      if (wonResponse.ok) {
+        const wonData = await wonResponse.json();
+        setParticipantData(prev => ({
+          ...prev,
+          eventsWon: wonData.count || 0
+        }));
+      }
+
+      // Fetch wishlisted events count
+      const wishlistResponse = await fetch(`/api/participants/wishlisted-events?user_id=${id}`);
+      if (wishlistResponse.ok) {
+        const wishlistData = await wishlistResponse.json();
+        setParticipantData(prev => ({
+          ...prev,
+          wishlistCount: wishlistData.count || 0
+        }));
+      }
+    } catch (err) {
+      console.error('Error fetching event counts:', err);
+      // Don't set error here as this is not critical for the main profile display
+    } finally {
+      setCountsLoading(false);
     }
   };
 
@@ -238,6 +276,13 @@ function ParticipantProfileContent() {
   const handleNavigation = (route) => {
     console.log('Navigate to:', route);
     router.push(route);
+  };
+
+  // Refresh event counts
+  const refreshEventCounts = () => {
+    if (userId) {
+      fetchEventCounts(userId);
+    }
   };
 
   // Close dropdown when clicking outside
@@ -362,6 +407,8 @@ function ParticipantProfileContent() {
                   </div>
                 </div>
 
+
+
                 {/* Menu Options */}
                 <div className="p-2">
                   {getProfileOptions().map((option, index) => {
@@ -405,6 +452,8 @@ function ParticipantProfileContent() {
         </div>
       </header>
 
+
+
       <main className="max-w-7xl mx-auto px-6 py-8">
         {/* Error Message */}
         {error && (
@@ -436,66 +485,118 @@ function ParticipantProfileContent() {
           </div>
         </div>
 
-        {/* Profile Details (editable) */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200/60 p-6 mb-10">
-          <div className="flex items-center justify-between mb-2">
-            <div>
-              <h3 className="text-2xl font-bold text-gray-900">Profile Details</h3>
-              <p className="text-gray-600 text-sm">Keep your information up to date</p>
-            </div>
-            {isEditingProfile ? (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={saveProfile}
-                  disabled={saving}
-                  className="bg-gradient-to-r from-green-500 to-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-green-600 hover:to-blue-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {saving ? 'Saving...' : 'Save'}
-                </button>
-                <button
-                  onClick={cancelEdit}
-                  disabled={saving}
-                  className="px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Cancel
-                </button>
+                {/* Profile Details (editable) */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-200/60 p-6 mb-8 relative overflow-hidden">
+          {/* Background decoration */}
+          <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full -translate-y-10 translate-x-10 opacity-60"></div>
+          <div className="absolute bottom-0 left-0 w-16 h-16 bg-gradient-to-br from-green-100 to-blue-100 rounded-full translate-y-8 -translate-x-8 opacity-60"></div>
+          
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Profile Details</h3>
+                  <p className="text-gray-600 text-sm">Keep your information up to date and accurate</p>
+                </div>
               </div>
-            ) : (
-              <button
-                onClick={startEdit}
-                className="px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300"
-              >
-                Edit
-              </button>
-            )}
-          </div>
+              {isEditingProfile ? (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={saveProfile}
+                    disabled={saving}
+                    className="bg-gradient-to-r from-green-500 to-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:from-green-600 hover:to-blue-700 shadow-md hover:shadow-lg transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                  >
+                    {saving ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        Saving...
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        Save Changes
+                      </div>
+                    )}
+                  </button>
+                  <button
+                    onClick={cancelEdit}
+                    disabled={saving}
+                    className="px-4 py-2 rounded-lg text-sm font-semibold border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={startEdit}
+                  className="group bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:from-blue-600 hover:to-purple-700 shadow-md hover:shadow-lg transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
+                >
+                  <div className="flex items-center gap-2">
+                    <svg className="w-3 h-3 group-hover:rotate-12 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    Edit Profile
+                  </div>
+                </button>
+              )}
+            </div>
 
           {isEditingProfile ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-              <div className="flex flex-col">
-                <label htmlFor="pf-name" className="text-xs font-medium text-gray-900 mb-1">Name *</label>
+              <div className="group">
+                <label htmlFor="pf-name" className="text-sm font-semibold text-gray-700 mb-2 block flex items-center gap-2">
+                  <div className="w-6 h-6 bg-blue-100 rounded-md flex items-center justify-center">
+                    <svg className="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                  Full Name *
+                </label>
                 <input
                   id="pf-name"
                   type="text"
                   value={draftProfile.name}
                   onChange={(e) => setDraftProfile({ ...draftProfile, name: e.target.value })}
-                  className="w-full text-sm text-gray-900 rounded-lg border border-gray-200 ring-1 ring-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none px-3 py-2 bg-white shadow-sm"
+                  className="w-full text-sm text-gray-900 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:outline-none px-3 py-2 bg-white shadow-sm transition-all duration-200 group-hover:border-gray-300"
                   placeholder="Enter your full name"
                 />
               </div>
-              <div className="flex flex-col">
-                <label htmlFor="pf-dept" className="text-xs font-medium text-gray-900 mb-1">Department *</label>
+              
+              <div className="group">
+                <label htmlFor="pf-dept" className="text-sm font-semibold text-gray-700 mb-2 block flex items-center gap-2">
+                  <div className="w-6 h-6 bg-green-100 rounded-md flex items-center justify-center">
+                    <svg className="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                  </div>
+                  Department *
+                </label>
                 <input
                   id="pf-dept"
                   type="text"
                   value={draftProfile.department}
                   onChange={(e) => setDraftProfile({ ...draftProfile, department: e.target.value })}
-                  className="w-full text-sm text-gray-900 rounded-lg border border-gray-200 ring-1 ring-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none px-3 py-2 bg-white shadow-sm"
+                  className="w-full text-sm text-gray-900 rounded-lg border-2 border-gray-200 focus:border-green-500 focus:outline-none px-3 py-2 bg-white shadow-sm transition-all duration-200 group-hover:border-gray-300"
                   placeholder="e.g., Computer Science"
                 />
               </div>
-              <div className="flex flex-col">
-                <label htmlFor="pf-year" className="text-xs font-medium text-gray-900 mb-1">Year * (1-6)</label>
+              
+              <div className="group">
+                <label htmlFor="pf-year" className="text-sm font-semibold text-gray-700 mb-2 block flex items-center gap-2">
+                  <div className="w-6 h-6 bg-purple-100 rounded-md flex items-center justify-center">
+                    <svg className="w-3 h-3 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  Academic Year * (1-6)
+                </label>
                 <input
                   id="pf-year"
                   type="number"
@@ -503,62 +604,134 @@ function ParticipantProfileContent() {
                   max="6"
                   value={draftProfile.year}
                   onChange={(e) => setDraftProfile({ ...draftProfile, year: e.target.value })}
-                  className="w-full text-sm text-gray-900 rounded-lg border border-gray-200 ring-1 ring-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none px-3 py-2 bg-white shadow-sm"
+                  className="w-full text-sm text-gray-900 rounded-lg border-2 border-gray-200 focus:border-purple-500 focus:outline-none px-3 py-2 bg-white shadow-sm transition-all duration-200 group-hover:border-gray-300"
                   placeholder="1-6"
                 />
               </div>
-              <div className="flex flex-col">
-                <label htmlFor="pf-reg" className="text-xs font-medium text-gray-900 mb-1">Register Number *</label>
+              
+              <div className="group">
+                <label htmlFor="pf-reg" className="text-sm font-semibold text-gray-700 mb-2 block flex items-center gap-2">
+                  <div className="w-6 h-6 bg-orange-100 rounded-md flex items-center justify-center">
+                    <svg className="w-3 h-3 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  Register Number *
+                </label>
                 <input
                   id="pf-reg"
                   type="text"
                   value={draftProfile.registerNumber}
                   onChange={(e) => setDraftProfile({ ...draftProfile, registerNumber: e.target.value })}
-                  className="w-full text-sm text-gray-900 rounded-lg border border-gray-200 ring-1 ring-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none px-3 py-2 bg-white shadow-sm"
+                  className="w-full text-sm text-gray-900 rounded-lg border-2 border-gray-200 focus:border-orange-500 focus:outline-none px-3 py-2 bg-white shadow-sm transition-all duration-200 group-hover:border-gray-300"
                   placeholder="Enter your register number"
                 />
               </div>
-              <div className="md:col-span-2 flex flex-col">
-                <label htmlFor="pf-college" className="text-xs font-medium text-gray-900 mb-1">College Name *</label>
+              
+              <div className="md:col-span-2 group">
+                <label htmlFor="pf-college" className="text-sm font-semibold text-gray-700 mb-2 block flex items-center gap-2">
+                  <div className="w-6 h-6 bg-indigo-100 rounded-md flex items-center justify-center">
+                    <svg className="w-3 h-3 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                  </div>
+                  College Name *
+                </label>
                 <input
                   id="pf-college"
                   type="text"
                   value={draftProfile.collegeName}
                   onChange={(e) => setDraftProfile({ ...draftProfile, collegeName: e.target.value })}
-                  className="w-full text-sm text-gray-900 rounded-lg border border-gray-200 ring-1 ring-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none px-3 py-2 bg-white shadow-sm"
+                  className="w-full text-sm text-gray-900 rounded-lg border-2 border-gray-200 focus:border-indigo-500 focus:outline-none px-3 py-2 bg-white shadow-sm transition-all duration-200 group-hover:border-gray-300"
                   placeholder="Enter your college name"
                 />
               </div>
             </div>
-          ) : (
+                    ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:bg-gray-100 transition-colors">
-                <div className="text-xs text-gray-600">Name</div>
-                <div className="text-sm font-medium text-gray-900">{participantData.name}</div>
+              <div className="group bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200 hover:from-blue-100 hover:to-blue-200 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                  <div className="text-xs font-medium text-blue-700 uppercase tracking-wide">Full Name</div>
+                </div>
+                <div className="text-base font-bold text-blue-900">{participantData.name}</div>
               </div>
-              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:bg-gray-100 transition-colors">
-                <div className="text-xs text-gray-600">Department</div>
-                <div className="text-sm font-medium text-gray-900">{participantData.department}</div>
+              
+              <div className="group bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 border border-green-200 hover:from-green-100 hover:to-green-200 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                  </div>
+                  <div className="text-xs font-medium text-green-700 uppercase tracking-wide">Department</div>
+                </div>
+                <div className="text-base font-bold text-green-900">{participantData.department}</div>
               </div>
-              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:bg-gray-100 transition-colors">
-                <div className="text-xs text-gray-600">Year</div>
-                <div className="text-sm font-medium text-gray-900">{participantData.year}</div>
+              
+              <div className="group bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 border border-purple-200 hover:from-purple-100 hover:to-purple-200 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
+                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <div className="text-xs font-medium text-purple-700 uppercase tracking-wide">Academic Year</div>
+                </div>
+                <div className="text-base font-bold text-purple-900">{participantData.year}</div>
               </div>
-              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:bg-gray-100 transition-colors">
-                <div className="text-xs text-gray-600">Register Number</div>
-                <div className="text-sm font-medium text-gray-900">{participantData.registerNumber}</div>
+              
+              <div className="group bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-4 border border-orange-200 hover:from-orange-100 hover:to-orange-200 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
+                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                  </div>
+                  <div className="text-xs font-medium text-orange-700 uppercase tracking-wide">Register Number</div>
+                </div>
+                <div className="text-base font-bold text-orange-900">{participantData.registerNumber}</div>
               </div>
-              <div className="md:col-span-2 bg-gray-50 rounded-lg p-4 border border-gray-200 hover:bg-gray-100 transition-colors">
-                <div className="text-xs text-gray-600">College Name</div>
-                <div className="text-sm font-medium text-gray-900">{participantData.collegeName}</div>
+              
+              <div className="md:col-span-2 group bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl p-4 border border-indigo-200 hover:from-indigo-100 hover:to-indigo-200 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center">
+                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                  </div>
+                  <div className="text-xs font-medium text-indigo-700 uppercase tracking-wide">College Name</div>
+                </div>
+                <div className="text-base font-bold text-indigo-900">{participantData.collegeName}</div>
               </div>
             </div>
           )}
         </div>
+        </div>
 
         {/* Quick Actions */}
-        <div className="mb-3">
-          <h3 className="text-xl font-semibold text-gray-900 mb-3">Quick Actions</h3>
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="text-xl font-semibold text-gray-900">Quick Actions</h3>
+          <button
+            onClick={refreshEventCounts}
+            disabled={countsLoading}
+            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {countsLoading ? (
+              <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            ) : (
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            )}
+            {countsLoading ? 'Refreshing...' : 'Refresh Counts'}
+          </button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Registered Events */}
@@ -579,7 +752,11 @@ function ParticipantProfileContent() {
                   );
                 })()}
                 <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-800 border border-gray-200">
-                  {participantData.eventsRegistered}
+                  {countsLoading ? (
+                    <div className="w-4 h-4 border border-gray-300 border-t-gray-600 rounded-full animate-spin mx-auto"></div>
+                  ) : (
+                    participantData.eventsRegistered
+                  )}
                 </span>
               </div>
               <h3 className="text-xl font-bold text-gray-800 text-center mb-2">Registered Events</h3>
@@ -588,7 +765,7 @@ function ParticipantProfileContent() {
                 onClick={() => handleNavigation('/participant/registered')}
                 className="bg-gradient-to-r from-green-500 to-blue-600 text-white px-6 py-3 rounded-xl font-medium hover:from-green-600 hover:to-blue-700 transition-all duration-200 shadow group-hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
-                View Events ({participantData.eventsRegistered})
+                View Events ({countsLoading ? '...' : participantData.eventsRegistered})
               </button>
             </div>
           </div>
@@ -611,7 +788,11 @@ function ParticipantProfileContent() {
                   );
                 })()}
                 <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-800 border border-gray-200">
-                  {participantData.eventsWon}
+                  {countsLoading ? (
+                    <div className="w-4 h-4 border border-gray-300 border-t-gray-600 rounded-full animate-spin mx-auto"></div>
+                  ) : (
+                    participantData.eventsWon
+                  )}
                 </span>
               </div>
               <h3 className="text-xl font-bold text-gray-800 text-center mb-2">Won Events</h3>
@@ -620,7 +801,7 @@ function ParticipantProfileContent() {
                 onClick={() => handleNavigation('/participant/winners')}
                 className="bg-gradient-to-r from-yellow-500 to-orange-600 text-white px-6 py-3 rounded-xl font-medium hover:from-yellow-600 hover:to-orange-700 transition-all duration-200 shadow group-hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
               >
-                View Wins ({participantData.eventsWon})
+                View Wins ({countsLoading ? '...' : participantData.eventsWon})
               </button>
             </div>
           </div>
@@ -643,7 +824,11 @@ function ParticipantProfileContent() {
                   );
                 })()}
                 <span className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-800 border border-gray-200">
-                  {participantData.wishlistCount}
+                  {countsLoading ? (
+                    <div className="w-4 h-4 border border-gray-300 border-t-gray-600 rounded-full animate-spin mx-auto"></div>
+                  ) : (
+                    participantData.wishlistCount
+                  )}
                 </span>
               </div>
               <h3 className="text-xl font-bold text-gray-800 text-center mb-2">Wishlist Events</h3>
@@ -652,7 +837,7 @@ function ParticipantProfileContent() {
                 onClick={() => handleNavigation('/participant/wishlist')}
                 className="bg-gradient-to-r from-pink-500 to-red-600 text-white px-6 py-3 rounded-xl font-medium hover:from-pink-600 hover:to-red-700 transition-all duration-200 shadow group-hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500"
               >
-                View Wishlist ({participantData.wishlistCount})
+                View Wishlist ({countsLoading ? '...' : participantData.wishlistCount})
               </button>
             </div>
           </div>

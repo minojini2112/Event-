@@ -30,33 +30,8 @@ export async function POST(request) {
 
     console.log('Checking for existing registration...');
 
-    // First, we need to find the profile_id from participants_profile table using the user_id
-    // The participant_id parameter is the Supabase auth user ID, we need to find the corresponding profile_id
-    console.log('Looking up profile for Supabase auth user ID:', participant_id);
-    
-    const { data: userProfile, error: profileError } = await supabase
-      .from('participants_profile')
-      .select('profile_id')
-      .eq('user_id', participant_id) // Find by Supabase auth user_id
-      .single();
-
-    if (profileError && profileError.code !== 'PGRST116') {
-      console.error('Error fetching user profile:', profileError);
-      return NextResponse.json({ 
-        error: 'Failed to fetch user profile' 
-      }, { status: 500 });
-    }
-
-    if (!userProfile) {
-      console.error('User profile not found for Supabase auth user ID:', participant_id);
-      return NextResponse.json({ 
-        error: 'User profile not found. Please complete your profile first or contact support.' 
-      }, { status: 404 });
-    }
-
-    // Use the profile_id for database operations
-    const actualProfileId = userProfile.profile_id;
-    console.log('Using profile_id for registration:', actualProfileId);
+    // Use user_id directly - no need to lookup profile_id
+    console.log('Using user_id directly for registration:', participant_id);
 
     // Check if the participant is already registered for this event
     // We need to check through the registrations table first, then registration_members
@@ -80,7 +55,7 @@ export async function POST(request) {
         .from('registration_members')
         .select('id')
         .in('registration_id', registrationIds)
-        .eq('participant_id', actualProfileId)
+        .eq('participant_id', participant_id) // Use user_id directly
         .single();
 
       if (memberCheckError && memberCheckError.code !== 'PGRST116') {
@@ -187,7 +162,7 @@ export async function POST(request) {
       .from('registration_members')
       .insert({
         registration_id: registrationId,
-        participant_id: actualProfileId
+        participant_id: participant_id // Use user_id directly
       })
       .select()
       .single();
@@ -225,7 +200,7 @@ export async function POST(request) {
     const { data: currentProfile, error: fetchError } = await supabase
       .from('participants_profile')
       .select('registered_events_count')
-      .eq('profile_id', actualProfileId)
+      .eq('user_id', participant_id) // Use user_id instead of profile_id
       .single();
 
     if (fetchError) {
@@ -240,7 +215,7 @@ export async function POST(request) {
         .update({ 
           registered_events_count: newCount
         })
-        .eq('profile_id', actualProfileId);
+        .eq('user_id', participant_id); // Use user_id instead of profile_id
 
       if (updateProfileError) {
         console.error('Error updating participant profile:', updateProfileError);
@@ -258,8 +233,7 @@ export async function POST(request) {
       message: 'Participant registered successfully for event',
       registration_id: registrationMember.id,
       event_id: event_id,
-      supabase_user_id: participant_id,
-      profile_id: actualProfileId,
+      user_id: participant_id, // Changed from supabase_user_id
       used_existing_registration: existingRegistrations && existingRegistrations.length > 0
     });
 
