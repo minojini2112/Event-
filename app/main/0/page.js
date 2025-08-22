@@ -5,24 +5,22 @@ import { useRouter } from 'next/navigation';
 import { AuthGuard } from '../../../lib/authGuard';
 import { getEventStatus, getAvailableSlots, formatEventDate } from '../../../lib/eventUtils';
 
-export default function AdminMainPage() {
+export default function GlobalAdminMainPage() {
   return (
-    <AuthGuard requiredRole="admin">
-      <AdminMainPageContent />
+    <AuthGuard requiredRole="global">
+      <GlobalAdminMainPageContent />
     </AuthGuard>
   );
 }
 
-function AdminMainPageContent() {
+function GlobalAdminMainPageContent() {
   const router = useRouter();
   // Profile dropdown state
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileRef = useRef(null);
   // Track active/hovered menu item for visual highlight
   const [activeMenu, setActiveMenu] = useState(null);
-  // Request access modal state
-  const [isRequestAccessOpen, setIsRequestAccessOpen] = useState(false);
-  const [requestEventName, setRequestEventName] = useState('');
+  // Global admin: no access request flow
 
   // User data from localStorage
   const [userData, setUserData] = useState({
@@ -198,33 +196,7 @@ function AdminMainPageContent() {
 
   const handleProfileNavigation = async (route) => {
     if (route === '/admin/addnewevent') {
-      // Check if admin has access to create events
-      const userId = localStorage.getItem('userId');
-      if (!userId) {
-        alert('User information not found. Please log in again.');
-        return;
-      }
-
-      try {
-        const response = await fetch(`/api/access-requests/check-access?adminUserId=${userId}`);
-        const data = await response.json();
-
-        if (response.ok && data.hasAccess) {
-          // Persist approved event name so add form can prefill and lock it
-          if (data.approvedEventName) {
-            localStorage.setItem('approved_event_name', data.approvedEventName);
-          }
-          // Admin has access, navigate to add new event
-          router.push(route);
-        } else {
-          // Admin doesn't have access, show request modal
-          setIsRequestAccessOpen(true);
-        }
-      } catch (error) {
-        console.error('Error checking access:', error);
-        // If there's an error, show the request modal as fallback
-        setIsRequestAccessOpen(true);
-      }
+      router.push(route);
       return;
     }
     if (route === '/logout') {
@@ -239,44 +211,7 @@ function AdminMainPageContent() {
     }
   };
 
-  const handleSubmitAccessRequest = async () => {
-    try {
-      const userId = localStorage.getItem('userId');
-      const username = localStorage.getItem('username');
-
-      if (!userId || !username) {
-        alert('User information not found. Please log in again.');
-        return;
-      }
-
-      const response = await fetch('/api/access-requests', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          eventName: requestEventName,
-          adminUserId: userId,
-          adminUsername: username
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        alert('Access request submitted successfully! Global admins will review your request.');
-        setIsRequestAccessOpen(false);
-        setRequestEventName('');
-      } else {
-        alert(`Error: ${data.error || 'Failed to submit request'}`);
-      }
-    } catch (error) {
-      console.error('Error submitting access request:', error);
-      alert('Failed to submit access request. Please try again.');
-    }
-  };
-
-  // Admin-specific profile options
+  // Global admin-specific profile options
   const getProfileOptions = () => {
     return [
       {
@@ -286,7 +221,7 @@ function AdminMainPageContent() {
           </svg>
         ),
         label: 'Home',
-        route: '/main/1'
+        route: '/main/0'
       },
       {
         icon: (
@@ -304,8 +239,19 @@ function AdminMainPageContent() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
           </svg>
         ),
-        label: 'My Posted Events',
+        label: 'View All Admin',
         route: '/admin/postedevent',
+        highlight: true
+      },
+      {
+        icon: (
+          <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 11V7a4 4 0 118 0v4" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 11h12a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6a2 2 0 012-2z" />
+          </svg>
+        ),
+        label: 'Request Access',
+        route: '/global_admin/access-requests',
         highlight: true
       },
       {
@@ -346,9 +292,9 @@ function AdminMainPageContent() {
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div>
             <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Admin Dashboard
+              Global Admin Dashboard
             </h1>
-            <p className="text-gray-600 mt-2">Manage and monitor your events</p>
+            <p className="text-gray-600 mt-2">Manage and monitor all events</p>
           </div>
           
           {/* Profile Circle */}
@@ -465,7 +411,7 @@ function AdminMainPageContent() {
                 <p className="text-sm font-medium text-gray-600">Active Events</p>
                 <p className="text-3xl font-bold text-gray-900">{userData.activeEvents}</p>
               </div>
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+              <div className="w-12 h-12 bg-purple-100 rounded-lg flex itemsCenter justify-center">
                 <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -680,7 +626,7 @@ function AdminMainPageContent() {
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                     <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                   </div>
                 </div>
@@ -694,7 +640,7 @@ function AdminMainPageContent() {
                   )}
                   {eventStatus.status === 'upcoming' && (
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2v12a2 2 0 002 2z" />
                     </svg>
                   )}
                   {eventStatus.status === 'ended' && (
@@ -710,9 +656,9 @@ function AdminMainPageContent() {
                   {event.registered_no || 0}/{event.total_participants_allowed || '∞'} spots
                 </div>
                 
-                {/* Admin badge */}
+                {/* Global Admin badge */}
                 <div className="absolute top-2 right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
-                  Admin
+                  Global Admin
                 </div>
               </div>
 
@@ -820,44 +766,7 @@ function AdminMainPageContent() {
       <div className="absolute top-10 left-10 w-20 h-20 bg-blue-200 rounded-full opacity-20 animate-pulse"></div>
       <div className="absolute bottom-10 right-10 w-16 h-16 bg-purple-200 rounded-full opacity-20 animate-pulse"></div>
       <div className="absolute top-1/2 right-5 w-12 h-12 bg-pink-200 rounded-full opacity-20 animate-pulse"></div>
-
-      {/* Request Access Modal */}
-      {isRequestAccessOpen && (
-        <div className="fixed inset-0 z-[20000] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-gray-200">
-            <div className="p-6">
-              <h3 className="text-xl font-semibold text-gray-900">Request access to add new event</h3>
-              <p className="text-sm text-gray-600 mt-2">Enter the event name and submit your request. An admin will review it shortly.</p>
-              <div className="mt-4">
-                <label htmlFor="request-event-name" className="block text-sm font-medium text-gray-700 mb-2">Event name</label>
-                <input
-                  id="request-event-name"
-                  type="text"
-                  value={requestEventName}
-                  onChange={(e) => setRequestEventName(e.target.value)}
-                  placeholder="e.g., Summer Hackathon 2025"
-                  className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-black placeholder-gray-500"
-                />
-              </div>
-            </div>
-            <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-3">
-              <button
-                onClick={() => setIsRequestAccessOpen(false)}
-                className="px-4 py-2 rounded-lg text-gray-700 bg-white border border-gray-200 hover:bg-gray-100"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSubmitAccessRequest}
-                disabled={!requestEventName.trim()}
-                className="px-4 py-2 rounded-lg text-white bg-gradient-to-r from-blue-500 to-purple-600 disabled:opacity-50"
-              >
-                Request Access
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      
     </div>
   );
 }

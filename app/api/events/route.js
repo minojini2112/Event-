@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-export async function GET() {
+export async function GET(request) {
   try {
     console.log('API: Starting to fetch events...');
+    const { searchParams } = new URL(request.url);
+    const adminId = searchParams.get('adminId');
     
     // Create a client with service role key to bypass RLS
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -28,11 +30,46 @@ export async function GET() {
     
     console.log('API: Test query result:', { testData, testError });
     
-    // Now try the actual query
-    const { data, error } = await supabase
-      .from('all_events')
-      .select('*')
-      .order('start_date', { ascending: true });
+    let data;
+    let error;
+
+    if (adminId) {
+      // Fetch events associated with this admin via approved access requests
+      const { data: approvals, error: approvalsError } = await supabase
+        .from('event_admin_access')
+        .select('event_name')
+        .eq('admin_id', adminId)
+        .eq('status', 'approved');
+
+      if (approvalsError) {
+        console.error('API: Error fetching approvals for admin:', approvalsError);
+        return NextResponse.json(
+          { error: 'Failed to fetch admin events', details: approvalsError.message },
+          { status: 500 }
+        );
+      }
+
+      const names = (approvals || []).map((a) => a.event_name).filter(Boolean);
+      if (names.length === 0) {
+        data = [];
+      } else {
+        const res = await supabase
+          .from('all_events')
+          .select('*')
+          .in('event_name', names)
+          .order('event_id', { ascending: false });
+        data = res.data;
+        error = res.error;
+      }
+    } else {
+      // Fetch all events (default)
+      const res = await supabase
+        .from('all_events')
+        .select('*')
+        .order('start_date', { ascending: true });
+      data = res.data;
+      error = res.error;
+    }
 
     console.log('API: Main query result:', { 
       dataLength: data?.length || 0, 
@@ -118,28 +155,62 @@ export async function POST(request) {
       staff_incharge: Array.isArray(eventData.staff_incharge) ? eventData.staff_incharge : []
     };
     
-    console.log('API: Inserting event data:', eventToInsert);
-    
-    // Insert the event into the all_events table
-    const { data, error } = await supabase
+    console.log('API: Preparing to upsert event data:', eventToInsert);
+
+    // Try to find a skeleton row created during approval
+    let updatedOrInserted;
+    let dbError;
+
+    const { data: skeleton, error: findError } = await supabase
       .from('all_events')
-      .insert([eventToInsert])
-      .select();
+      .select('event_id, description, start_date, end_date')
+      .eq('event_name', eventToInsert.event_name)
+      .is('description', null)
+      .is('start_date', null)
+      .is('end_date', null)
+      .order('event_id', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (findError) {
+      console.warn('API: Could not check for skeleton row (continuing with insert):', findError);
+    }
+
+    if (skeleton && skeleton.event_id) {
+      // Update the existing skeleton row with full details
+      const { data: updated, error: updateError } = await supabase
+        .from('all_events')
+        .update(eventToInsert)
+        .eq('event_id', skeleton.event_id)
+        .select();
+      updatedOrInserted = updated;
+      dbError = updateError;
+      console.log('API: Updated existing skeleton row', { event_id: skeleton.event_id, ok: !updateError });
+    } else {
+      // No skeleton; insert a new event row
+      const { data: inserted, error: insertError } = await supabase
+        .from('all_events')
+        .insert([eventToInsert])
+        .select();
+      updatedOrInserted = inserted;
+      dbError = insertError;
+      console.log('API: Inserted new event row', { ok: !insertError });
+    }
     
-    if (error) {
-      console.error('Error creating event:', error);
+    if (dbError) {
+      console.error('Error saving event:', dbError);
       return NextResponse.json(
-        { error: 'Failed to create event in database', details: error.message },
+        { error: 'Failed to save event in database', details: dbError.message },
         { status: 500 }
       );
     }
     
-    console.log('API: Event created successfully:', data);
+    console.log('API: Event saved successfully:', updatedOrInserted);
     
     return NextResponse.json({ 
       success: true,
-      event: data[0],
-      message: 'Event created successfully'
+      event: updatedOrInserted[0],
+      message: 'Event saved successfully'
     });
     
   } catch (error) {

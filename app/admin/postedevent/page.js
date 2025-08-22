@@ -8,14 +8,22 @@ export default function AdminPostedEventsPage() {
   const [selected, setSelected] = useState(null); // event for View More modal
 
   useEffect(() => {
-    try {
-      if (typeof window === 'undefined') return;
-      const stored = window.localStorage.getItem('posted_events');
-      const list = stored ? JSON.parse(stored) : [];
-      if (Array.isArray(list)) setPostedEvents(list);
-    } catch (e) {
-      console.error('Failed to load posted events:', e);
-    }
+    const fetchMyEvents = async () => {
+      try {
+        const adminId = typeof window !== 'undefined' ? window.localStorage.getItem('userId') : null;
+        if (!adminId) return;
+        const res = await fetch(`/api/events?adminId=${adminId}`);
+        const json = await res.json();
+        if (res.ok) {
+          setPostedEvents(json.events || []);
+        } else {
+          console.error('Failed to fetch admin events:', json.error);
+        }
+      } catch (e) {
+        console.error('Failed to load posted events:', e);
+      }
+    };
+    fetchMyEvents();
   }, []);
 
   const totalPosted = useMemo(() => postedEvents.length, [postedEvents]);
@@ -32,9 +40,6 @@ export default function AdminPostedEventsPage() {
             <p className="text-gray-600 mt-2">You have posted {totalPosted} {totalPosted === 1 ? 'event' : 'events'}</p>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={() => router.push('/admin/addnewevent')} className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-blue-700 hover:to-purple-700">
-              Add New Event
-            </button>
             <button onClick={() => router.push('/main/1')} className="px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-50">
               Go to Dashboard
             </button>
@@ -51,17 +56,17 @@ export default function AdminPostedEventsPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {postedEvents.map((event) => (
-              <div key={event.id} className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] border border-gray-200/50 overflow-hidden">
+              <div key={event.event_id} className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] border border-gray-200/50 overflow-hidden">
                 <div className="relative h-40 bg-gradient-to-br from-blue-100 to-purple-100 overflow-hidden">
                   <div className="absolute bottom-2 right-2 bg-black/20 text-white text-xs px-2 py-1 rounded">Posted</div>
                 </div>
                 <div className="p-4">
-                  <h3 className="font-bold text-gray-900 text-lg mb-1 line-clamp-2">{event.title}</h3>
+                  <h3 className="font-bold text-gray-900 text-lg mb-1 line-clamp-2">{event.event_name}</h3>
                   <div className="flex items-center text-gray-900 mb-2">
                     <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
-                    <span className="text-sm">{event.date}</span>
+                    <span className="text-sm">{event.start_date || '-'}</span>
                   </div>
                   <p className="text-gray-900 text-sm line-clamp-3">{event.description || '-'}</p>
                   <div className="mt-3 flex justify-end">
@@ -84,7 +89,7 @@ export default function AdminPostedEventsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 w-full max-w-2xl">
             <div className="flex items-center justify-between p-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">{selected.title}</h2>
+              <h2 className="text-lg font-semibold text-gray-900">{selected.event_name}</h2>
               <button onClick={() => setSelected(null)} className="text-gray-600 hover:text-gray-900">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -127,6 +132,16 @@ export default function AdminPostedEventsPage() {
             </div>
             <div className="flex justify-end gap-2 p-4 border-t border-gray-200">
               <button onClick={() => setSelected(null)} className="px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-50">Close</button>
+              <button
+                onClick={() => {
+                  setSelected(null);
+                  // Route to edit page with event id
+                  router.push(`/admin/addnewevent?id=${selected.event_id}`);
+                }}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-blue-700 hover:to-purple-700"
+              >
+                Edit
+              </button>
             </div>
           </div>
         </div>

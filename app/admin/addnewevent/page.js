@@ -30,6 +30,7 @@ export default function AddNewEventPage() {
   const [postStatus, setPostStatus] = useState('idle'); // idle | posting | posted
   const [isPostPopupOpen, setIsPostPopupOpen] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
+  const [isNameLocked, setIsNameLocked] = useState(false);
 
   const loadExistingEvent = useCallback(() => {
     try {
@@ -69,6 +70,16 @@ export default function AddNewEventPage() {
       loadExistingEvent();
     }
   }, [isEditMode, loadExistingEvent]);
+
+  // Prefill event name from approved access flow and lock the field
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const approvedName = window.localStorage.getItem('approved_event_name');
+    if (approvedName && !isEditMode) {
+      setForm((prev) => ({ ...prev, event_name: approvedName }));
+      setIsNameLocked(true);
+    }
+  }, [isEditMode]);
 
   const updateField = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -281,6 +292,12 @@ export default function AddNewEventPage() {
       
       setPostStatus('posted');
       setIsPostPopupOpen(true);
+      // Clear the approved name so future clicks prompt for access again
+      try {
+        if (typeof window !== 'undefined') {
+          window.localStorage.removeItem('approved_event_name');
+        }
+      } catch {}
       // Navigate after a short delay to let user see the popup
       setTimeout(() => {
         router.push('/main/1');
@@ -323,6 +340,8 @@ export default function AddNewEventPage() {
                 <input
                   value={form.event_name}
                   onChange={(e) => updateField('event_name', e.target.value)}
+                  readOnly={isNameLocked}
+                  disabled={isNameLocked}
                   placeholder="Enter event name"
                   className={`text-sm rounded-lg border px-3 py-2 bg-white ring-1 text-gray-800 ${errors.event_name ? 'border-red-300 ring-red-200' : 'border-gray-200 ring-gray-200'} focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
                 />

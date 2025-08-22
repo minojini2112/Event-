@@ -48,7 +48,9 @@ export default function LoginPage() {
           localStorage.setItem('role', userData.role);
           
           // Redirect to role-specific main page
-          const redirectRoute = userData.role === 'admin' ? '/main/1' : '/main/2';
+          const isGlobal = userData.role === 'global' || userData.role === 'global admin';
+          const isAdmin = userData.role === 'admin';
+          const redirectRoute = isGlobal ? '/main/0' : isAdmin ? '/main/1' : '/main/2';
           router.push(redirectRoute);
         } catch (error) {
           console.error('Error fetching user data:', error);
