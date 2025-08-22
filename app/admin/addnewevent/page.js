@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function AddNewEventPage() {
@@ -10,12 +10,14 @@ export default function AddNewEventPage() {
 
   const [isEditing, setIsEditing] = useState(true);
   const [form, setForm] = useState({
-    registered_count: 6,
+    registered_count: 0,
     event_name: '',
     description: '',
+    caption: '',
     start_date: '',
     end_date: '',
     images: [], // File[]
+    image_urls: [], // string[]
     student_coordinators: [{ name: '', phone: '' }],
     staff_incharge: [{ name: '', department: '' }],
     total_participants_allowed: '',
@@ -27,15 +29,9 @@ export default function AddNewEventPage() {
   const [saveStatus, setSaveStatus] = useState('idle'); // idle | saving | saved
   const [postStatus, setPostStatus] = useState('idle'); // idle | posting | posted
   const [isPostPopupOpen, setIsPostPopupOpen] = useState(false);
+  const [uploadingImages, setUploadingImages] = useState(false);
 
-  // Load existing event data if in edit mode
-  useEffect(() => {
-    if (isEditMode && typeof window !== 'undefined') {
-      loadExistingEvent();
-    }
-  }, [isEditMode]);
-
-  const loadExistingEvent = () => {
+  const loadExistingEvent = useCallback(() => {
     try {
       // Try to load from posted events
       const postedRaw = window.localStorage.getItem('posted_events');
@@ -46,12 +42,14 @@ export default function AddNewEventPage() {
         if (existingEvent) {
           // Map the existing event data to our form structure
           setForm({
-            registered_count: 6, // Keep default for now
+            registered_count: existingEvent.registered_count ?? 0,
             event_name: existingEvent.title || existingEvent.event_name || '',
             description: existingEvent.description || '',
+            caption: existingEvent.caption || '',
             start_date: existingEvent.start_date || existingEvent.date || '',
             end_date: existingEvent.end_date || '',
             images: [], // Reset images for now
+            image_urls: Array.isArray(existingEvent.image_urls) ? existingEvent.image_urls : [],
             student_coordinators: existingEvent.student_coordinators?.length ? existingEvent.student_coordinators : [{ name: '', phone: '' }],
             staff_incharge: existingEvent.staff_incharge?.length ? existingEvent.staff_incharge : [{ name: '', department: '' }],
             total_participants_allowed: existingEvent.total_participants_allowed || '',
@@ -63,7 +61,14 @@ export default function AddNewEventPage() {
     } catch (e) {
       console.error('Failed to load existing event:', e);
     }
-  };
+  }, [eventId]);
+
+  // Load existing event data if in edit mode
+  useEffect(() => {
+    if (isEditMode && typeof window !== 'undefined') {
+      loadExistingEvent();
+    }
+  }, [isEditMode, loadExistingEvent]);
 
   const updateField = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -84,6 +89,8 @@ export default function AddNewEventPage() {
       title: draft.event_name || 'Untitled Event',
       date: draft.start_date || new Date().toISOString().slice(0, 10),
       description: draft.description || '',
+      caption: draft.caption || '',
+      image_urls: Array.isArray(draft.image_urls) ? draft.image_urls : [],
       // Extra details for "View More" screens
       start_date: draft.start_date || '',
       end_date: draft.end_date || '',
@@ -141,8 +148,47 @@ export default function AddNewEventPage() {
     try {
       new URL(string);
       return true;
-    } catch (_) {
+    } catch {
       return false;
+    }
+  };
+
+  // Client-side image upload helper (Cloudinary unsigned)
+  const uploadImages = async (files) => {
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+    const folder = process.env.NEXT_PUBLIC_CLOUDINARY_FOLDER;
+    if (!cloudName || !uploadPreset) {
+      alert('Image upload is not configured. Please set NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME and NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET.');
+      return [];
+    }
+    setUploadingImages(true);
+    try {
+      const uploadedUrls = await Promise.all(
+        files.map(async (file) => {
+          const formData = new FormData();
+          formData.append('file', file);
+          formData.append('upload_preset', uploadPreset);
+          if (folder) formData.append('folder', folder);
+          const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+            method: 'POST',
+            body: formData,
+          });
+          if (!response.ok) {
+            const text = await response.text();
+            throw new Error(text || 'Upload failed');
+          }
+          const data = await response.json();
+          return data.secure_url || data.url;
+        })
+      );
+      return uploadedUrls;
+    } catch (e) {
+      console.error('Image upload failed:', e);
+      alert('Image upload failed. Check your Cloudinary configuration.');
+      return [];
+    } finally {
+      setUploadingImages(false);
     }
   };
 
@@ -158,12 +204,56 @@ export default function AddNewEventPage() {
   const handleConfirmPost = async () => {
     setPostStatus('posting');
     try {
-      // Persist posted event to localStorage so both main pages can read it
+      // Upload images first and collect URLs
+      let imageUrls = Array.isArray(form.image_urls) ? [...form.image_urls] : [];
+      if (form.images && form.images.length > 0) {
+        const uploaded = await uploadImages(form.images);
+        if (uploaded.length > 0) {
+          imageUrls = [...imageUrls, ...uploaded];
+          // reflect in UI for view mode
+          updateField('image_urls', imageUrls);
+        }
+      }
+
+      // Prepare clean payload for API (exclude File objects)
+      const payload = {
+        event_name: form.event_name,
+        description: form.description,
+        caption: form.caption || null,
+        start_date: form.start_date,
+        end_date: form.end_date || null,
+        registered_count: form.registered_count ?? null,
+        total_participants_allowed: form.total_participants_allowed ? Number(form.total_participants_allowed) : null,
+        registration_link: form.registration_link || null,
+        registration_type: form.registration_type || 'individual',
+        student_coordinators: Array.isArray(form.student_coordinators) ? form.student_coordinators : [],
+        staff_incharge: Array.isArray(form.staff_incharge) ? form.staff_incharge : [],
+        image_urls: imageUrls
+      };
+
+      // Call the API to create/update event in database
+      const apiResponse = await fetch('/api/events', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!apiResponse.ok) {
+        const errorData = await apiResponse.json();
+        throw new Error(errorData.error || 'Failed to create event');
+      }
+
+      const result = await apiResponse.json();
+      console.log('Event created successfully:', result);
+
+      // Also persist to localStorage for backward compatibility
       const key = 'posted_events';
       const nextEvent = buildEventForFeed(form);
       
       if (isEditMode) {
-        // Update existing event
+        // Update existing event in localStorage
         const existing = typeof window !== 'undefined' ? window.localStorage.getItem(key) : null;
         const list = existing ? JSON.parse(existing) : [];
         const eventIndex = list.findIndex(e => String(e.id) === eventId);
@@ -180,7 +270,7 @@ export default function AddNewEventPage() {
           window.localStorage.setItem(key, JSON.stringify(list));
         }
       } else {
-        // Create new event
+        // Create new event in localStorage
         const existing = typeof window !== 'undefined' ? window.localStorage.getItem(key) : null;
         const list = existing ? JSON.parse(existing) : [];
         list.push(nextEvent);
@@ -189,8 +279,6 @@ export default function AddNewEventPage() {
         }
       }
       
-      // Simulate network delay
-      await new Promise((r) => setTimeout(r, 500));
       setPostStatus('posted');
       setIsPostPopupOpen(true);
       // Navigate after a short delay to let user see the popup
@@ -200,6 +288,8 @@ export default function AddNewEventPage() {
     } catch (err) {
       console.error('Failed to post event:', err);
       setPostStatus('idle');
+      // You could add error handling UI here
+      alert(`Failed to create event: ${err.message}`);
     }
   };
 
@@ -239,6 +329,17 @@ export default function AddNewEventPage() {
                 {errors.event_name && <span className="text-xs text-red-600 mt-1">{errors.event_name}</span>}
               </div>
 
+              {/* Caption */}
+              <div className="flex flex-col">
+                <label className="text-sm text-gray-900 mb-1">Caption</label>
+                <input
+                  value={form.caption}
+                  onChange={(e) => updateField('caption', e.target.value)}
+                  placeholder="Short caption shown in lists"
+                  className="text-sm rounded-lg border px-3 py-2 bg-white ring-1 text-gray-800 border-gray-200 ring-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+
               {/* Start Date */}
               <div className="flex flex-col">
                 <label className="text-sm text-gray-900 mb-1">Start Date</label>
@@ -276,6 +377,25 @@ export default function AddNewEventPage() {
                   }}
                   className="text-sm rounded-lg border border-gray-200 ring-1 ring-gray-200 px-3 py-2 bg-white text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
+                {uploadingImages && (
+                  <div className="text-sm text-gray-600 mt-2">Uploading images...</div>
+                )}
+                {form.image_urls && form.image_urls.length > 0 && (
+                  <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                    {form.image_urls.map((url, idx) => (
+                      <div key={idx} className="relative group">
+                        <img src={url} alt={`img-${idx}`} className="w-full h-28 object-cover rounded-lg border border-gray-200" />
+                        <button
+                          type="button"
+                          onClick={() => updateField('image_urls', form.image_urls.filter((_, i) => i !== idx))}
+                          className="absolute top-1 right-1 bg-white/90 text-gray-700 rounded-full px-2 py-0.5 text-xs shadow hover:bg-white"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
                 {form.images && form.images.length > 0 && (
                   <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                     {form.images.map((file, idx) => (
@@ -424,6 +544,7 @@ export default function AddNewEventPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Detail label="Registration Number" value={form.registration_number} />
               <Detail label="Event Name" value={form.event_name} />
+              <Detail label="Caption" value={form.caption || '-'} />
               <Detail label="Start Date" value={form.start_date} />
               <Detail label="End Date" value={form.end_date} />
               <Detail label="Total Allowed" value={form.total_participants_allowed || '-'} />
