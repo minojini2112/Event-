@@ -101,7 +101,7 @@ export default function ParticipantWinnersPage() {
         )}
 
         {!loading && !error && (
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
           <aside className="md:col-span-2">
             <div className="bg-white/90 backdrop-blur-sm border border-gray-200/60 rounded-2xl p-6 shadow-sm sticky top-4">
               <h2 className="text-sm font-semibold text-gray-900">Badge Journey</h2>
@@ -172,6 +172,7 @@ export default function ParticipantWinnersPage() {
                     <tr>
                       <th scope="col" className="px-6 py-3 text-left text-[11px] font-semibold text-gray-600 uppercase tracking-wider">Title</th>
                       <th scope="col" className="px-6 py-3 text-left text-[11px] font-semibold text-gray-600 uppercase tracking-wider">Date</th>
+                      <th scope="col" className="px-6 py-3 text-left text-[11px] font-semibold text-gray-600 uppercase tracking-wider">Won As</th>
                       <th scope="col" className="px-6 py-3 text-right text-[11px] font-semibold text-gray-600 uppercase tracking-wider">Action</th>
                     </tr>
                   </thead>
@@ -190,6 +191,22 @@ export default function ParticipantWinnersPage() {
                           <span className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-blue-200 bg-blue-50 text-blue-700">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                             {formatYmd(e.start_date || e.date)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-700">
+                          <span className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-full border ${
+                            e.won_as === 'team' 
+                              ? 'border-green-200 bg-green-50 text-green-700' 
+                              : 'border-purple-200 bg-purple-50 text-purple-700'
+                          }`}>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              {e.won_as === 'team' ? (
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                              ) : (
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                              )}
+                            </svg>
+                            {e.won_as === 'team' ? 'Team' : 'Individual'}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-right">

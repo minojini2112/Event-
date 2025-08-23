@@ -101,7 +101,7 @@ export default function ParticipantRegisteredPage() {
         )}
 
         {!loading && !error && (
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
           <aside className="md:col-span-2">
             <div className="bg-white/90 backdrop-blur-sm border border-gray-200/60 rounded-2xl p-6 shadow-sm sticky top-4">
               <h2 className="text-sm font-semibold text-gray-900">Badge Journey</h2>

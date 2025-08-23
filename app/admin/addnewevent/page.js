@@ -32,33 +32,33 @@ export default function AddNewEventPage() {
   const [uploadingImages, setUploadingImages] = useState(false);
   const [isNameLocked, setIsNameLocked] = useState(false);
 
-  const loadExistingEvent = useCallback(() => {
+  const loadExistingEvent = useCallback(async () => {
     try {
-      // Try to load from posted events
-      const postedRaw = window.localStorage.getItem('posted_events');
-      if (postedRaw) {
-        const posted = JSON.parse(postedRaw);
-        const existingEvent = posted.find(e => String(e.id) === eventId);
-        
-        if (existingEvent) {
-          // Map the existing event data to our form structure
-          setForm({
-            registered_count: existingEvent.registered_count ?? 0,
-            event_name: existingEvent.title || existingEvent.event_name || '',
-            description: existingEvent.description || '',
-            caption: existingEvent.caption || '',
-            start_date: existingEvent.start_date || existingEvent.date || '',
-            end_date: existingEvent.end_date || '',
-            images: [], // Reset images for now
-            image_urls: Array.isArray(existingEvent.image_urls) ? existingEvent.image_urls : [],
-            student_coordinators: existingEvent.student_coordinators?.length ? existingEvent.student_coordinators : [{ name: '', phone: '' }],
-            staff_incharge: existingEvent.staff_incharge?.length ? existingEvent.staff_incharge : [{ name: '', department: '' }],
-            total_participants_allowed: existingEvent.total_participants_allowed || '',
-            registration_link: existingEvent.registration_link || '',
-            registration_type: existingEvent.registration_type || 'individual'
-          });
-        }
+      if (!eventId) return;
+      // Always fetch from DB for edit mode
+      const res = await fetch(`/api/events/${eventId}`);
+      if (!res.ok) {
+        console.error('Failed to fetch event from DB');
+        return;
       }
+      const json = await res.json();
+      const ev = json.event;
+      if (!ev) return;
+      setForm({
+        registered_count: ev.registered_no ?? 0,
+        event_name: ev.event_name || '',
+        description: ev.description || '',
+        caption: ev.caption || '',
+        start_date: ev.start_date || '',
+        end_date: ev.end_date || '',
+        images: [],
+        image_urls: ev.image_url ? [ev.image_url] : [],
+        student_coordinators: Array.isArray(ev.student_coordinators) ? ev.student_coordinators : (ev.student_coordinators ? [ev.student_coordinators] : [{ name: '', phone: '' }]),
+        staff_incharge: Array.isArray(ev.staff_incharge) ? ev.staff_incharge : (ev.staff_incharge ? [ev.staff_incharge] : [{ name: '', department: '' }]),
+        total_participants_allowed: ev.total_participants_allowed || '',
+        registration_link: ev.registration_link || '',
+        registration_type: ev.registration_type || 'individual'
+      });
     } catch (e) {
       console.error('Failed to load existing event:', e);
     }
@@ -242,14 +242,19 @@ export default function AddNewEventPage() {
         image_urls: imageUrls
       };
 
-      // Call the API to create/update event in database
-      const apiResponse = await fetch('/api/events', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
+      // Call the API to create or update event in database
+      const apiResponse = await (isEditMode
+        ? fetch(`/api/events/${eventId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          })
+        : fetch('/api/events', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          })
+      );
 
       if (!apiResponse.ok) {
         const errorData = await apiResponse.json();
@@ -257,38 +262,27 @@ export default function AddNewEventPage() {
       }
 
       const result = await apiResponse.json();
-      console.log('Event created successfully:', result);
+      console.log('Event saved successfully:', result);
 
       // Also persist to localStorage for backward compatibility
       const key = 'posted_events';
       const nextEvent = buildEventForFeed(form);
       
-      if (isEditMode) {
-        // Update existing event in localStorage
+      // Optionally sync to localStorage (best-effort)
+      try {
         const existing = typeof window !== 'undefined' ? window.localStorage.getItem(key) : null;
-        const list = existing ? JSON.parse(existing) : [];
-        const eventIndex = list.findIndex(e => String(e.id) === eventId);
-        
-        if (eventIndex !== -1) {
-          // Preserve the original ID for editing
+        let list = existing ? JSON.parse(existing) : [];
+        if (isEditMode) {
+          const idx = list.findIndex(e => String(e.id) === String(eventId));
           nextEvent.id = eventId;
-          list[eventIndex] = nextEvent;
+          if (idx !== -1) list[idx] = nextEvent; else list.push(nextEvent);
         } else {
           list.push(nextEvent);
         }
-        
         if (typeof window !== 'undefined') {
           window.localStorage.setItem(key, JSON.stringify(list));
         }
-      } else {
-        // Create new event in localStorage
-        const existing = typeof window !== 'undefined' ? window.localStorage.getItem(key) : null;
-        const list = existing ? JSON.parse(existing) : [];
-        list.push(nextEvent);
-        if (typeof window !== 'undefined') {
-          window.localStorage.setItem(key, JSON.stringify(list));
-        }
-      }
+      } catch {}
       
       setPostStatus('posted');
       setIsPostPopupOpen(true);

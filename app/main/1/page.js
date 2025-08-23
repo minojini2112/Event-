@@ -1,6 +1,7 @@
 'use client';
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { supabase } from '../../../lib/supabase';
 
 import { AuthGuard } from '../../../lib/authGuard';
 import { getEventStatus, getAvailableSlots, formatEventDate } from '../../../lib/eventUtils';
@@ -31,20 +32,56 @@ function AdminMainPageContent() {
     userType: 'admin',
     eventsCreated: 0,
     totalParticipants: 0,
-    activeEvents: 0
+    activeEvents: 0,
+    upcomingEvents: 0,
+    pastEvents: 0
   });
 
   // Load user data
   useEffect(() => {
-    // Load user data from localStorage
-    const username = localStorage.getItem('username') || 'Admin';
-    const email = localStorage.getItem('email') || 'No email';
-    
-    setUserData(prev => ({
-      ...prev,
-      username,
-      email
-    }));
+    const loadUserInfo = async () => {
+      const username = localStorage.getItem('username') || 'Admin';
+      let email = localStorage.getItem('email');
+
+      // Fallback: read from current Supabase session if not in localStorage
+      if (!email) {
+        try {
+          const { data } = await supabase.auth.getUser();
+          email = data?.user?.email || null;
+          if (email) {
+            localStorage.setItem('email', email);
+          }
+        } catch {}
+      }
+
+      setUserData(prev => ({
+        ...prev,
+        username,
+        email: email || 'No email'
+      }));
+    };
+
+    loadUserInfo();
+  }, []);
+
+  // Load dashboard stats from backend
+  useEffect(() => {
+    const loadStats = async () => {
+      try {
+        const res = await fetch('/api/events/stats');
+        if (!res.ok) return;
+        const stats = await res.json();
+        setUserData((prev) => ({
+          ...prev,
+          eventsCreated: stats.totalEvents ?? prev.eventsCreated,
+          totalParticipants: stats.totalParticipants ?? prev.totalParticipants,
+          activeEvents: stats.liveEvents ?? prev.activeEvents,
+          upcomingEvents: stats.upcomingEvents ?? prev.upcomingEvents,
+          pastEvents: stats.pastEvents ?? prev.pastEvents,
+        }));
+      } catch {}
+    };
+    loadStats();
   }, []);
 
   // Close dropdown when clicking outside
@@ -311,25 +348,6 @@ function AdminMainPageContent() {
       {
         icon: (
           <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-          </svg>
-        ),
-        label: 'My Profile',
-        route: '/admin/profile'
-      },
-      {
-        icon: (
-          <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-        ),
-        label: 'Settings',
-        route: '/settings'
-      },
-      {
-        icon: (
-          <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         ),
@@ -376,10 +394,6 @@ function AdminMainPageContent() {
                     <div className="flex-1">
                       <h3 className="text-white font-semibold text-lg">{userData.username}</h3>
                       <p className="text-white/80 text-sm">{userData.email}</p>
-                      <div className="mt-2 flex items-center gap-4 text-white/90 text-sm">
-                        <span>Events: {userData.eventsCreated}</span>
-                        <span>Participants: {userData.totalParticipants}</span>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -430,7 +444,7 @@ function AdminMainPageContent() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-6 py-8">
         {/* Admin Stats */}
-        <section className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <section className="mb-8 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
           <div className="bg-white/90 backdrop-blur-sm border border-gray-200/60 rounded-xl p-6 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
@@ -468,6 +482,34 @@ function AdminMainPageContent() {
               <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
                 <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white/90 backdrop-blur-sm border border-gray-200/60 rounded-xl p-6 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Upcoming Events</p>
+                <p className="text-3xl font-bold text-gray-900">{userData.upcomingEvents}</p>
+              </div>
+              <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
+                <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white/90 backdrop-blur-sm border border-gray-200/60 rounded-xl p-6 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Past Events</p>
+                <p className="text-3xl font-bold text-gray-900">{userData.pastEvents}</p>
+              </div>
+              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
             </div>
@@ -694,7 +736,7 @@ function AdminMainPageContent() {
                   )}
                   {eventStatus.status === 'upcoming' && (
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 002 2z" />
                     </svg>
                   )}
                   {eventStatus.status === 'ended' && (

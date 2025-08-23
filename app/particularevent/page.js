@@ -11,6 +11,20 @@ export default function ParticularEventPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  const safeParseArray = (data) => {
+    if (!data) return [];
+    if (Array.isArray(data)) return data;
+    if (typeof data === 'string') {
+      try {
+        return JSON.parse(data);
+      } catch (error) {
+        console.error('JSON parse error:', error);
+        return [];
+      }
+    }
+    return [];
+  };
+
   // Fetch event data from API
   useEffect(() => {
     const fetchEventData = async () => {
@@ -78,8 +92,13 @@ export default function ParticularEventPage() {
     if (eventData) {
       console.log('Event Data loaded:', eventData);
       console.log('Image URL:', eventData.image_url);
+      
+      // Check if event is ended and fetch past event details
+      if (eventStatus?.status === 'ended') {
+        fetchPastEventDetails(eventData.event_id);
+      }
     }
-  }, [eventData]);
+  }, [eventData, eventStatus]);
 
   // CTA state and handlers
   const [isRegistered, setIsRegistered] = useState(false);
@@ -92,10 +111,263 @@ export default function ParticularEventPage() {
   const [teamName, setTeamName] = useState('');
   const [eventRegistrationType, setEventRegistrationType] = useState(null);
 
+  // Role & access state
+  const [userRole, setUserRole] = useState(null);
+  const [userId, setUserId] = useState(null);
+  const [canEditEvent, setCanEditEvent] = useState(false);
+
+  // Past event details state
+  const [pastEventDetails, setPastEventDetails] = useState(null);
+  const [isPastEvent, setIsPastEvent] = useState(false);
+  const [pastEventLoading, setPastEventLoading] = useState(false);
+  const [showPastEventEditor, setShowPastEventEditor] = useState(false);
+  const [pastPhotoFiles, setPastPhotoFiles] = useState([]);
+  const [uploadingPastImages, setUploadingPastImages] = useState(false);
+  const [pastWinnersInput, setPastWinnersInput] = useState('');
+  const [pastEventSummary, setPastEventSummary] = useState('');
+  const [registeredUsers, setRegisteredUsers] = useState([]);
+  const [selectedWinners, setSelectedWinners] = useState([]);
+  const isPastDetailsMissing = useMemo(() => {
+    if (!isPastEvent || !pastEventDetails) return false;
+    const photosEmpty = !Array.isArray(pastEventDetails.photos) || pastEventDetails.photos.length === 0;
+    const winnersEmpty = !Array.isArray(pastEventDetails.winners) || pastEventDetails.winners.length === 0;
+    const detailsEmpty = !pastEventDetails.event_details;
+    return photosEmpty || winnersEmpty || detailsEmpty;
+  }, [isPastEvent, pastEventDetails]);
+
+  // Load registered users for winner selection when admin opens editor
+  useEffect(() => {
+    const loadRegisteredUsers = async () => {
+      try {
+        if (!showPastEventEditor || !eventData?.event_id) return;
+        const res = await fetch(`/api/participants/registered-users?event_id=${eventData.event_id}`);
+        if (res.ok) {
+          const json = await res.json();
+          setRegisteredUsers(Array.isArray(json.users) ? json.users : []);
+        }
+      } catch {}
+    };
+    loadRegisteredUsers();
+  }, [showPastEventEditor, eventData]);
+
+  // Prefill winners selection from existing past event details (if available)
+  useEffect(() => {
+    if (pastEventDetails?.winners) {
+      const winnersPrefill = (Array.isArray(pastEventDetails.winners) ? pastEventDetails.winners : [])
+        .map((w) => (typeof w === 'object' && w !== null) ? { profile_id: w.profile_id || '', username: w.username || (w.name || '') } : { profile_id: '', username: String(w) })
+        .slice(0, 3);
+      setSelectedWinners(winnersPrefill);
+    }
+  }, [pastEventDetails]);
+  
+  // Feedback state
+  const [feedbackText, setFeedbackText] = useState('');
+  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
+
   // Toast function
   const showToast = (message) => {
     setToast(message);
     setTimeout(() => setToast(''), 3000);
+  };
+
+  // Load role and userId
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const role = window.localStorage.getItem('role');
+      const uid = window.localStorage.getItem('userId');
+      setUserRole(role);
+      setUserId(uid);
+    } catch {}
+  }, []);
+
+  const isGlobalAdmin = useMemo(() => userRole === 'global' || userRole === 'global admin', [userRole]);
+  const isEventAdmin = useMemo(() => userRole === 'admin', [userRole]);
+  const showParticipantCTAs = useMemo(() => !(isGlobalAdmin || isEventAdmin), [isGlobalAdmin, isEventAdmin]);
+
+  // Check if current admin has edit access to this event
+  useEffect(() => {
+    const checkEditAccess = async () => {
+      try {
+        if (!eventData || !isEventAdmin || !userId) return;
+        const res = await fetch(`/api/events?adminId=${userId}`);
+        if (!res.ok) return;
+        const json = await res.json();
+        const list = Array.isArray(json.events) ? json.events : [];
+        const match = list.find((e) => String(e.event_id) === String(eventData.event_id) || e.event_name === eventData.event_name);
+        setCanEditEvent(!!match);
+      } catch (e) {
+        // noop
+      }
+    };
+    checkEditAccess();
+  }, [eventData, isEventAdmin, userId]);
+
+  // Fetch past event details if event is ended
+  const fetchPastEventDetails = async (eventId) => {
+    try {
+      setPastEventLoading(true);
+      const response = await fetch(`/api/events/past-event-details?event_id=${eventId}`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Past event details received:', data);
+        if (data.isPastEvent) {
+          console.log('Photos array:', data.pastEvent?.photos);
+          console.log('Photo URLs:', data.pastEvent?.photos?.map(photo => photo));
+          setPastEventDetails(data.pastEvent);
+          setIsPastEvent(true);
+          // Pre-fill editor fields
+          setPastEventSummary(data.pastEvent?.event_details || '');
+          setPastWinnersInput(Array.isArray(data.pastEvent?.winners) ? data.pastEvent.winners.map(w => (typeof w === 'object' ? (w.name || JSON.stringify(w)) : String(w))).join('\n') : '');
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching past event details:', error);
+    } finally {
+      setPastEventLoading(false);
+    }
+  };
+
+  const uploadPastImages = async (files) => {
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+    const folder = process.env.NEXT_PUBLIC_CLOUDINARY_FOLDER;
+    if (!cloudName || !uploadPreset) {
+      showToast('Image upload is not configured');
+      return [];
+    }
+    setUploadingPastImages(true);
+    try {
+      const uploadedUrls = await Promise.all(
+        files.map(async (file) => {
+          const formData = new FormData();
+          formData.append('file', file);
+          formData.append('upload_preset', uploadPreset);
+          if (folder) formData.append('folder', folder);
+          const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, { method: 'POST', body: formData });
+          if (!response.ok) {
+            const text = await response.text();
+            throw new Error(text || 'Upload failed');
+          }
+          const data = await response.json();
+          return data.secure_url || data.url;
+        })
+      );
+      return uploadedUrls;
+    } catch (e) {
+      console.error('Image upload failed:', e);
+      showToast('Image upload failed');
+      return [];
+    } finally {
+      setUploadingPastImages(false);
+    }
+  };
+
+  const handleSavePastEventDetails = async () => {
+    if (!eventData?.event_id) return;
+    try {
+      let uploaded = [];
+      if (pastPhotoFiles && pastPhotoFiles.length > 0) {
+        uploaded = await uploadPastImages(pastPhotoFiles);
+      }
+      const existing = Array.isArray(pastEventDetails?.photos) ? pastEventDetails.photos : [];
+      const photos = [...existing, ...uploaded];
+      const winners = selectedWinners.filter(Boolean).map(w => ({ profile_id: w.profile_id, username: w.username }));
+
+      const res = await fetch('/api/events/past-event-details', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event_id: eventData.event_id,
+          photos,
+          winners,
+          event_details: pastEventSummary
+        })
+      });
+      if (res.ok) {
+        showToast('Past event details saved');
+        await fetchPastEventDetails(eventData.event_id);
+        setPastPhotoFiles([]);
+        setShowPastEventEditor(false);
+      } else {
+        const err = await res.json();
+        showToast(err.error || 'Failed to save details');
+      }
+    } catch (e) {
+      showToast('Failed to save details');
+    }
+  };
+
+  const handleCancelPastEventEdit = () => {
+    setShowPastEventEditor(false);
+    setPastEventSummary(pastEventDetails?.event_details || '');
+    const winnersPrefill = (Array.isArray(pastEventDetails?.winners) ? pastEventDetails.winners : [])
+      .map((w) => (typeof w === 'object' && w !== null)
+        ? { profile_id: w.profile_id || '', username: w.username || (w.name || '') }
+        : { profile_id: '', username: String(w) })
+      .slice(0, 3);
+    setSelectedWinners(winnersPrefill);
+  };
+
+  // Handle feedback submission
+  const handleSubmitFeedback = async () => {
+    if (!feedbackText.trim()) return;
+    
+    try {
+      setIsSubmittingFeedback(true);
+      
+      // Get the user's profile to get the correct user_id
+      const supabaseUserId = localStorage.getItem('userId');
+      if (!supabaseUserId) {
+        showToast('Please log in to submit feedback');
+        return;
+      }
+
+      const profileResponse = await fetch(`/api/participants/profile?user_id=${supabaseUserId}`);
+      if (!profileResponse.ok) {
+        showToast('Failed to fetch user profile. Please try again.');
+        return;
+      }
+
+      const profileData = await profileResponse.json();
+      if (!profileData.profile || !profileData.profile.user_id) {
+        showToast('User profile not found. Please complete your profile first.');
+        return;
+      }
+
+      const actualUserId = profileData.profile.user_id;
+      
+      // Submit feedback
+      const response = await fetch('/api/events/add-feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          event_id: idParam,
+          participant_id: actualUserId,
+          feedback_text: feedbackText.trim()
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        showToast(data.message);
+        setFeedbackText(''); // Clear the form
+        
+        // Refresh past event details to show updated feedback
+        await fetchPastEventDetails(idParam);
+      } else {
+        const errorData = await response.json();
+        showToast(errorData.error || 'Failed to submit feedback');
+      }
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+      showToast('Failed to submit feedback. Please try again.');
+    } finally {
+      setIsSubmittingFeedback(false);
+    }
   };
 
   useEffect(() => {
@@ -109,6 +381,17 @@ export default function ParticularEventPage() {
       setIsWishlisted(Array.isArray(wish) && wish.includes(idParam));
     } catch {}
   }, [idParam]);
+
+  // Function to validate image URL
+  const isValidImageUrl = (url) => {
+    if (!url || typeof url !== 'string') return false;
+    try {
+      const urlObj = new URL(url);
+      return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
+    } catch {
+      return false;
+    }
+  };
 
   // Check if user is already registered for this event from database and wishlist status
   useEffect(() => {
@@ -149,7 +432,7 @@ export default function ParticularEventPage() {
                 if (!list.includes(idParam)) list.push(idParam);
                 window.localStorage.setItem('registered_event_ids', JSON.stringify(list));
               }
-            } catch {}
+        } catch {}
           }
         }
 
@@ -193,8 +476,8 @@ export default function ParticularEventPage() {
   const handleRegister = async () => {
     try {
       // Always open registration link first if available
-      if (eventData.registration_link) {
-        window.open(eventData.registration_link, '_blank');
+    if (eventData.registration_link) {
+      window.open(eventData.registration_link, '_blank');
       }
       
       // Get event registration info to determine if it's team or individual
@@ -208,9 +491,9 @@ export default function ParticularEventPage() {
           setShowTeamRegistrationModal(true);
         } else {
           // Individual event - show regular registration confirmation
-          setShowRegistrationModal(true);
+      setShowRegistrationModal(true);
         }
-      } else {
+    } else {
         // Fallback to regular registration confirmation if API fails
         setShowRegistrationModal(true);
       }
@@ -376,9 +659,9 @@ export default function ParticularEventPage() {
         if (response.ok) {
           setIsWishlisted(false);
           // Update localStorage
-          const wishRaw = window.localStorage.getItem('wishlist_event_ids');
-          let list = wishRaw ? JSON.parse(wishRaw) : [];
-          list = list.filter((x) => x !== idParam);
+      const wishRaw = window.localStorage.getItem('wishlist_event_ids');
+      let list = wishRaw ? JSON.parse(wishRaw) : [];
+        list = list.filter((x) => x !== idParam);
           window.localStorage.setItem('wishlist_event_ids', JSON.stringify(list));
           showToast('Event removed from wishlist');
         } else {
@@ -401,7 +684,7 @@ export default function ParticularEventPage() {
         });
 
         if (response.ok) {
-          setIsWishlisted(true);
+        setIsWishlisted(true);
           // Update localStorage
           const wishRaw = window.localStorage.getItem('wishlist_event_ids');
           let list = wishRaw ? JSON.parse(wishRaw) : [];
@@ -490,8 +773,8 @@ export default function ParticularEventPage() {
               <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Level up your skills. Meet mentors. Win prizes.</h2>
               <p className="mt-2 text-white/90 text-sm md:text-base">{eventData.caption || 'Join a vibrant community of builders and creators. Hands-on workshops, exclusive swag, and certificates to boost your portfolio.'}</p>
               <div className="mt-4 flex flex-wrap items-center gap-3">
-                {/* Registration Button - Only show for upcoming events */}
-                {eventStatus?.showRegistration && (
+                {/* Registration Button - Only for participants (not admins) and upcoming events */}
+                {showParticipantCTAs && eventStatus?.showRegistration && (
                   <button 
                     onClick={handleRegister} 
                     disabled={isRegistered} 
@@ -522,28 +805,40 @@ export default function ParticularEventPage() {
                   </div>
                 )}
                 
-                <button 
-                  onClick={handleWishlist} 
-                  disabled={isWishlistLoading}
-                  className={`px-5 py-2.5 rounded-lg text-sm font-semibold border shadow-md transition-all duration-200 ${
-                    isWishlisted 
-                      ? 'bg-pink-100/30 border-white/40' 
-                      : 'bg-transparent border-white/40 hover:bg-white/10'
-                  } ${isWishlistLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                  {isWishlistLoading ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                      {isWishlisted ? 'Removing...' : 'Adding...'}
-                    </div>
-                  ) : (
-                    isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'
-                  )}
-                </button>
+                {showParticipantCTAs && (
+                  <button 
+                    onClick={handleWishlist} 
+                    disabled={isWishlistLoading}
+                    className={`px-5 py-2.5 rounded-lg text-sm font-semibold border shadow-md transition-all duration-200 ${
+                      isWishlisted 
+                        ? 'bg-pink-100/30 border-white/40' 
+                        : 'bg-transparent border-white/40 hover:bg-white/10'
+                    } ${isWishlistLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    {isWishlistLoading ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        {isWishlisted ? 'Removing...' : 'Adding...'}
+                      </div>
+                    ) : (
+                      isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'
+                    )}
+                  </button>
+                )}
+
+                {/* Edit button for event admins with access (only for upcoming/live) */}
+                {canEditEvent && eventStatus?.status !== 'ended' && (
+                  <button 
+                    onClick={() => router.push(`/admin/addnewevent?id=${eventData.event_id}`)}
+                    className="bg-white/90 text-blue-700 px-5 py-2.5 rounded-lg text-sm font-semibold shadow-md hover:bg-white"
+                  >
+                    Edit Event
+                  </button>
+                )}
               </div>
               
-              {/* Info message when no registration link - Only show for upcoming events */}
-              {!eventData.registration_link && eventStatus?.showRegistration && (
+              {/* Info message when no registration link - Only for participants on upcoming events */}
+              {showParticipantCTAs && !eventData.registration_link && eventStatus?.showRegistration && (
                 <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                   <div className="flex items-center gap-2 text-yellow-800">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -588,22 +883,33 @@ export default function ParticularEventPage() {
 
 
 
-                 {/* Event Details */}
-         <div className="bg-white rounded-2xl shadow-lg border border-gray-200/60 p-6">
+        {/* Event Details */}
+        <div className="bg-gradient-to-br from-white via-blue-50/30 to-purple-50/30 rounded-3xl shadow-xl border border-white/60 p-8 backdrop-blur-sm">
+          {/* Section Header */}
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Event Details</h3>
+              <p className="text-gray-500 text-sm">Complete information about this event</p>
+            </div>
+          </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Left: Event Image */}
             <div className="lg:col-span-1">
-              <div className="relative w-full overflow-hidden rounded-xl border border-gray-200 bg-gray-100 cursor-pointer hover:shadow-lg transition-shadow duration-200" onClick={() => eventData.image_url && setShowImageModal(true)}>
-                <div className="aspect-[4/3] w-full h-auto">
-                  {/* Main event image - same logic as popup */}
+              <div className="relative w-full overflow-hidden rounded-2xl border-2 border-white/20 bg-gradient-to-br from-gray-100 to-gray-200 cursor-pointer hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02]" onClick={() => eventData.image_url && setShowImageModal(true)}>
+                <div className="aspect-[3/4] w-full h-auto min-h-[400px]">
+                  {/* Main event image */}
                   {eventData.image_url ? (
                     <img 
                       id="main-event-image"
                       src={eventData.image_url} 
                       alt={eventData.event_name}
                       className="w-full h-full object-cover"
-
                       onLoad={(e) => {
                         // Image loaded successfully
                       }}
@@ -633,22 +939,23 @@ export default function ParticularEventPage() {
                   )}
                   
                   {/* Fallback when no image or image fails to load */}
-                  <div className={`w-full h-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center ${eventData.image_url ? 'hidden' : 'flex'}`}>
+                  <div className={`w-full h-full bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 flex items-center justify-center ${eventData.image_url ? 'hidden' : 'flex'}`}>
                     <div className="text-center">
-                      <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div className="w-20 h-20 bg-gradient-to-r from-blue-500 via-purple-600 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                        <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                       </div>
-                      <p className="text-gray-600 text-sm font-medium">Event Image</p>
-                      <p className="text-gray-500 text-xs">Click to view details</p>
-                </div>
+                      <p className="text-gray-700 text-base font-semibold">Event Image</p>
+                      <p className="text-gray-500 text-sm">Click to view details</p>
+                    </div>
                   </div>
                 </div>
                 
+                {/* Hover overlay */}
                 {eventData.image_url && (
-                  <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-10 transition-all duration-200 flex items-center justify-center">
-                    <div className="bg-white bg-opacity-90 rounded-full p-2 opacity-0 hover:opacity-100 transition-opacity duration-200">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+                    <div className="bg-white/90 backdrop-blur-sm rounded-full p-3 transform scale-90 hover:scale-100 transition-transform duration-200 shadow-lg">
                       <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607zM10.5 7.5v6m3-3H7.5" />
                       </svg>
@@ -658,50 +965,85 @@ export default function ParticularEventPage() {
               </div>
             </div>
 
-            {/* Right: Details */}
-            <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Detail label="Event Name" value={eventData.event_name || 'N/A'} />
-              <Detail label="Start Date" value={eventData.start_date ? formatEventDate(eventData.start_date, 'long') : 'N/A'} />
-              <Detail label="End Date" value={eventData.end_date ? formatEventDate(eventData.end_date, 'long') : 'N/A'} />
-              <Detail label="Total Participants Allowed" value={eventData.total_participants_allowed || 'Unlimited'} />
-              <Detail label="Currently Registered" value={`${eventData.registered_no || 0} participants`} />
-              <Detail label="Available Spots" value={availableSlots ? 
-                `${availableSlots.available} spots remaining` : 
-                'Unlimited spots available'} />
-              <Detail label="Description" value={eventData.description || eventData.caption || 'No description available'} wide />
+            {/* Right: Details Grid */}
+            <div className="lg:col-span-2">
+              {/* Main Info Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <Detail label="Event Name" value={eventData.event_name || 'N/A'} />
+                <Detail label="Start Date" value={eventData.start_date ? formatEventDate(eventData.start_date, 'long') : 'N/A'} />
+                <Detail label="End Date" value={eventData.end_date ? formatEventDate(eventData.end_date, 'long') : 'N/A'} />
+                <Detail label="Total Participants Allowed" value={eventData.total_participants_allowed || 'Unlimited'} />
+                <Detail label="Currently Registered" value={`${eventData.registered_no || 0} participants`} />
+                <Detail label="Available Spots" value={availableSlots ? 
+                  `${availableSlots.available} spots remaining` : 
+                  'Unlimited spots available'} />
+              </div>
+
+              {/* Description Card */}
+              <div className="mb-6">
+                <Detail label="Description" value={eventData.description || eventData.caption || 'No description available'} wide />
+              </div>
               
-              {/* Registration Link */}
+              {/* Registration Link Card */}
               {eventData.registration_link && (
-                <Detail label="Registration Link" value={eventData.registration_link} wide isCode />
+                <div className="mb-6">
+                  <Detail label="Registration Link" value={eventData.registration_link} wide isCode />
+                </div>
               )}
               
-              {/* Event Status */}
-              <div className={`md:col-span-2 rounded-lg p-4 border ${
+              {/* Enhanced Event Status Card */}
+              <div className={`rounded-2xl p-6 border-2 shadow-lg ${
                 eventStatus?.status === 'upcoming' 
-                  ? 'bg-blue-50 border-blue-200' 
+                  ? 'bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200/50' 
                   : eventStatus?.status === 'live'
-                  ? 'bg-green-50 border-green-200'
-                  : 'bg-gray-50 border-gray-200'
+                  ? 'bg-gradient-to-r from-green-50 to-green-100 border-green-200/50'
+                  : 'bg-gradient-to-r from-gray-50 to-gray-100 border-gray-200/50'
               }`}>
-                <div className={`text-xs font-medium mb-2 ${
-                  eventStatus?.status === 'upcoming' 
-                    ? 'text-blue-600' 
-                    : eventStatus?.status === 'live'
-                    ? 'text-green-600'
-                    : 'text-gray-600'
-                }`}>
-                  Event Status
+                <div className="flex items-center gap-3 mb-4">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                    eventStatus?.status === 'upcoming' 
+                      ? 'bg-blue-500' 
+                      : eventStatus?.status === 'live'
+                      ? 'bg-green-500'
+                      : 'bg-gray-500'
+                  }`}>
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div className={`text-sm font-semibold ${
+                      eventStatus?.status === 'upcoming' 
+                        ? 'text-blue-700' 
+                        : eventStatus?.status === 'live'
+                        ? 'text-green-700'
+                        : 'text-gray-700'
+                    }`}>
+                      Event Status
+                    </div>
+                    <div className={`text-lg font-bold ${
+                      eventStatus?.status === 'upcoming' 
+                        ? 'text-blue-800' 
+                        : eventStatus?.status === 'live'
+                        ? 'text-green-800'
+                        : 'text-gray-800'
+                    }`}>
+                      {eventStatus?.status === 'upcoming' ? 'Registration Open' : 
+                       eventStatus?.status === 'live' ? 'Event in Progress' : 'Event Completed'}
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center gap-4">
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {eventStatus?.status === 'upcoming' && (
                     <>
-                  <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                    <span className="text-sm text-gray-700">Registration Open</span>
-                  </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                        <span className="text-sm text-gray-700">
+                      <div className="flex items-center gap-3 p-3 bg-white/50 rounded-xl border border-white/30">
+                        <div className="w-3 h-3 bg-blue-500 rounded-full shadow-sm"></div>
+                        <span className="text-sm font-medium text-blue-800">Registration Open</span>
+                      </div>
+                      <div className="flex items-center gap-3 p-3 bg-white/50 rounded-xl border border-white/30">
+                        <div className="w-3 h-3 bg-green-500 rounded-full shadow-sm"></div>
+                        <span className="text-sm font-medium text-green-800">
                           {availableSlots?.available} spots available
                         </span>
                       </div>
@@ -710,34 +1052,516 @@ export default function ParticularEventPage() {
                   
                   {eventStatus?.status === 'live' && (
                     <>
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                        <span className="text-sm text-gray-700">Event in Progress</span>
+                      <div className="flex items-center gap-3 p-3 bg-white/50 rounded-xl border border-white/30">
+                        <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse shadow-sm"></div>
+                        <span className="text-sm font-medium text-green-800">Event in Progress</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                        <span className="text-sm text-gray-700">{eventData.registered_no || 0} participants</span>
+                      <div className="flex items-center gap-3 p-3 bg-white/50 rounded-xl border border-white/30">
+                        <div className="w-3 h-3 bg-blue-500 rounded-full shadow-sm"></div>
+                        <span className="text-sm font-medium text-blue-800">{eventData.registered_no || 0} participants</span>
                       </div>
                     </>
                   )}
                   
                   {eventStatus?.status === 'ended' && (
                     <>
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
-                        <span className="text-sm text-gray-700">Event Completed</span>
+                      <div className="flex items-center gap-3 p-3 bg-white/50 rounded-xl border border-white/30">
+                        <div className="w-3 h-3 bg-gray-500 rounded-full shadow-sm"></div>
+                        <span className="text-sm font-medium text-gray-800">Event Completed</span>
                       </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                        <span className="text-sm text-gray-700">{eventData.registered_no || 0} total participants</span>
-                  </div>
+                      <div className="flex items-center gap-3 p-3 bg-white/50 rounded-xl border border-white/30">
+                        <div className="w-3 h-3 bg-blue-500 rounded-full shadow-sm"></div>
+                        <span className="text-sm font-medium text-blue-800">{eventData.registered_no || 0} total participants</span>
+                      </div>
                     </>
                   )}
-              </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
+
+        {/* Student Coordinators & Staff Incharge */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-200/60 p-6 mt-8">
+          <h3 className="text-xl font-bold text-gray-900 mb-6">Event Team</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Student Coordinators */}
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                  </svg>
+                </div>
+                <h4 className="text-lg font-semibold text-blue-900">Student Coordinators</h4>
+              </div>
+                                <div className="space-y-2">
+                    {eventData.student_coordinators ? (() => {
+                      try {
+                        const coordinators = typeof eventData.student_coordinators === 'string' 
+                          ? JSON.parse(eventData.student_coordinators) 
+                          : eventData.student_coordinators;
+                        
+                        if (Array.isArray(coordinators) && coordinators.length > 0) {
+                          return coordinators.map((coordinator, index) => {
+                            // Handle if coordinator is an object
+                            if (typeof coordinator === 'object' && coordinator !== null) {
+                              const name = coordinator.name || 'No Name';
+                              const phone = coordinator.phone || 'No Phone';
+                              return (
+                                <div key={index} className="flex items-center gap-2 text-blue-800">
+                                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                  <div className="flex flex-col">
+                                    <span className="text-sm font-medium">{name}</span>
+                                    <span className="text-xs text-blue-600">{phone}</span>
+                                  </div>
+                                </div>
+                              );
+                            } else {
+                              return (
+                                <div key={index} className="flex items-center gap-2 text-blue-800">
+                                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                  <span className="text-sm font-medium">{String(coordinator)}</span>
+                                </div>
+                              );
+                            }
+                          });
+                        } else if (typeof coordinators === 'object' && coordinators !== null) {
+                          // Handle single object case
+                          const name = coordinators.name || 'No Name';
+                          const phone = coordinators.phone || 'No Phone';
+                          return (
+                            <div className="text-blue-800">
+                              <div className="text-sm font-medium">{name}</div>
+                              <div className="text-xs text-blue-600">{phone}</div>
+                            </div>
+                          );
+                        } else {
+                          return <div className="text-blue-800 text-sm font-medium">{String(coordinators)}</div>;
+                        }
+                      } catch (e) {
+                        return <div className="text-blue-800 text-sm font-medium">{String(eventData.student_coordinators)}</div>;
+                      }
+                    })() : (
+                      <div className="text-blue-600 text-sm italic">Not added</div>
+                    )}
+                  </div>
+            </div>
+
+            {/* Staff Incharge */}
+            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border border-green-200">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
+                  <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2z" />
+                  </svg>
+                </div>
+                <h4 className="text-lg font-semibold text-green-900">Staff Incharge</h4>
+              </div>
+                                <div className="space-y-2">
+                    {eventData.staff_incharge ? (() => {
+                      try {
+                        const staff = typeof eventData.staff_incharge === 'string' 
+                          ? JSON.parse(eventData.staff_incharge) 
+                          : eventData.staff_incharge;
+                        
+                        if (Array.isArray(staff) && staff.length > 0) {
+                          return staff.map((member, index) => {
+                            // Handle if member is an object
+                            if (typeof member === 'object' && member !== null) {
+                              const name = member.name || 'No Name';
+                              const department = member.department || 'No Department';
+                              return (
+                                <div key={index} className="flex items-center gap-2 text-green-800">
+                                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                  <div className="flex flex-col">
+                                    <span className="text-sm font-medium">{name}</span>
+                                    <span className="text-xs text-green-600">{department}</span>
+                                  </div>
+                                </div>
+                              );
+                            } else {
+                              return (
+                                <div key={index} className="flex items-center gap-2 text-green-800">
+                                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                  <span className="text-sm font-medium">{String(member)}</span>
+                                </div>
+                              );
+                            }
+                          });
+                        } else if (typeof staff === 'object' && staff !== null) {
+                          // Handle single object case
+                          const name = staff.name || 'No Name';
+                          const department = staff.department || 'No Department';
+                          return (
+                            <div className="text-green-800">
+                              <div className="text-sm font-medium">{name}</div>
+                              <div className="text-xs text-green-600">{department}</div>
+                            </div>
+                          );
+                        } else {
+                          return <div className="text-green-800 text-sm font-medium">{String(staff)}</div>;
+                        }
+                      } catch (e) {
+                        return <div className="text-green-800 text-sm font-medium">{String(eventData.staff_incharge)}</div>;
+                      }
+                    })() : (
+                      <div className="text-green-600 text-sm italic">Not added</div>
+                    )}
+                  </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Past Event Details */}
+        {isPastEvent && pastEventDetails && (
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200/60 p-6 mt-8">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-gray-900">Event Results & Memories</h3>
+              {(isEventAdmin && canEditEvent && eventStatus?.status === 'ended') && (
+                showPastEventEditor ? (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleSavePastEventDetails}
+                      className="px-4 py-2 rounded-lg text-sm font-medium bg-green-600 text-white hover:bg-green-700"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={handleCancelPastEventEdit}
+                      className="px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-50"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setShowPastEventEditor(true)}
+                    className="px-4 py-2 rounded-lg text-sm font-medium bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700"
+                  >
+                    Edit Details
+                  </button>
+                )
+              )}
+            </div>
+            
+            {/* Event Details */}
+            <div className="mb-8">
+              <h4 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Event Summary
+              </h4>
+              {showPastEventEditor ? (
+                <textarea
+                  value={pastEventSummary}
+                  onChange={(e) => setPastEventSummary(e.target.value)}
+                  rows={3}
+                  className="w-full px-3 py-2 border rounded-lg"
+                  placeholder="Describe what happened during the event"
+                />
+              ) : (
+                pastEventDetails.event_details ? (
+                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <p className="text-gray-700">{pastEventDetails.event_details}</p>
+                  </div>
+                ) : (
+                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <p className="text-gray-500 text-sm italic">Not added</p>
+                  </div>
+                )
+              )}
+            </div>
+
+            {/* Winners */}
+            <div className="mb-8">
+              <h4 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                </svg>
+                Winners
+              </h4>
+              {showPastEventEditor ? (
+                registeredUsers.length > 0 ? (
+                  <div className="space-y-2">
+                    {[0,1,2].map((pos) => (
+                      <div key={pos} className="flex items-center gap-2">
+                        <span className="text-sm text-gray-700 w-12">{pos+1}{pos===0?'st':pos===1?'nd':pos===2?'rd':'th'}</span>
+                        <select
+                          value={selectedWinners[pos]?.profile_id || ''}
+                          onChange={(e) => {
+                            const copy = [...selectedWinners];
+                            const found = registeredUsers.find(u => String(u.profile_id) === e.target.value);
+                            copy[pos] = found || null;
+                            setSelectedWinners(copy);
+                          }}
+                          className="flex-1 px-3 py-2 border rounded-lg"
+                        >
+                          <option value="">Select winner</option>
+                          {registeredUsers.map(u => (
+                            <option key={u.profile_id} value={u.profile_id}>{u.username}</option>
+                          ))}
+                        </select>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-sm text-gray-600">No registered users found.</div>
+                )
+              ) : (
+                pastEventDetails.winners && pastEventDetails.winners.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {pastEventDetails.winners.map((winner, index) => {
+                      const displayText = typeof winner === 'object' && winner !== null
+                        ? (winner.username || winner.name || winner.phone || JSON.stringify(winner))
+                        : String(winner);
+                      return (
+                        <div key={index} className="bg-gradient-to-r from-yellow-50 to-orange-100 rounded-lg p-4 border border-yellow-200">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
+                              <span className="text-white font-bold text-sm">{index + 1}</span>
+                            </div>
+                            <div>
+                              <p className="font-semibold text-yellow-900">{displayText}</p>
+                              <p className="text-yellow-700 text-sm">
+                                {index === 0 ? '1st Place' : index === 1 ? '2nd Place' : index === 2 ? '3rd Place' : `${index + 1}th Place`}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <p className="text-gray-500 text-sm italic">Not added</p>
+                  </div>
+                )
+              )}
+            </div>
+
+            {/* If admin and details missing, show quick call-to-action */}
+            {(isEventAdmin && canEditEvent && eventStatus?.status === 'ended' && isPastDetailsMissing) && (
+              <div className="mb-8 p-4 rounded-xl border border-blue-200 bg-blue-50 flex items-center justify-between">
+                <div className="text-blue-800 text-sm">Some past event details are missing. Help complete this event.</div>
+                <button onClick={() => setShowPastEventEditor(true)} className="px-4 py-2 rounded-lg text-sm bg-blue-600 text-white">Add Details</button>
+              </div>
+            )}
+
+            {/* Inline editor removed in favor of per-field editing above */}
+
+            {/* Event Photos */}
+            <div className="mb-8">
+                <h4 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                  <span className="mr-2">📷</span> Event Photos 
+                  {safeParseArray(pastEventDetails.photos).length > 0 && (
+                    <span className="ml-2 text-sm text-gray-500">({safeParseArray(pastEventDetails.photos).length} photos)</span>
+                  )}
+                </h4>
+                {showPastEventEditor && (
+                  <div className="mb-4 bg-gray-50 border border-gray-200 rounded-lg p-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Add photos</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={(e) => setPastPhotoFiles(Array.from(e.target.files || []))}
+                      className="w-full px-3 py-2 border rounded-lg"
+                    />
+                    {pastPhotoFiles && pastPhotoFiles.length > 0 && (
+                      <div className="text-xs text-gray-600 mt-2">{pastPhotoFiles.length} new photo(s) selected. They will be added on Save.</div>
+                    )}
+                    {uploadingPastImages && <div className="text-xs text-gray-600 mt-1">Uploading...</div>}
+                  </div>
+                )}
+                {safeParseArray(pastEventDetails.photos).length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {safeParseArray(pastEventDetails.photos).map((photo, index) => (
+                      <div key={index} className="relative group">
+                        <div className="aspect-w-16 aspect-h-12 bg-gray-200 rounded-lg overflow-hidden">
+                          <img
+                            src={photo}
+                            alt={`Photo ${index + 1}`}
+                            className="w-full h-48 object-cover rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300"
+                            style={{
+                              display: 'block',
+                              backgroundColor: '#f3f4f6'
+                            }}
+                            onError={(e) => {
+                              e.target.style.backgroundColor = '#ef4444';
+                              e.target.style.color = 'white';
+                              e.target.style.display = 'flex';
+                              e.target.style.alignItems = 'center';
+                              e.target.style.justifyContent = 'center';
+                              e.target.innerHTML = 'Invalid URL';
+                            }}
+                          />
+                        </div>
+                        <div className="mt-2 text-center">
+                          <p className="text-sm text-gray-600">Photo {index + 1}</p>
+                          <a 
+                            href={photo} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                          >
+                            Click to view
+                          </a>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500">Not added</p>
+                )}
+              </div>
+
+            {/* Student Feedback */}
+            <div className="mb-8">
+              <h4 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                Student Feedback
+              </h4>
+              
+              {/* Feedback Form for Registered Participants */}
+              {isRegistered && (
+                <div className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-100 rounded-lg p-6 border border-blue-200">
+                  <h5 className="text-md font-semibold text-blue-900 mb-3 flex items-center gap-2">
+                    <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    Share Your Experience
+                  </h5>
+                  <p className="text-blue-700 text-sm mb-4">
+                    As a registered participant, you can share your feedback about this event.
+                  </p>
+                  
+                  <div className="space-y-3">
+                    <textarea
+                      value={feedbackText}
+                      onChange={(e) => setFeedbackText(e.target.value)}
+                      placeholder="Share your experience, what you learned, or any suggestions for future events..."
+                      className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                      rows={4}
+                      maxLength={500}
+                    />
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-blue-600">
+                        {feedbackText.length}/500 characters
+                      </span>
+                      <button
+                        onClick={handleSubmitFeedback}
+                        disabled={!feedbackText.trim() || isSubmittingFeedback}
+                        className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isSubmittingFeedback ? (
+                          <div className="flex items-center gap-2">
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            Submitting...
+                          </div>
+                        ) : (
+                          'Submit Feedback'
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* Message for non-registered participants (hide for admins/global) */}
+              {!isRegistered && !isEventAdmin && !isGlobalAdmin && (
+                <div className="mb-6 bg-gradient-to-r from-amber-50 to-orange-100 rounded-lg p-6 border border-amber-200">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center">
+                      <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <h5 className="text-md font-semibold text-amber-900">Feedback Not Available</h5>
+                  </div>
+                  <p className="text-amber-700 text-sm">
+                    Only registered participants can submit feedback for this event. If you participated in this event, please make sure you&apos;re logged in with the account you used for registration.
+                  </p>
+                </div>
+              )}
+              
+              {/* Display Existing Feedback */}
+              {pastEventDetails.students_feedback && pastEventDetails.students_feedback.length > 0 ? (
+                <div className="space-y-4">
+                  {pastEventDetails.students_feedback.map((feedback, index) => {
+                    // Handle if feedback is an object
+                    let displayText = '';
+                    let participantInfo = '';
+                    
+                    if (typeof feedback === 'object' && feedback !== null) {
+                      if (feedback.feedback) {
+                        displayText = feedback.feedback;
+                        participantInfo = `Participant Feedback`;
+                        if (feedback.timestamp) {
+                          participantInfo += ` • ${new Date(feedback.timestamp).toLocaleDateString()}`;
+                        }
+                      } else {
+                        displayText = feedback.message || feedback.text || feedback.comment || JSON.stringify(feedback);
+                        participantInfo = `Student Feedback #${index + 1}`;
+                      }
+                    } else {
+                      displayText = String(feedback);
+                      participantInfo = `Student Feedback #${index + 1}`;
+                    }
+                    
+                    return (
+                      <div key={index} className="bg-gradient-to-r from-green-50 to-emerald-100 rounded-lg p-4 border border-green-200">
+                        <div className="flex items-start gap-3">
+                          <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-green-800 text-sm leading-relaxed">&quot;{displayText}&quot;</p>
+                            <p className="text-green-600 text-xs mt-2">{participantInfo}</p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <p className="text-gray-500 text-sm italic">No feedback submitted yet</p>
+                </div>
+              )}
+            </div>
+
+            {/* Show message if no past event details */}
+            {!pastEventDetails.event_details && 
+             (!pastEventDetails.winners || pastEventDetails.winners.length === 0) && 
+             (!pastEventDetails.photos || pastEventDetails.photos.length === 0) && 
+             (!pastEventDetails.students_feedback || pastEventDetails.students_feedback.length === 0) && (
+              <div className="text-center py-8">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <p className="text-gray-500 text-sm">No additional details available for this past event.</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Loading state for past event details */}
+        {eventStatus?.status === 'ended' && pastEventLoading && (
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200/60 p-6 mt-8">
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+              <span className="ml-3 text-gray-600">Loading event results...</span>
+            </div>
+          </div>
+        )}
       </main>
 
       {/* Toast */}
@@ -852,7 +1676,7 @@ export default function ParticularEventPage() {
               </div>
               <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
                 <p className="text-green-800 text-sm">
-                  <strong>Note:</strong> You will be registered as the team leader for this event. Make sure you've completed the external registration form first.
+                  <strong>Note:</strong> You will be registered as the team leader for this event. Make sure you&apos;ve completed the external registration form first.
                 </p>
               </div>
             </div>
@@ -890,12 +1714,12 @@ export default function ParticularEventPage() {
             
             <div className="text-center mb-6">
               <p className="text-gray-700 mb-3">
-                You are about to register for <strong>"{eventData.event_name}"</strong>.
+                You are about to register for <strong>&quot;{eventData.event_name}&quot;</strong>.
               </p>
               {eventRegistrationType === 'team' && teamName && (
                 <div className="mb-3 p-3 bg-green-50 rounded-lg border border-green-200">
                   <p className="text-green-800 text-sm">
-                    <strong>Team Event:</strong> You will be registered as the team leader for <strong>"{teamName}"</strong>.
+                    <strong>Team Event:</strong> You will be registered as the team leader for <strong>&quot;{teamName}&quot;</strong>.
                   </p>
                 </div>
               )}
@@ -940,12 +1764,17 @@ export default function ParticularEventPage() {
 
 function Detail({ label, value, wide = false, isCode = false }) {
   return (
-    <div className={`${wide ? 'md:col-span-2' : ''} bg-gray-50 rounded-lg p-4 border border-gray-200`}>
-      <div className="text-xs text-gray-600">{label}</div>
+    <div className={`${wide ? 'md:col-span-2' : ''} bg-gradient-to-br from-white to-gray-50/80 rounded-xl p-5 border border-white/40 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.02] backdrop-blur-sm`}>
+      <div className="flex items-center gap-2 mb-2">
+        <div className="w-2 h-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"></div>
+        <div className="text-xs font-semibold text-gray-600 uppercase tracking-wide">{label}</div>
+      </div>
       {isCode ? (
-        <pre className="text-xs text-gray-900 whitespace-pre-wrap break-words mt-1">{value}</pre>
+        <div className="bg-gray-900/5 rounded-lg p-3 border border-gray-200/50">
+          <pre className="text-xs text-gray-800 whitespace-pre-wrap break-words font-mono">{value}</pre>
+        </div>
       ) : (
-        <div className="text-sm font-medium text-gray-900 mt-1">{value}</div>
+        <div className="text-sm font-semibold text-gray-800 mt-1 leading-relaxed">{value}</div>
       )}
     </div>
   );

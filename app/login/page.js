@@ -46,6 +46,9 @@ export default function LoginPage() {
           localStorage.setItem('userId', data.user.id);
           localStorage.setItem('username', userData.username);
           localStorage.setItem('role', userData.role);
+          if (data.user.email) {
+            localStorage.setItem('email', data.user.email);
+          }
           
           // Redirect to role-specific main page
           const isGlobal = userData.role === 'global' || userData.role === 'global admin';
