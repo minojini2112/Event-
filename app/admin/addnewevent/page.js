@@ -31,6 +31,11 @@ export default function AddNewEventPage() {
   const [isPostPopupOpen, setIsPostPopupOpen] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
   const [isNameLocked, setIsNameLocked] = useState(false);
+  const [isCheckingAccess, setIsCheckingAccess] = useState(false);
+  const [accessError, setAccessError] = useState('');
+  const [requestEventName, setRequestEventName] = useState('');
+  const [isSubmittingAccessRequest, setIsSubmittingAccessRequest] = useState(false);
+  const [latestRequest, setLatestRequest] = useState(null); // {status, event_name}
 
   const loadExistingEvent = useCallback(async () => {
     try {
@@ -80,6 +85,77 @@ export default function AddNewEventPage() {
       setIsNameLocked(true);
     }
   }, [isEditMode]);
+
+  // If name not pre-approved via localStorage, check access backend directly
+  useEffect(() => {
+    const maybeCheckAccess = async () => {
+      if (isEditMode) return;
+      if (isNameLocked) return;
+      try {
+        const adminUserId = typeof window !== 'undefined' ? window.localStorage.getItem('userId') : null;
+        if (!adminUserId) return;
+        setIsCheckingAccess(true);
+        setAccessError('');
+        // Pull latest request to show pending/rejected info
+        try {
+          const latestRes = await fetch(`/api/access-requests/my-latest?adminUserId=${adminUserId}`);
+          if (latestRes.ok) {
+            const latestJson = await latestRes.json();
+            setLatestRequest(latestJson.latest || null);
+          }
+        } catch {}
+        const res = await fetch(`/api/access-requests/check-access?adminUserId=${adminUserId}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data?.hasAccess && data?.approvedEventName) {
+          try {
+            if (typeof window !== 'undefined') {
+              window.localStorage.setItem('approved_event_name', data.approvedEventName);
+            }
+          } catch {}
+          setForm((prev) => ({ ...prev, event_name: data.approvedEventName }));
+          setIsNameLocked(true);
+        }
+      } catch {
+        setAccessError('Unable to check access at the moment.');
+      } finally {
+        setIsCheckingAccess(false);
+      }
+    };
+    maybeCheckAccess();
+  }, [isEditMode, isNameLocked]);
+
+  const handleSubmitAccessRequest = async () => {
+    try {
+      const adminUserId = typeof window !== 'undefined' ? window.localStorage.getItem('userId') : null;
+      const username = typeof window !== 'undefined' ? window.localStorage.getItem('username') : null;
+      if (!adminUserId || !username) {
+        alert('User not found. Please log in again.');
+        return;
+      }
+      if (!requestEventName.trim()) {
+        alert('Please enter an event name to request access.');
+        return;
+      }
+      setIsSubmittingAccessRequest(true);
+      const response = await fetch('/api/access-requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ eventName: requestEventName.trim(), adminUserId })
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        alert(data?.error || 'Failed to submit request');
+        return;
+      }
+      alert('Access request submitted! A global admin will review it.');
+      setRequestEventName('');
+    } catch {
+      alert('Failed to submit request. Please try again.');
+    } finally {
+      setIsSubmittingAccessRequest(false);
+    }
+  };
 
   const updateField = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -318,8 +394,73 @@ export default function AddNewEventPage() {
       </header>
 
       <main className="max-w-6xl mx-auto px-6 py-8">
-        {/* Editor */}
-        {isEditing ? (
+        {/* Access gating cards for admins without approval */}
+        {!isEditMode && !isNameLocked && (
+          latestRequest && latestRequest.status === 'pending' ? (
+            <div className="mb-6 bg-yellow-50 rounded-2xl border border-yellow-200 p-5">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-lg bg-yellow-500 flex items-center justify-center text-white">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-yellow-900">Access request pending</h3>
+                  <p className="text-sm text-yellow-800 mt-1">
+                    You already have a pending request for <span className="font-semibold">{latestRequest.event_name}</span>. Please wait until it is accepted or rejected.
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="mb-6 bg-gradient-to-br from-amber-50 to-orange-100 rounded-2xl border border-amber-200 p-5">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-lg bg-amber-500 flex items-center justify-center text-white">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-amber-900">Request access to create a new event</h3>
+                  <p className="text-sm text-amber-800 mt-1">Submit your event name for approval. Once approved, the name will be auto-filled and locked in this form.</p>
+                  {isCheckingAccess && (
+                    <div className="mt-2 text-sm text-amber-800">Checking approval status...</div>
+                  )}
+                  {accessError && (
+                    <div className="mt-2 text-sm text-red-700">{accessError}</div>
+                  )}
+                  {latestRequest && latestRequest.status === 'rejected' && (
+                    <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800">
+                      <span>Your previous request for </span>
+                      <span className="font-semibold">{latestRequest.event_name}</span>
+                      <span> was rejected. You may submit a new request.</span>
+                    </div>
+                  )}
+                  <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
+                    <input
+                      type="text"
+                      value={requestEventName}
+                      onChange={(e) => setRequestEventName(e.target.value)}
+                      placeholder="Proposed event name"
+                      className="text-sm rounded-lg border border-amber-300 ring-1 ring-amber-200 px-3 py-2 bg-white text-gray-900"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleSubmitAccessRequest}
+                      disabled={isSubmittingAccessRequest}
+                      className="sm:col-span-1 bg-gradient-to-r from-amber-600 to-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-60"
+                    >
+                      {isSubmittingAccessRequest ? 'Submitting...' : 'Request Access'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )
+        )}
+        {/* Editor (gated until approval for new events) */}
+        {(isEditMode || isNameLocked) ? (
+          isEditing ? (
           <div className="bg-white rounded-2xl shadow-lg border border-gray-200/60 p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {/* Registered Count (read only dummy for now) */}
@@ -334,8 +475,8 @@ export default function AddNewEventPage() {
                 <input
                   value={form.event_name}
                   onChange={(e) => updateField('event_name', e.target.value)}
-                  readOnly={isNameLocked}
-                  disabled={isNameLocked}
+                  readOnly={isNameLocked || isEditMode}
+                  disabled={isNameLocked || isEditMode}
                   placeholder="Enter event name"
                   className={`text-sm rounded-lg border px-3 py-2 bg-white ring-1 text-gray-800 ${errors.event_name ? 'border-red-300 ring-red-200' : 'border-gray-200 ring-gray-200'} focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
                 />
@@ -539,7 +680,7 @@ export default function AddNewEventPage() {
               </button>
             </div>
           </div>
-        ) : (
+          ) : (
           // View mode with edit option
           <div className="bg-white rounded-2xl shadow-lg border border-gray-200/60 p-6">
             <div className="flex items-center justify-between mb-4">
@@ -599,6 +740,12 @@ export default function AddNewEventPage() {
                 Event has been {isEditMode ? 'updated' : 'posted'} successfully.
               </div>
             )}
+          </div>
+          )
+        ) : (
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200/60 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">Awaiting Approval</h2>
+            <p className="text-sm text-gray-700">The event editor will be available once your access request is approved by a global admin.</p>
           </div>
         )}
       </main>

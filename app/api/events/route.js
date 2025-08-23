@@ -35,6 +35,8 @@ export async function GET(request) {
 
     if (adminId) {
       // Fetch events associated with this admin via approved access requests
+      console.log('API: Fetching events for admin:', adminId);
+      
       const { data: approvals, error: approvalsError } = await supabase
         .from('event_admin_access')
         .select('event_name')
@@ -49,17 +51,52 @@ export async function GET(request) {
         );
       }
 
+      console.log('API: Admin approvals found:', approvals);
+      
       const names = (approvals || []).map((a) => a.event_name).filter(Boolean);
+      
+      console.log('API: Event names from approvals:', names);
+      
       if (names.length === 0) {
+        console.log('API: No approved events found for admin');
         data = [];
       } else {
-        const res = await supabase
+        // Fetch events by event names with case-insensitive matching
+        console.log('API: Fetching events by event names:', names);
+        
+        // First try exact matches
+        let res = await supabase
           .from('all_events')
           .select('*')
           .in('event_name', names)
           .order('event_id', { ascending: false });
+        
+        // If no exact matches, try case-insensitive matching
+        if (!res.data || res.data.length === 0) {
+          console.log('API: No exact matches found, trying case-insensitive matching');
+          const lowerNames = names.map(name => name.toLowerCase());
+          
+          // Get all events and filter by case-insensitive name matching
+          const allEventsRes = await supabase
+            .from('all_events')
+            .select('*')
+            .order('event_id', { ascending: false });
+          
+          if (allEventsRes.data) {
+            res.data = allEventsRes.data.filter(event => 
+              lowerNames.includes(event.event_name?.toLowerCase())
+            );
+          }
+        }
+        
         data = res.data;
         error = res.error;
+        
+        console.log('API: Events fetched for admin:', {
+          count: data?.length || 0,
+          eventIds: data?.map(e => e.event_id) || [],
+          eventNames: data?.map(e => e.event_name) || []
+        });
       }
     } else {
       // Fetch all events (default)

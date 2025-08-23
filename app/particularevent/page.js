@@ -87,18 +87,12 @@ export default function ParticularEventPage() {
     return getAvailableSlots(eventData.registered_no, eventData.total_participants_allowed);
   }, [eventData]);
 
-  // Debug: Log event data to see what we're working with
+  // When status changes to ended, fetch past results from DB
   useEffect(() => {
-    if (eventData) {
-      console.log('Event Data loaded:', eventData);
-      console.log('Image URL:', eventData.image_url);
-      
-      // Check if event is ended and fetch past event details
-      if (eventStatus?.status === 'ended') {
-        fetchPastEventDetails(eventData.event_id);
-      }
+    if (eventStatus?.status === 'ended' && (eventData?.event_id || idParam)) {
+      fetchPastEventDetails(eventData?.event_id || idParam);
     }
-  }, [eventData, eventStatus]);
+  }, [eventStatus?.status, eventData?.event_id, idParam]);
 
   // CTA state and handlers
   const [isRegistered, setIsRegistered] = useState(false);
@@ -117,7 +111,7 @@ export default function ParticularEventPage() {
   const [canEditEvent, setCanEditEvent] = useState(false);
 
   // Past event details state
-  const [pastEventDetails, setPastEventDetails] = useState(null);
+  const [pastEventDetails, setPastEventDetails] = useState({});
   const [isPastEvent, setIsPastEvent] = useState(false);
   const [pastEventLoading, setPastEventLoading] = useState(false);
   const [showPastEventEditor, setShowPastEventEditor] = useState(false);
@@ -128,12 +122,13 @@ export default function ParticularEventPage() {
   const [registeredUsers, setRegisteredUsers] = useState([]);
   const [selectedWinners, setSelectedWinners] = useState([]);
   const isPastDetailsMissing = useMemo(() => {
-    if (!isPastEvent || !pastEventDetails) return false;
+    if (eventStatus?.status !== 'ended') return false;
+    if (!pastEventDetails) return true;
     const photosEmpty = !Array.isArray(pastEventDetails.photos) || pastEventDetails.photos.length === 0;
     const winnersEmpty = !Array.isArray(pastEventDetails.winners) || pastEventDetails.winners.length === 0;
     const detailsEmpty = !pastEventDetails.event_details;
     return photosEmpty || winnersEmpty || detailsEmpty;
-  }, [isPastEvent, pastEventDetails]);
+  }, [eventStatus, pastEventDetails]);
 
   // Load registered users for winner selection when admin opens editor
   useEffect(() => {
@@ -220,6 +215,10 @@ export default function ParticularEventPage() {
           // Pre-fill editor fields
           setPastEventSummary(data.pastEvent?.event_details || '');
           setPastWinnersInput(Array.isArray(data.pastEvent?.winners) ? data.pastEvent.winners.map(w => (typeof w === 'object' ? (w.name || JSON.stringify(w)) : String(w))).join('\n') : '');
+        } else {
+          // Past event with no details yet
+          setIsPastEvent(eventStatus?.status === 'ended');
+          setPastEventDetails({ photos: [], winners: [], students_feedback: [], event_details: '' });
         }
       }
     } catch (error) {
@@ -1214,11 +1213,11 @@ export default function ParticularEventPage() {
         </div>
 
         {/* Past Event Details */}
-        {isPastEvent && pastEventDetails && (
+        {eventStatus?.status === 'ended' && (
           <div className="bg-white rounded-2xl shadow-lg border border-gray-200/60 p-6 mt-8">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-gray-900">Event Results & Memories</h3>
-              {(isEventAdmin && canEditEvent && eventStatus?.status === 'ended') && (
+              {(((isEventAdmin && canEditEvent) || isGlobalAdmin) && eventStatus?.status === 'ended') && (
                 showPastEventEditor ? (
                   <div className="flex items-center gap-2">
                     <button
@@ -1285,26 +1284,21 @@ export default function ParticularEventPage() {
               {showPastEventEditor ? (
                 registeredUsers.length > 0 ? (
                   <div className="space-y-2">
-                    {[0,1,2].map((pos) => (
-                      <div key={pos} className="flex items-center gap-2">
-                        <span className="text-sm text-gray-700 w-12">{pos+1}{pos===0?'st':pos===1?'nd':pos===2?'rd':'th'}</span>
-                        <select
-                          value={selectedWinners[pos]?.profile_id || ''}
-                          onChange={(e) => {
-                            const copy = [...selectedWinners];
-                            const found = registeredUsers.find(u => String(u.profile_id) === e.target.value);
-                            copy[pos] = found || null;
-                            setSelectedWinners(copy);
-                          }}
-                          className="flex-1 px-3 py-2 border rounded-lg"
-                        >
-                          <option value="">Select winner</option>
-                          {registeredUsers.map(u => (
-                            <option key={u.profile_id} value={u.profile_id}>{u.username}</option>
-                          ))}
-                        </select>
-                      </div>
-                    ))}
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Select winners (any number)</label>
+                    <select
+                      multiple
+                      value={selectedWinners.map(w => String(w?.profile_id || ''))}
+                      onChange={(e) => {
+                        const options = Array.from(e.target.selectedOptions).map(o => o.value);
+                        const chosen = registeredUsers.filter(u => options.includes(String(u.profile_id)));
+                        setSelectedWinners(chosen);
+                      }}
+                      className="w-full px-3 py-2 border rounded-lg h-36"
+                    >
+                      {registeredUsers.map(u => (
+                        <option key={u.profile_id} value={u.profile_id}>{u.username}</option>
+                      ))}
+                    </select>
                   </div>
                 ) : (
                   <div className="text-sm text-gray-600">No registered users found.</div>
@@ -1341,13 +1335,7 @@ export default function ParticularEventPage() {
               )}
             </div>
 
-            {/* If admin and details missing, show quick call-to-action */}
-            {(isEventAdmin && canEditEvent && eventStatus?.status === 'ended' && isPastDetailsMissing) && (
-              <div className="mb-8 p-4 rounded-xl border border-blue-200 bg-blue-50 flex items-center justify-between">
-                <div className="text-blue-800 text-sm">Some past event details are missing. Help complete this event.</div>
-                <button onClick={() => setShowPastEventEditor(true)} className="px-4 py-2 rounded-lg text-sm bg-blue-600 text-white">Add Details</button>
-              </div>
-            )}
+            {/* Removed CTA banner for missing past event details */}
 
             {/* Inline editor removed in favor of per-field editing above */}
 
@@ -1536,20 +1524,7 @@ export default function ParticularEventPage() {
               )}
             </div>
 
-            {/* Show message if no past event details */}
-            {!pastEventDetails.event_details && 
-             (!pastEventDetails.winners || pastEventDetails.winners.length === 0) && 
-             (!pastEventDetails.photos || pastEventDetails.photos.length === 0) && 
-             (!pastEventDetails.students_feedback || pastEventDetails.students_feedback.length === 0) && (
-              <div className="text-center py-8">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <p className="text-gray-500 text-sm">No additional details available for this past event.</p>
-              </div>
-            )}
+            {/* Removed placeholder when no past event details */}
           </div>
         )}
 

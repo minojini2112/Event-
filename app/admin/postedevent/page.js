@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 export default function AdminPostedEventsPage() {
   const router = useRouter();
   const [postedEvents, setPostedEvents] = useState([]);
-  const [selected, setSelected] = useState(null); // event for View More modal
 
   useEffect(() => {
     const fetchMyEvents = async () => {
@@ -71,7 +70,14 @@ export default function AdminPostedEventsPage() {
                   <p className="text-gray-900 text-sm line-clamp-3">{event.description || '-'}</p>
                   <div className="mt-3 flex justify-end">
                     <button
-                      onClick={() => setSelected(event)}
+                      onClick={() => {
+                        try {
+                          if (typeof window !== 'undefined') {
+                            window.localStorage.setItem('selected_event', JSON.stringify(event));
+                          }
+                        } catch {}
+                        router.push(`/particularevent?id=${event.event_id}`);
+                      }}
                       className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg"
                     >
                       View More
@@ -83,69 +89,6 @@ export default function AdminPostedEventsPage() {
           </div>
         )}
       </main>
-
-      {/* View More Modal */}
-      {selected && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 w-full max-w-2xl">
-            <div className="flex items-center justify-between p-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">{selected.event_name}</h2>
-              <button onClick={() => setSelected(null)} className="text-gray-600 hover:text-gray-900">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-                <div className="text-xs text-gray-600">Start Date</div>
-                <div className="text-sm font-medium text-gray-900">{selected.start_date || '-'}</div>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-                <div className="text-xs text-gray-600">End Date</div>
-                <div className="text-sm font-medium text-gray-900">{selected.end_date || '-'}</div>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 md:col-span-2">
-                <div className="text-xs text-gray-600">Description</div>
-                <div className="text-sm text-gray-900 mt-1 whitespace-pre-wrap">{selected.description || '-'}</div>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 md:col-span-2">
-                <div className="text-xs text-gray-600">Total Participants Allowed</div>
-                <div className="text-sm font-medium text-gray-900">{selected.total_participants_allowed || '-'}</div>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 md:col-span-2">
-                <div className="text-xs text-gray-600">Student Coordinators</div>
-                <ul className="mt-1 text-sm text-gray-900 list-disc list-inside">
-                  {(selected.student_coordinators || []).filter(c => c.name || c.phone).map((c, i) => (
-                    <li key={i}>{c.name} {c.phone && `• ${c.phone}`}</li>
-                  ))}
-                </ul>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-3 border border-gray-200 md:col-span-2">
-                <div className="text-xs text-gray-600">Staff Incharge</div>
-                <ul className="mt-1 text-sm text-gray-900 list-disc list-inside">
-                  {(selected.staff_incharge || []).filter(s => s.name || s.department).map((s, i) => (
-                    <li key={i}>{s.name} {s.department && `• ${s.department}`}</li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-            <div className="flex justify-end gap-2 p-4 border-t border-gray-200">
-              <button onClick={() => setSelected(null)} className="px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-50">Close</button>
-              <button
-                onClick={() => {
-                  setSelected(null);
-                  // Route to edit page with event id
-                  router.push(`/admin/addnewevent?id=${selected.event_id}`);
-                }}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-blue-700 hover:to-purple-700"
-              >
-                Edit
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

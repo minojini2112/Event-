@@ -24,6 +24,8 @@ function AdminMainPageContent() {
   // Request access modal state
   const [isRequestAccessOpen, setIsRequestAccessOpen] = useState(false);
   const [requestEventName, setRequestEventName] = useState('');
+  const [latestRequest, setLatestRequest] = useState(null);
+  const [isSubmittingAccessRequest, setIsSubmittingAccessRequest] = useState(false);
 
   // User data from localStorage
   const [userData, setUserData] = useState({
@@ -255,11 +257,23 @@ function AdminMainPageContent() {
           router.push(route);
         } else {
           // Admin doesn't have access, show request modal
+          try {
+            const latestRes = await fetch(`/api/access-requests/my-latest?adminUserId=${userId}`);
+            if (latestRes.ok) {
+              const latestJson = await latestRes.json();
+              setLatestRequest(latestJson.latest || null);
+            }
+          } catch {}
           setIsRequestAccessOpen(true);
         }
       } catch (error) {
         console.error('Error checking access:', error);
         // If there's an error, show the request modal as fallback
+        const latestRes = await fetch(`/api/access-requests/my-latest?adminUserId=${userId}`);
+        if (latestRes.ok) {
+          const latestJson = await latestRes.json();
+          setLatestRequest(latestJson.latest || null);
+        }
         setIsRequestAccessOpen(true);
       }
       return;
@@ -286,6 +300,7 @@ function AdminMainPageContent() {
         return;
       }
 
+      setIsSubmittingAccessRequest(true);
       const response = await fetch('/api/access-requests', {
         method: 'POST',
         headers: {
@@ -304,12 +319,16 @@ function AdminMainPageContent() {
         alert('Access request submitted successfully! Global admins will review your request.');
         setIsRequestAccessOpen(false);
         setRequestEventName('');
+        // reflect latest as pending
+        setLatestRequest({ id: data?.request?.id, event_name: data?.request?.event_name || requestEventName, status: 'pending', requested_at: new Date().toISOString() });
       } else {
         alert(`Error: ${data.error || 'Failed to submit request'}`);
       }
     } catch (error) {
       console.error('Error submitting access request:', error);
       alert('Failed to submit access request. Please try again.');
+    } finally {
+      setIsSubmittingAccessRequest(false);
     }
   };
 
@@ -868,19 +887,35 @@ function AdminMainPageContent() {
         <div className="fixed inset-0 z-[20000] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-gray-200">
             <div className="p-6">
-              <h3 className="text-xl font-semibold text-gray-900">Request access to add new event</h3>
-              <p className="text-sm text-gray-600 mt-2">Enter the event name and submit your request. An admin will review it shortly.</p>
-              <div className="mt-4">
-                <label htmlFor="request-event-name" className="block text-sm font-medium text-gray-700 mb-2">Event name</label>
-                <input
-                  id="request-event-name"
-                  type="text"
-                  value={requestEventName}
-                  onChange={(e) => setRequestEventName(e.target.value)}
-                  placeholder="e.g., Summer Hackathon 2025"
-                  className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-black placeholder-gray-500"
-                />
-              </div>
+              {latestRequest && latestRequest.status === 'pending' ? (
+                <>
+                  <h3 className="text-xl font-semibold text-gray-900">Access request pending</h3>
+                  <p className="text-sm text-gray-700 mt-2">
+                    You already have a pending request for <span className="font-semibold">{latestRequest.event_name}</span>. Please wait until a global admin accepts or rejects it.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <h3 className="text-xl font-semibold text-gray-900">Request access to add new event</h3>
+                  <p className="text-sm text-gray-600 mt-2">Enter the event name and submit your request. An admin will review it shortly.</p>
+                  {latestRequest && latestRequest.status === 'rejected' && (
+                    <div className="mt-3 p-3 rounded-lg bg-red-50 text-red-700 border border-red-200 text-sm">
+                      Your previous request for <span className="font-semibold">{latestRequest.event_name}</span> was rejected. You may submit a new request.
+                    </div>
+                  )}
+                  <div className="mt-4">
+                    <label htmlFor="request-event-name" className="block text-sm font-medium text-gray-700 mb-2">Event name</label>
+                    <input
+                      id="request-event-name"
+                      type="text"
+                      value={requestEventName}
+                      onChange={(e) => setRequestEventName(e.target.value)}
+                      placeholder="e.g., Summer Hackathon 2025"
+                      className="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-black placeholder-gray-500"
+                    />
+                  </div>
+                </>
+              )}
             </div>
             <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-3">
               <button
@@ -889,13 +924,15 @@ function AdminMainPageContent() {
               >
                 Cancel
               </button>
-              <button
-                onClick={handleSubmitAccessRequest}
-                disabled={!requestEventName.trim()}
-                className="px-4 py-2 rounded-lg text-white bg-gradient-to-r from-blue-500 to-purple-600 disabled:opacity-50"
-              >
-                Request Access
-              </button>
+              {!(latestRequest && latestRequest.status === 'pending') && (
+                <button
+                  onClick={handleSubmitAccessRequest}
+                  disabled={!requestEventName.trim() || isSubmittingAccessRequest}
+                  className="px-4 py-2 rounded-lg text-white bg-gradient-to-r from-blue-500 to-purple-600 disabled:opacity-50"
+                >
+                  {isSubmittingAccessRequest ? 'Submitting...' : 'Request Access'}
+                </button>
+              )}
             </div>
           </div>
         </div>

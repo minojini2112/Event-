@@ -24,12 +24,12 @@ export async function POST(request) {
 
     const supabase = getServiceClient();
 
-    // Optional: prevent duplicate pending requests for same admin + event name
+    // Prevent duplicate pending requests for the same admin (regardless of event name)
     const { data: existing, error: existingError } = await supabase
       .from('event_admin_access')
       .select('id, status')
       .eq('admin_id', adminUserId)
-      .eq('event_name', eventName)
+      .eq('status', 'pending')
       .limit(1)
       .maybeSingle();
 
@@ -37,7 +37,7 @@ export async function POST(request) {
       console.error('Error checking existing request:', existingError);
     } else if (existing && existing.status === 'pending') {
       return NextResponse.json(
-        { error: 'A pending request already exists for this event name.' },
+        { error: 'A pending request already exists for your account.' },
         { status: 409 }
       );
     }

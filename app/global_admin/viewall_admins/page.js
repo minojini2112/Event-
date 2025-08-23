@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { AuthGuard } from "../../../lib/authGuard";
 
 export default function ViewAllAdminsPage() {
@@ -12,7 +11,6 @@ export default function ViewAllAdminsPage() {
 }
 
 function AdminsTable() {
-  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [requests, setRequests] = useState([]);
@@ -61,34 +59,6 @@ function AdminsTable() {
     });
     return Array.from(map.entries());
   }, [filtered]);
-
-  // Navigate to event details by event name (best-effort)
-  const handleOpenEventByName = async (eventName, adminId) => {
-    try {
-      const res = await fetch("/api/events");
-      if (!res.ok) throw new Error("Failed to fetch events");
-      const json = await res.json();
-      const list = Array.isArray(json.events) ? json.events : [];
-      const normalized = (s) => (s || "").toString().trim().toLowerCase();
-      // Prefer exact name + same admin when possible
-      let found = list.find((e) => normalized(e.event_name) === normalized(eventName) && (String(e.admin_id||e.created_by||"") === String(adminId||"")));
-      if (!found) {
-        found = list.find((e) => normalized(e.event_name) === normalized(eventName));
-      }
-      if (!found) {
-        alert("Event not found or not yet created.");
-        return;
-      }
-      try {
-        if (typeof window !== "undefined") {
-          window.localStorage.setItem("selected_event", JSON.stringify(found));
-        }
-      } catch {}
-      router.push(`/particularevent?id=${found.event_id}`);
-    } catch {
-      alert("Unable to open event. Please try again.");
-    }
-  };
 
   const statusBadge = (status) => {
     if (status === "approved") return "bg-green-100 text-green-700 border-green-200";
@@ -181,19 +151,7 @@ function AdminsTable() {
                     {idx === 0 && (
                       <td rowSpan={items.length} className="px-6 py-4 text-gray-900 align-top font-semibold bg-gray-50 border-r border-gray-100">{adminName}</td>
                     )}
-                    <td className="px-6 py-4 text-gray-900 max-w-[28rem] truncate" title={r.event_name || ''}>
-                      {r.event_name ? (
-                        <button
-                          onClick={() => handleOpenEventByName(r.event_name, r.admin_id)}
-                          className="text-blue-700 hover:text-blue-900 hover:underline"
-                          title="Open event"
-                        >
-                          {r.event_name}
-                        </button>
-                      ) : (
-                        '-'
-                      )}
-                    </td>
+                    <td className="px-6 py-4 text-gray-900 max-w-[28rem] truncate" title={r.event_name || ''}>{r.event_name || '-'}</td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center px-2.5 py-1 rounded-full border text-xs font-medium ${statusBadge(r.status)}`}>
                         {r.status}
