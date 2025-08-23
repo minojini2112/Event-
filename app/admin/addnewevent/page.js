@@ -37,6 +37,9 @@ export default function AddNewEventPage() {
   const [isSubmittingAccessRequest, setIsSubmittingAccessRequest] = useState(false);
   const [latestRequest, setLatestRequest] = useState(null); // {status, event_name}
 
+  // Check if user is global admin
+  const [isGlobalAdmin, setIsGlobalAdmin] = useState(false);
+
   const loadExistingEvent = useCallback(async () => {
     try {
       if (!eventId) return;
@@ -85,6 +88,14 @@ export default function AddNewEventPage() {
       setIsNameLocked(true);
     }
   }, [isEditMode]);
+
+  // Check if user is global admin
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const userRole = window.localStorage.getItem('role');
+    const isGlobal = userRole === 'global' || userRole === 'global admin';
+    setIsGlobalAdmin(isGlobal);
+  }, []);
 
   // If name not pre-approved via localStorage, check access backend directly
   useEffect(() => {
@@ -380,6 +391,30 @@ export default function AddNewEventPage() {
     }
   };
 
+  const handleDeleteEvent = async (eventId) => {
+    if (!window.confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
+      return;
+    }
+    try {
+      const response = await fetch(`/api/events/${eventId}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete event');
+      }
+      alert('Event deleted successfully!');
+      setPostStatus('posted'); // Simulate post status for redirection
+      setIsPostPopupOpen(true);
+      setTimeout(() => {
+        router.push('/main/1');
+      }, 1200);
+    } catch (err) {
+      console.error('Failed to delete event:', err);
+      alert(`Failed to delete event: ${err.message}`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <header className="w-full px-6 py-6 bg-white/80 backdrop-blur-sm border-b border-gray-200/50 shadow-sm">
@@ -395,7 +430,7 @@ export default function AddNewEventPage() {
 
       <main className="max-w-6xl mx-auto px-6 py-8">
         {/* Access gating cards for admins without approval */}
-        {!isEditMode && !isNameLocked && (
+        {!isEditMode && !isNameLocked && !isGlobalAdmin && (
           latestRequest && latestRequest.status === 'pending' ? (
             <div className="mb-6 bg-yellow-50 rounded-2xl border border-yellow-200 p-5">
               <div className="flex items-start gap-3">
@@ -458,8 +493,8 @@ export default function AddNewEventPage() {
             </div>
           )
         )}
-        {/* Editor (gated until approval for new events) */}
-        {(isEditMode || isNameLocked) ? (
+        {/* Editor (gated until approval for new events, or always visible for global admins) */}
+        {(isEditMode || isNameLocked || isGlobalAdmin) ? (
           isEditing ? (
           <div className="bg-white rounded-2xl shadow-lg border border-gray-200/60 p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -687,6 +722,14 @@ export default function AddNewEventPage() {
               <h2 className="text-xl font-semibold text-gray-900">Event Details</h2>
               <div className="flex items-center gap-2">
                 <button onClick={() => setIsEditing(true)} className="px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-50">Edit</button>
+                {isGlobalAdmin && isEditMode && (
+                  <button 
+                    onClick={() => handleDeleteEvent(eventId)}
+                    className="px-4 py-2 rounded-lg text-sm font-medium border border-red-300 text-red-700 hover:bg-red-50"
+                  >
+                    Delete Event
+                  </button>
+                )}
                 {saveStatus === 'saved' && (
                   <button onClick={handleConfirmPost} disabled={postStatus === 'posting' || postStatus === 'posted'} className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-60">
                     {postStatus === 'posted' ? (isEditMode ? 'Updated' : 'Posted') : postStatus === 'posting' ? (isEditMode ? 'Updating...' : 'Posting...') : (isEditMode ? 'Confirm & Update' : 'Confirm & Post')}

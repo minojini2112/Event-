@@ -325,10 +325,6 @@ function GlobalAdminMainPageContent() {
                     <div className="flex-1">
                       <h3 className="text-white font-semibold text-lg">{userData.username}</h3>
                       <p className="text-white/80 text-sm">{userData.email}</p>
-                      <div className="mt-2 flex items-center gap-4 text-white/90 text-sm">
-                        <span>Events: {userData.eventsCreated}</span>
-                        <span>Participants: {userData.totalParticipants}</span>
-                      </div>
                     </div>
                   </div>
                 </div>

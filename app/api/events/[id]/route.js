@@ -164,3 +164,51 @@ export async function PATCH(request, { params }) {
     );
   }
 }
+
+export async function DELETE(request, { params }) {
+  try {
+    const { id } = params;
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Event ID is required' },
+        { status: 400 }
+      );
+    }
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!supabaseUrl || !supabaseServiceKey) {
+      return NextResponse.json(
+        { error: 'Database not configured properly' },
+        { status: 500 }
+      );
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Delete the event
+    const { error } = await supabase
+      .from('all_events')
+      .delete()
+      .eq('event_id', id);
+
+    if (error) {
+      console.error('Error deleting event:', error);
+      return NextResponse.json(
+        { error: 'Failed to delete event', details: error.message },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Event deleted successfully' 
+    });
+  } catch (error) {
+    console.error('Unexpected error deleting event:', error);
+    return NextResponse.json(
+      { error: 'Internal server error', details: error.message },
+      { status: 500 }
+    );
+  }
+}

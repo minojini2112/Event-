@@ -298,6 +298,29 @@ export default function ParticularEventPage() {
     }
   };
 
+  const handleDeleteEvent = async (eventId) => {
+    if (!confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
+      return;
+    }
+    
+    try {
+      const response = await fetch(`/api/events/${eventId}`, {
+        method: 'DELETE',
+      });
+      
+      if (response.ok) {
+        showToast('Event deleted successfully');
+        router.push('/main/0'); // Redirect to global admin dashboard
+      } else {
+        const error = await response.json();
+        showToast(error.error || 'Failed to delete event');
+      }
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      showToast('Failed to delete event');
+    }
+  };
+
   const handleCancelPastEventEdit = () => {
     setShowPastEventEditor(false);
     setPastEventSummary(pastEventDetails?.event_details || '');
@@ -832,6 +855,26 @@ export default function ParticularEventPage() {
                     className="bg-white/90 text-blue-700 px-5 py-2.5 rounded-lg text-sm font-semibold shadow-md hover:bg-white"
                   >
                     Edit Event
+                  </button>
+                )}
+
+                {/* Edit button for global admins (only for upcoming/live events) */}
+                {isGlobalAdmin && eventStatus?.status !== 'ended' && (
+                  <button 
+                    onClick={() => router.push(`/admin/addnewevent?id=${eventData.event_id}`)}
+                    className="bg-white/90 text-blue-700 px-5 py-2.5 rounded-lg text-sm font-semibold shadow-md hover:bg-white"
+                  >
+                    Edit Event
+                  </button>
+                )}
+
+                {/* Delete button for global admins */}
+                {isGlobalAdmin && (
+                  <button 
+                    onClick={() => handleDeleteEvent(eventData.event_id)}
+                    className="bg-white/90 text-red-700 px-5 py-2.5 rounded-lg text-sm font-semibold shadow-md hover:bg-white"
+                  >
+                    Delete Event
                   </button>
                 )}
               </div>
