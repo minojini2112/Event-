@@ -357,45 +357,87 @@ function ParticipantProfileContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading profile...</p>
+      <div className="min-h-screen bg-gradient-to-br from-[#F8FAFC] via-white to-[#EFF6FF] relative overflow-hidden flex items-center justify-center">
+        {/* Animated Background Elements */}
+        <div className="fixed inset-0 pointer-events-none">
+          {/* Floating Orbs */}
+          <div className="absolute top-20 left-20 w-72 h-72 bg-gradient-to-r from-[#3B82F6]/10 to-[#06B6D4]/10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-20 right-20 w-96 h-96 bg-gradient-to-r from-[#06B6D4]/10 to-[#3B82F6]/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/2 left-1/4 w-64 h-64 bg-gradient-to-r from-[#3B82F6]/5 to-[#1E40AF]/5 rounded-full blur-3xl animate-pulse delay-500"></div>
+        </div>
+        
+        <div className="text-center relative z-10">
+          <div className="relative">
+            <div className="w-20 h-20 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] rounded-full flex items-center justify-center animate-pulse">
+              <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center">
+                <svg className="w-8 h-8 text-[#3B82F6] animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.001 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              </div>
+            </div>
+            <div className="absolute -inset-4 bg-gradient-to-r from-[#3B82F6]/20 to-[#06B6D4]/20 rounded-full blur-2xl animate-pulse"></div>
+          </div>
+          <p className="text-[#64748B] mt-6 text-lg font-medium">Loading your profile...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-[#F8FAFC] via-white to-[#EFF6FF] relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 pointer-events-none">
+        {/* Floating Orbs */}
+        <div className="absolute top-20 left-20 w-72 h-72 bg-gradient-to-r from-[#3B82F6]/10 to-[#06B6D4]/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-20 w-96 h-96 bg-gradient-to-r from-[#06B6D4]/10 to-[#3B82F6]/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/4 w-64 h-64 bg-gradient-to-r from-[#3B82F6]/5 to-[#1E40AF]/5 rounded-full blur-3xl animate-pulse delay-500"></div>
+        
+        {/* Grid Pattern */}
+        <div className="absolute inset-0 opacity-30">
+          <div className="w-full h-full" style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23E2E8F0' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            backgroundSize: '60px 60px'
+          }}></div>
+        </div>
+      </div>
+
       {/* Header */}
-      <header className="w-full px-6 py-6 bg-white/80 backdrop-blur-sm border-b border-gray-200/50 shadow-sm">
+      <header className="relative z-50 w-full px-8 py-6 bg-white/80 backdrop-blur-xl border-b border-[#E2E8F0]/50 shadow-lg sticky top-0">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            My Profile
-          </h1>
-          <p className="text-gray-600 mt-2">Track your event participation and achievements</p>
+          {/* Logo/Brand */}
+          <div className="flex items-center space-x-4 group">
+            <div className="relative">
+              <div className="w-14 h-14 bg-gradient-to-br from-[#3B82F6] to-[#1E40AF] rounded-2xl flex items-center justify-center shadow-2xl group-hover:shadow-[#3B82F6]/25 transition-all duration-500 transform group-hover:scale-110 group-hover:rotate-3">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+              <div className="absolute -inset-2 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] rounded-2xl blur-xl opacity-0 group-hover:opacity-30 transition-opacity duration-500"></div>
+            </div>
+            <div>
+              <h1 className="text-4xl font-black text-[#1E40AF]">My Profile</h1>
+              <p className="text-[#64748B] mt-1 font-medium">Track your event participation and achievements</p>
+            </div>
           </div>
           
           {/* Profile Circle */}
           <div className="flex items-center relative" ref={profileRef}>
             <button 
               onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+              className="w-14 h-14 bg-gradient-to-br from-[#3B82F6] to-[#06B6D4] rounded-2xl flex items-center justify-center hover:from-[#1E40AF] hover:to-[#3B82F6] transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105"
             >
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
             </button>
 
             {/* Profile Dropdown */}
             {isProfileOpen && (
-              <div className="absolute top-14 right-0 w-[22rem] bg-white/95 backdrop-blur rounded-xl shadow-xl ring-1 ring-gray-200 z-[99999] overflow-hidden">
+              <div className="absolute top-16 right-0 w-[22rem] bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-[#E2E8F0]/50 z-50 overflow-hidden">
                 {/* Header Section */}
-                <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-6">
+                <div className="bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] p-6">
                   <div className="flex items-center space-x-4">
-                    <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+                    <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center">
                       <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                       </svg>
@@ -454,106 +496,123 @@ function ParticipantProfileContent() {
 
 
 
-      <main className="max-w-7xl mx-auto px-6 py-8">
+      {/* Main Content */}
+      <main className="relative z-10 max-w-7xl mx-auto px-8 py-12">
         {/* Error Message */}
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="mb-8 bg-red-50/80 backdrop-blur-sm border border-red-200/60 rounded-2xl p-6 shadow-lg">
             <div className="flex items-center">
-              <svg className="w-5 h-5 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-              </svg>
-              <span className="text-red-800">{error}</span>
+              <div className="w-12 h-12 bg-red-100 rounded-2xl flex items-center justify-center mr-4">
+                <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-red-800">Error</h3>
+                <p className="text-red-700">{error}</p>
+              </div>
             </div>
           </div>
         )}
 
         {/* Profile Section */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200/60 overflow-hidden mb-8">
-          <div className="bg-gradient-to-r from-green-500 to-blue-600 p-8">
+        <div className="bg-white/90 backdrop-blur-xl border border-[#E2E8F0]/50 rounded-3xl shadow-xl overflow-hidden mb-8 relative">
+          {/* Background decoration */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#3B82F6]/10 to-[#06B6D4]/10 rounded-full -translate-y-16 translate-x-16"></div>
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-br from-[#06B6D4]/10 to-[#3B82F6]/10 rounded-full translate-y-12 -translate-x-12"></div>
+          
+          <div className="bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] p-8 relative z-10">
             <div className="flex items-center space-x-6">
-              <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center">
+              <div className="w-24 h-24 bg-white/20 rounded-3xl flex items-center justify-center shadow-2xl">
                 <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </div>
               <div className="flex-1">
-                <h2 className="text-3xl font-bold text-white">{participantData.username}</h2>
-                <p className="text-white/80 text-lg">{participantData.email}</p>
-                <p className="text-white/70">{participantData.role}</p>
+                <h2 className="text-3xl font-black text-white mb-2">{participantData.username}</h2>
+                <p className="text-white/90 text-lg font-medium mb-1">{participantData.email}</p>
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/20 rounded-xl border border-white/30">
+                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-white font-medium">{participantData.role}</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
                 {/* Profile Details (editable) */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200/60 p-6 mb-8 relative overflow-hidden">
+        <div className="bg-white/90 backdrop-blur-xl border border-[#E2E8F0]/50 rounded-3xl p-8 mb-8 relative overflow-hidden shadow-xl">
           {/* Background decoration */}
-          <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full -translate-y-10 translate-x-10 opacity-60"></div>
-          <div className="absolute bottom-0 left-0 w-16 h-16 bg-gradient-to-br from-green-100 to-blue-100 rounded-full translate-y-8 -translate-x-8 opacity-60"></div>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#3B82F6]/5 to-[#06B6D4]/5 rounded-full -translate-y-16 translate-x-16"></div>
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-br from-[#06B6D4]/5 to-[#3B82F6]/5 rounded-full translate-y-12 -translate-x-12"></div>
           
           <div className="relative z-10">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 bg-gradient-to-br from-[#3B82F6] to-[#06B6D4] rounded-2xl flex items-center justify-center shadow-xl">
+                  <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">Profile Details</h3>
-                  <p className="text-gray-600 text-sm">Keep your information up to date and accurate</p>
+                  <h3 className="text-2xl font-bold text-[#1E40AF]">Personal Information</h3>
+                  <p className="text-[#64748B] text-sm">Keep your information up to date and accurate</p>
                 </div>
               </div>
               {isEditingProfile ? (
-                <div className="flex items-center gap-2">
+                <div className="flex gap-3">
                   <button
                     onClick={saveProfile}
                     disabled={saving}
-                    className="bg-gradient-to-r from-green-500 to-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:from-green-600 hover:to-blue-700 shadow-md hover:shadow-lg transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                    className="group relative px-6 py-3 bg-gradient-to-r from-[#10B981] to-[#059669] text-white rounded-2xl hover:from-[#059669] hover:to-[#047857] transition-all duration-300 font-semibold shadow-xl hover:shadow-2xl transform hover:scale-105 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {saving ? (
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        Saving...
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <span className="relative z-10 flex items-center gap-2">
+                      {saving ? (
+                        <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.001 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                      ) : (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
-                        Save Changes
-                      </div>
-                    )}
+                      )}
+                      {saving ? 'Saving...' : 'Save Changes'}
+                    </span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#059669] to-[#10B981] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   </button>
                   <button
                     onClick={cancelEdit}
                     disabled={saving}
-                    className="px-4 py-2 rounded-lg text-sm font-semibold border-2 border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                    className="group relative px-6 py-3 bg-gradient-to-r from-[#6B7280] to-[#4B5563] text-white rounded-2xl hover:from-[#4B5563] hover:to-[#374151] transition-all duration-300 font-semibold shadow-xl hover:shadow-2xl transform hover:scale-105 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Cancel
+                    <span className="relative z-10">Cancel</span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#4B5563] to-[#6B7280] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   </button>
                 </div>
               ) : (
                 <button
                   onClick={startEdit}
-                  className="group bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:from-blue-600 hover:to-purple-700 shadow-md hover:shadow-lg transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
+                  className="group relative px-6 py-3 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] text-white rounded-2xl hover:from-[#1E40AF] hover:to-[#3B82F6] transition-all duration-300 font-semibold shadow-xl hover:shadow-2xl transform hover:scale-105 overflow-hidden"
                 >
-                  <div className="flex items-center gap-2">
-                    <svg className="w-3 h-3 group-hover:rotate-12 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <span className="relative z-10 flex items-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
                     Edit Profile
-                  </div>
+                  </span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#06B6D4] to-[#3B82F6] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </button>
               )}
             </div>
 
           {isEditingProfile ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
               <div className="group">
-                <label htmlFor="pf-name" className="text-sm font-semibold text-gray-700 mb-2 block flex items-center gap-2">
-                  <div className="w-6 h-6 bg-blue-100 rounded-md flex items-center justify-center">
-                    <svg className="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <label htmlFor="pf-name" className="text-sm font-semibold text-[#1E40AF] mb-3 block flex items-center gap-3">
+                  <div className="w-8 h-8 bg-[#3B82F6]/10 rounded-xl flex items-center justify-center">
+                    <svg className="w-4 h-4 text-[#3B82F6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                   </div>
@@ -564,15 +623,15 @@ function ParticipantProfileContent() {
                   type="text"
                   value={draftProfile.name}
                   onChange={(e) => setDraftProfile({ ...draftProfile, name: e.target.value })}
-                  className="w-full text-sm text-gray-900 rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:outline-none px-3 py-2 bg-white shadow-sm transition-all duration-200 group-hover:border-gray-300"
+                  className="w-full text-sm text-[#1E40AF] rounded-2xl border-2 border-[#E2E8F0] focus:border-[#3B82F6] focus:outline-none px-4 py-3 bg-white/80 backdrop-blur-sm shadow-sm transition-all duration-300 group-hover:border-[#3B82F6]/50 focus:shadow-lg"
                   placeholder="Enter your full name"
                 />
               </div>
               
               <div className="group">
-                <label htmlFor="pf-dept" className="text-sm font-semibold text-gray-700 mb-2 block flex items-center gap-2">
-                  <div className="w-6 h-6 bg-green-100 rounded-md flex items-center justify-center">
-                    <svg className="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <label htmlFor="pf-dept" className="text-sm font-semibold text-[#1E40AF] mb-3 block flex items-center gap-3">
+                  <div className="w-8 h-8 bg-[#10B981]/10 rounded-xl flex items-center justify-center">
+                    <svg className="w-4 h-4 text-[#10B981]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                     </svg>
                   </div>
@@ -583,15 +642,15 @@ function ParticipantProfileContent() {
                   type="text"
                   value={draftProfile.department}
                   onChange={(e) => setDraftProfile({ ...draftProfile, department: e.target.value })}
-                  className="w-full text-sm text-gray-900 rounded-lg border-2 border-gray-200 focus:border-green-500 focus:outline-none px-3 py-2 bg-white shadow-sm transition-all duration-200 group-hover:border-gray-300"
+                  className="w-full text-sm text-[#1E40AF] rounded-2xl border-2 border-[#E2E8F0] focus:border-[#10B981] focus:outline-none px-4 py-3 bg-white/80 backdrop-blur-sm shadow-sm transition-all duration-300 group-hover:border-[#10B981]/50 focus:shadow-lg"
                   placeholder="e.g., Computer Science"
                 />
               </div>
               
               <div className="group">
-                <label htmlFor="pf-year" className="text-sm font-semibold text-gray-700 mb-2 block flex items-center gap-2">
-                  <div className="w-6 h-6 bg-purple-100 rounded-md flex items-center justify-center">
-                    <svg className="w-3 h-3 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <label htmlFor="pf-year" className="text-sm font-semibold text-[#1E40AF] mb-3 block flex items-center gap-3">
+                  <div className="w-8 h-8 bg-[#8B5CF6]/10 rounded-xl flex items-center justify-center">
+                    <svg className="w-4 h-4 text-[#8B5CF6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                   </div>
@@ -604,15 +663,15 @@ function ParticipantProfileContent() {
                   max="6"
                   value={draftProfile.year}
                   onChange={(e) => setDraftProfile({ ...draftProfile, year: e.target.value })}
-                  className="w-full text-sm text-gray-900 rounded-lg border-2 border-gray-200 focus:border-purple-500 focus:outline-none px-3 py-2 bg-white shadow-sm transition-all duration-200 group-hover:border-gray-300"
+                  className="w-full text-sm text-[#1E40AF] rounded-2xl border-2 border-[#E2E8F0] focus:border-[#8B5CF6] focus:outline-none px-4 py-3 bg-white/80 backdrop-blur-sm shadow-sm transition-all duration-300 group-hover:border-[#8B5CF6]/50 focus:shadow-lg"
                   placeholder="1-6"
                 />
               </div>
               
               <div className="group">
-                <label htmlFor="pf-reg" className="text-sm font-semibold text-gray-700 mb-2 block flex items-center gap-2">
-                  <div className="w-6 h-6 bg-orange-100 rounded-md flex items-center justify-center">
-                    <svg className="w-3 h-3 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <label htmlFor="pf-reg" className="text-sm font-semibold text-[#1E40AF] mb-3 block flex items-center gap-3">
+                  <div className="w-8 h-8 bg-[#F59E0B]/10 rounded-xl flex items-center justify-center">
+                    <svg className="w-4 h-4 text-[#F59E0B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                   </div>
@@ -623,15 +682,15 @@ function ParticipantProfileContent() {
                   type="text"
                   value={draftProfile.registerNumber}
                   onChange={(e) => setDraftProfile({ ...draftProfile, registerNumber: e.target.value })}
-                  className="w-full text-sm text-gray-900 rounded-lg border-2 border-gray-200 focus:border-orange-500 focus:outline-none px-3 py-2 bg-white shadow-sm transition-all duration-200 group-hover:border-gray-300"
+                  className="w-full text-sm text-[#1E40AF] rounded-2xl border-2 border-[#E2E8F0] focus:border-[#F59E0B] focus:outline-none px-4 py-3 bg-white/80 backdrop-blur-sm shadow-sm transition-all duration-300 group-hover:border-[#F59E0B]/50 focus:shadow-lg"
                   placeholder="Enter your register number"
                 />
               </div>
               
               <div className="md:col-span-2 group">
-                <label htmlFor="pf-college" className="text-sm font-semibold text-gray-700 mb-2 block flex items-center gap-2">
-                  <div className="w-6 h-6 bg-indigo-100 rounded-md flex items-center justify-center">
-                    <svg className="w-3 h-3 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <label htmlFor="pf-college" className="text-sm font-semibold text-[#1E40AF] mb-3 block flex items-center gap-3">
+                  <div className="w-8 h-8 bg-[#06B6D4]/10 rounded-xl flex items-center justify-center">
+                    <svg className="w-4 h-4 text-[#06B6D4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                     </svg>
                   </div>
@@ -642,71 +701,71 @@ function ParticipantProfileContent() {
                   type="text"
                   value={draftProfile.collegeName}
                   onChange={(e) => setDraftProfile({ ...draftProfile, collegeName: e.target.value })}
-                  className="w-full text-sm text-gray-900 rounded-lg border-2 border-gray-200 focus:border-indigo-500 focus:outline-none px-3 py-2 bg-white shadow-sm transition-all duration-200 group-hover:border-gray-300"
+                  className="w-full text-sm text-[#1E40AF] rounded-2xl border-2 border-[#E2E8F0] focus:border-[#06B6D4] focus:outline-none px-4 py-3 bg-white/80 backdrop-blur-sm shadow-sm transition-all duration-300 group-hover:border-[#06B6D4]/50 focus:shadow-lg"
                   placeholder="Enter your college name"
                 />
               </div>
             </div>
                     ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-              <div className="group bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200 hover:from-blue-100 hover:to-blue-200 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
+              <div className="group bg-white/90 backdrop-blur-xl border border-[#E2E8F0]/50 rounded-xl p-4 hover:shadow-lg transition-all duration-300 hover:scale-105">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-8 h-8 bg-[#3B82F6]/10 rounded-lg flex items-center justify-center">
+                    <svg className="w-4 h-4 text-[#3B82F6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                   </div>
-                  <div className="text-xs font-medium text-blue-700 uppercase tracking-wide">Full Name</div>
+                  <div className="text-xs font-semibold text-[#64748B] uppercase tracking-wide">Full Name</div>
                 </div>
-                <div className="text-base font-bold text-blue-900">{participantData.name}</div>
+                <div className="text-base font-bold text-[#1E40AF]">{participantData.name}</div>
               </div>
               
-              <div className="group bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 border border-green-200 hover:from-green-100 hover:to-green-200 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
+              <div className="group bg-white/90 backdrop-blur-xl border border-[#E2E8F0]/50 rounded-xl p-4 hover:shadow-lg transition-all duration-300 hover:scale-105">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
-                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-8 h-8 bg-[#3B82F6]/10 rounded-lg flex items-center justify-center">
+                    <svg className="w-4 h-4 text-[#3B82F6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                     </svg>
                   </div>
-                  <div className="text-xs font-medium text-green-700 uppercase tracking-wide">Department</div>
+                  <div className="text-xs font-semibold text-[#64748B] uppercase tracking-wide">Department</div>
                 </div>
-                <div className="text-base font-bold text-green-900">{participantData.department}</div>
+                <div className="text-base font-bold text-[#1E40AF]">{participantData.department}</div>
               </div>
               
-              <div className="group bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 border border-purple-200 hover:from-purple-100 hover:to-purple-200 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
+              <div className="group bg-white/90 backdrop-blur-xl border border-[#E2E8F0]/50 rounded-xl p-4 hover:shadow-lg transition-all duration-300 hover:scale-105">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
-                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-8 h-8 bg-[#3B82F6]/10 rounded-lg flex items-center justify-center">
+                    <svg className="w-4 h-4 text-[#3B82F6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                   </div>
-                  <div className="text-xs font-medium text-purple-700 uppercase tracking-wide">Academic Year</div>
+                  <div className="text-xs font-semibold text-[#64748B] uppercase tracking-wide">Academic Year</div>
                 </div>
-                <div className="text-base font-bold text-purple-900">{participantData.year}</div>
+                <div className="text-base font-bold text-[#1E40AF]">{participantData.year}</div>
               </div>
               
-              <div className="group bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-4 border border-orange-200 hover:from-orange-100 hover:to-orange-200 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
+              <div className="group bg-white/90 backdrop-blur-xl border border-[#E2E8F0]/50 rounded-xl p-4 hover:shadow-lg transition-all duration-300 hover:scale-105">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
-                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-8 h-8 bg-[#3B82F6]/10 rounded-lg flex items-center justify-center">
+                    <svg className="w-4 h-4 text-[#3B82F6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                   </div>
-                  <div className="text-xs font-medium text-orange-700 uppercase tracking-wide">Register Number</div>
+                  <div className="text-xs font-semibold text-[#64748B] uppercase tracking-wide">Register Number</div>
                 </div>
-                <div className="text-base font-bold text-orange-900">{participantData.registerNumber}</div>
+                <div className="text-base font-bold text-[#1E40AF]">{participantData.registerNumber}</div>
               </div>
               
-              <div className="md:col-span-2 group bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-xl p-4 border border-indigo-200 hover:from-indigo-100 hover:to-indigo-200 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5">
+              <div className="md:col-span-2 group bg-white/90 backdrop-blur-xl border border-[#E2E8F0]/50 rounded-xl p-4 hover:shadow-lg transition-all duration-300 hover:scale-105">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center">
-                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-8 h-8 bg-[#3B82F6]/10 rounded-lg flex items-center justify-center">
+                    <svg className="w-4 h-4 text-[#3B82F6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                     </svg>
                   </div>
-                  <div className="text-xs font-medium text-indigo-700 uppercase tracking-wide">College Name</div>
+                  <div className="text-xs font-semibold text-[#64748B] uppercase tracking-wide">College Name</div>
                 </div>
-                <div className="text-base font-bold text-indigo-900">{participantData.collegeName}</div>
+                <div className="text-base font-bold text-[#1E40AF]">{participantData.collegeName}</div>
               </div>
             </div>
           )}
@@ -714,12 +773,12 @@ function ParticipantProfileContent() {
         </div>
 
         {/* Quick Actions */}
-        <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-xl font-semibold text-gray-900">Quick Actions</h3>
+        <div className="mb-8 flex items-center justify-between">
+          <h3 className="text-2xl font-bold text-[#1E40AF]">Quick Actions</h3>
           <button
             onClick={refreshEventCounts}
             disabled={countsLoading}
-            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="group relative px-6 py-3 bg-white/80 backdrop-blur-sm text-[#3B82F6] border-2 border-[#3B82F6] rounded-2xl hover:bg-[#EFF6FF] hover:border-[#1E40AF] transition-all duration-300 font-semibold shadow-xl hover:shadow-2xl transform hover:scale-105 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {countsLoading ? (
               <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -733,11 +792,11 @@ function ParticipantProfileContent() {
             {countsLoading ? 'Refreshing...' : 'Refresh Counts'}
           </button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {/* Registered Events */}
-          <div className="group bg-white rounded-2xl shadow-lg border border-gray-200/60 p-6 hover:shadow-xl transition-transform duration-300 hover:-translate-y-0.5 ring-1 ring-transparent hover:ring-blue-100">
+          <div className="group bg-white rounded-2xl shadow-lg border border-gray-200/60 p-6 hover:shadow-xl transition-transform duration-300 hover:-translate-y-0.5 ring-1 ring-transparent hover:ring-green-100">
             <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-gradient-to-r from-[#10B981] to-[#06B6D4] rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -763,7 +822,7 @@ function ParticipantProfileContent() {
               <p className="text-gray-600 mb-4">View all events you&apos;ve registered for</p>
               <button 
                 onClick={() => handleNavigation('/participant/registered')}
-                className="bg-gradient-to-r from-green-500 to-blue-600 text-white px-6 py-3 rounded-xl font-medium hover:from-green-600 hover:to-blue-700 transition-all duration-200 shadow group-hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="bg-gradient-to-r from-[#10B981] to-[#06B6D4] text-white px-6 py-3 rounded-xl font-medium hover:from-[#059669] hover:to-[#3B82F6] transition-all duration-200 shadow group-hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
               >
                 View Events ({countsLoading ? '...' : participantData.eventsRegistered})
               </button>

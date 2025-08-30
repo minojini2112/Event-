@@ -53,10 +53,10 @@ export default function ParticipantRegisteredPage() {
   };
 
   const tiers = [
-    { key: 'bronze', label: 'Bronze', min: 5, classes: 'bg-amber-50 text-amber-800 border-amber-300', cardBg: 'from-amber-50 to-orange-100', iconText: 'text-amber-800' },
-    { key: 'silver', label: 'Silver', min: 10, classes: 'bg-zinc-50 text-zinc-700 border-zinc-200', cardBg: 'from-zinc-50 to-zinc-100', iconText: 'text-zinc-700' },
-    { key: 'gold', label: 'Gold', min: 20, classes: 'bg-yellow-50 text-yellow-700 border-yellow-300', cardBg: 'from-yellow-50 to-yellow-200', iconText: 'text-yellow-700' },
-    { key: 'platinum', label: 'Platinum', min: 40, classes: 'bg-purple-50 text-purple-700 border-purple-200', cardBg: 'from-purple-50 to-purple-100', iconText: 'text-purple-700' }
+    { key: 'bronze', label: 'Bronze', min: 5, classes: 'bg-gradient-to-br from-amber-100 to-orange-200 text-amber-800 border-amber-300', cardBg: 'from-amber-50 to-orange-100', iconText: 'text-amber-800', icon: 'M12 2l2.39 4.84 5.34.78-3.86 3.76.91 5.32L12 14.77 6.22 16.7l.91-5.32L3.27 7.62l5.34-.78L12 2z' },
+    { key: 'silver', label: 'Silver', min: 10, classes: 'bg-gradient-to-br from-slate-100 to-gray-200 text-slate-700 border-slate-300', cardBg: 'from-slate-50 to-gray-100', iconText: 'text-slate-700', icon: 'M12 2l2.39 4.84 5.34.78-3.86 3.76.91 5.32L12 14.77 6.22 16.7l.91-5.32L3.27 7.62l5.34-.78L12 2z' },
+    { key: 'gold', label: 'Gold', min: 20, classes: 'bg-gradient-to-br from-yellow-100 to-amber-200 text-yellow-700 border-yellow-300', cardBg: 'from-yellow-50 to-amber-100', iconText: 'text-yellow-700', icon: 'M12 2l2.39 4.84 5.34.78-3.86 3.76.91 5.32L12 14.77 6.22 16.7l.91-5.32L3.27 7.62l5.34-.78L12 2z' },
+    { key: 'platinum', label: 'Platinum', min: 40, classes: 'bg-gradient-to-br from-purple-100 to-indigo-200 text-purple-700 border-purple-300', cardBg: 'from-purple-50 to-indigo-100', iconText: 'text-purple-700', icon: 'M12 2l2.39 4.84 5.34.78-3.86 3.76.91 5.32L12 14.77 6.22 16.7l.91-5.32L3.27 7.62l5.34-.78L12 2z' }
   ];
   const totalRegistrations = events.length;
   const currentBadge = tiers.reduce((acc, t) => (totalRegistrations >= t.min ? t : acc), null);
@@ -66,146 +66,277 @@ export default function ParticipantRegisteredPage() {
   const viewDetails = (id) => router.push(`/particularevent?id=${id}`);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <header className="w-full px-6 py-6 bg-white/80 backdrop-blur-sm border-b border-gray-200/50 shadow-sm">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">My Registrations</h1>
-            <p className="text-gray-600 mt-2">All events you have registered for</p>
+    <div className="min-h-screen bg-gradient-to-br from-[#F8FAFC] via-white to-[#EFF6FF] relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 pointer-events-none">
+        {/* Floating Orbs */}
+        <div className="absolute top-20 left-20 w-72 h-72 bg-gradient-to-r from-[#3B82F6]/10 to-[#06B6D4]/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-20 w-96 h-96 bg-gradient-to-r from-[#06B6D4]/10 to-[#3B82F6]/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/4 w-64 h-64 bg-gradient-to-r from-[#3B82F6]/5 to-[#1E40AF]/5 rounded-full blur-3xl animate-pulse delay-500"></div>
+        
+        {/* Grid Pattern */}
+        <div className="absolute inset-0 opacity-30">
+          <div className="w-full h-full" style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23E2E8F0' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            backgroundSize: '60px 60px'
+          }}></div>
+        </div>
+      </div>
+
+      {/* Header */}
+      <header className="relative z-50 w-full px-8 py-6 bg-white/80 backdrop-blur-xl border-b border-[#E2E8F0]/50 shadow-lg sticky top-0">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          {/* Logo/Brand */}
+          <div className="flex items-center space-x-4 group">
+            <div className="relative">
+              <div className="w-14 h-14 bg-gradient-to-br from-[#3B82F6] to-[#1E40AF] rounded-2xl flex items-center justify-center shadow-2xl group-hover:shadow-[#3B82F6]/25 transition-all duration-500 transform group-hover:scale-110 group-hover:rotate-3">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div className="absolute -inset-2 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] rounded-2xl blur-xl opacity-0 group-hover:opacity-30 transition-opacity duration-500"></div>
+            </div>
+            <div>
+              <h1 className="text-4xl font-black text-[#1E40AF]">My Registrations</h1>
+              <p className="text-[#64748B] mt-1 font-medium">Track your event journey and achievements</p>
+            </div>
           </div>
-          <button onClick={() => router.back()} className="px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 text-gray-700 hover:bg-gray-50">Back</button>
+          
+          {/* Back Button */}
+          <button 
+            onClick={() => router.back()} 
+            className="group relative px-6 py-3 bg-white/80 backdrop-blur-sm text-[#3B82F6] border-2 border-[#3B82F6] rounded-2xl hover:bg-[#EFF6FF] hover:border-[#1E40AF] transition-all duration-300 font-semibold shadow-xl hover:shadow-2xl transform hover:scale-105 overflow-hidden"
+          >
+            <span className="relative z-10 flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              Back
+            </span>
+            <div className="absolute inset-0 bg-gradient-to-r from-[#3B82F6]/10 to-[#06B6D4]/10 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+          </button>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-6 py-8">
+      {/* Main Content */}
+      <main className="relative z-10 max-w-7xl mx-auto px-8 py-12">
         {/* Error Message */}
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="mb-8 bg-red-50/80 backdrop-blur-sm border border-red-200/60 rounded-2xl p-6 shadow-lg">
             <div className="flex items-center">
-              <svg className="w-5 h-5 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-              </svg>
-              <span className="text-red-800">{error}</span>
+              <div className="w-12 h-12 bg-red-100 rounded-2xl flex items-center justify-center mr-4">
+                <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-red-800">Error</h3>
+                <p className="text-red-700">{error}</p>
+              </div>
             </div>
           </div>
         )}
 
         {/* Loading State */}
         {loading && (
-          <div className="flex items-center justify-center py-12">
+          <div className="flex items-center justify-center py-20">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading your registered events...</p>
+              <div className="relative">
+                <div className="w-20 h-20 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] rounded-full flex items-center justify-center animate-pulse">
+                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center">
+                    <svg className="w-8 h-8 text-[#3B82F6] animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.001 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                  </div>
+                </div>
+                <div className="absolute -inset-4 bg-gradient-to-r from-[#3B82F6]/20 to-[#06B6D4]/20 rounded-full blur-2xl animate-pulse"></div>
+              </div>
+              <p className="text-[#64748B] mt-6 text-lg font-medium">Loading your registered events...</p>
             </div>
           </div>
         )}
 
         {!loading && !error && (
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-          <aside className="md:col-span-2">
-            <div className="bg-white/90 backdrop-blur-sm border border-gray-200/60 rounded-2xl p-6 shadow-sm sticky top-4">
-              <h2 className="text-sm font-semibold text-gray-900">Badge Journey</h2>
-              <p className="text-xs text-gray-700 mt-1">Earn badges by registering for more events.</p>
-              <div className="mt-4 space-y-3">
-                {tiers.map((t) => {
-                  const achieved = totalRegistrations >= t.min;
-                  const isCurrent = currentBadge?.key === t.key;
-                  return (
-                    <div key={t.key} className={`rounded-2xl border shadow-md p-4 md:p-5 bg-gradient-to-br ${t.cardBg} ${achieved ? '' : 'opacity-80'} ${isCurrent ? 'ring-2 ring-purple-300' : ''} min-h-[92px]`}>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <span className={`inline-flex items-center justify-center w-12 h-12 rounded-xl bg-white/80 border border-white/60 ${t.iconText}`}>
-                            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                              <path d="M12 2l2.39 4.84 5.34.78-3.86 3.76.91 5.32L12 14.77 6.22 16.7l.91-5.32L3.27 7.62l5.34-.78L12 2z" />
-                            </svg>
-                          </span>
-                          <div>
-                            <div className={`text-base font-bold ${t.iconText}`}>{t.label}</div>
-                            <div className="text-xs text-gray-700">{t.min}+ registrations</div>
-                          </div>
-                        </div>
-                        {achieved && (
-                          <span className="inline-flex items-center gap-1.5 text-[11px] md:text-xs px-2.5 py-1.5 rounded-md bg-emerald-100 text-emerald-800 border border-emerald-200">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/></svg>
-                            Achieved
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </aside>
-
-          <section className="md:col-span-3">
-            <div className="mb-6 bg-white/90 backdrop-blur-sm border border-gray-200/60 rounded-2xl p-5 shadow-sm">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-base font-semibold text-gray-900">Achievements</h2>
-                  <p className="text-xs text-gray-700">
-                    You have <span className="font-semibold text-gray-900">{totalRegistrations}</span> registration{totalRegistrations === 1 ? '' : 's'}.
-                    {nextBadge ? (
-                      <> {' '}Only <span className="font-semibold text-gray-900">{remainingToNext}</span> more for <span className="font-semibold">{nextBadge.label}</span>!</>
-                    ) : (
-                      <> Keep going — you&apos;re at the top tier!</>
-                    )}
-                  </p>
-                </div>
-                {currentBadge && (
-                  <span className={`inline-flex items-center gap-2 text-xs border px-3 py-1.5 rounded-full ${currentBadge.classes}`} title={`Current badge: ${currentBadge.label}`}>
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                      <path d="M12 2l2.39 4.84 5.34.78-3.86 3.76.91 5.32L12 14.77 6.22 16.7l.91-5.32L3.27 7.62l5.34-.78L12 2z" />
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+            {/* Badge Journey Sidebar */}
+            <aside className="lg:col-span-2 space-y-6">
+              {/* Stats Card */}
+              <div className="bg-white/90 backdrop-blur-xl border border-[#E2E8F0]/50 rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105">
+                <div className="text-center mb-6">
+                  <div className="w-20 h-20 bg-gradient-to-br from-[#3B82F6] to-[#06B6D4] rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-2xl">
+                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    Current: {currentBadge.label}
-                  </span>
+                  </div>
+                  <h2 className="text-3xl font-black text-[#1E40AF] mb-2">{totalRegistrations}</h2>
+                  <p className="text-[#64748B] font-medium">Total Registrations</p>
+                </div>
+                
+                {currentBadge && (
+                  <div className="text-center mb-6">
+                    <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-2xl ${currentBadge.classes} border-2 shadow-lg`}>
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d={currentBadge.icon} />
+                      </svg>
+                      <span className="font-bold">Current: {currentBadge.label}</span>
+                    </div>
+                  </div>
+                )}
+                
+                {nextBadge && (
+                  <div className="text-center">
+                    <p className="text-[#64748B] text-sm mb-2">Next milestone</p>
+                    <div className="bg-gradient-to-r from-[#3B82F6]/10 to-[#06B6D4]/10 rounded-2xl p-4 border border-[#3B82F6]/20">
+                      <div className="flex items-center justify-center gap-3 mb-2">
+                        <svg className="w-6 h-6 text-[#3B82F6]" fill="currentColor" viewBox="0 0 24 24">
+                          <path d={nextBadge.icon} />
+                        </svg>
+                        <span className="font-bold text-[#1E40AF]">{nextBadge.label}</span>
+                      </div>
+                      <p className="text-[#64748B] text-sm">
+                        Only <span className="font-bold text-[#1E40AF]">{remainingToNext}</span> more registrations!
+                      </p>
+                    </div>
+                  </div>
                 )}
               </div>
-            </div>
 
-            {events.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-gray-200/60 p-10 text-center text-gray-900">No registrations yet.</div>
-        ) : (
-          <div className="bg-white rounded-2xl border border-gray-200/60 overflow-x-auto shadow-md">
-            <table className="min-w-full divide-y divide-gray-200 text-sm">
-              <thead className="bg-gray-50/80">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-[11px] font-semibold text-gray-600 uppercase tracking-wider">Title</th>
-                  <th scope="col" className="px-6 py-3 text-left text-[11px] font-semibold text-gray-600 uppercase tracking-wider">Date</th>
-                  <th scope="col" className="px-6 py-3 text-right text-[11px] font-semibold text-gray-600 uppercase tracking-wider">Action</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-100">
-                {events.map((e) => (
-                  <tr key={e.id} className="odd:bg-white even:bg-gray-50 hover:bg-indigo-50/50 transition-colors cursor-pointer" onClick={() => viewDetails(e.id)}>
-                    <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                      <div className="flex items-center gap-3">
-                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-md bg-indigo-50 text-indigo-600 border border-indigo-100">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
-                        </span>
-                        <span className="truncate max-w-[28ch]">{e.title || 'Untitled Event'}</span>
+              {/* Badge Journey */}
+              <div className="bg-white/90 backdrop-blur-xl border border-[#E2E8F0]/50 rounded-3xl p-6 shadow-xl">
+                <h3 className="text-xl font-bold text-[#1E40AF] mb-4 flex items-center gap-2">
+                  <svg className="w-6 h-6 text-[#3B82F6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                  </svg>
+                  Badge Journey
+                </h3>
+                <div className="space-y-3">
+                  {tiers.map((tier) => {
+                    const achieved = totalRegistrations >= tier.min;
+                    const isCurrent = currentBadge?.key === tier.key;
+                    return (
+                      <div 
+                        key={tier.key} 
+                        className={`relative p-4 rounded-2xl border-2 transition-all duration-300 ${
+                          achieved 
+                            ? 'bg-gradient-to-br from-emerald-50 to-green-100 border-emerald-200 shadow-lg' 
+                            : 'bg-gray-50/50 border-gray-200'
+                        } ${isCurrent ? 'ring-2 ring-[#3B82F6] ring-offset-2' : ''}`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                              achieved ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-200 text-gray-500'
+                            }`}>
+                              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d={tier.icon} />
+                              </svg>
+                            </div>
+                            <div>
+                              <div className={`font-bold ${achieved ? 'text-emerald-800' : 'text-gray-600'}`}>
+                                {tier.label}
+                              </div>
+                              <div className="text-xs text-gray-500">{tier.min}+ registrations</div>
+                            </div>
+                          </div>
+                          {achieved && (
+                            <div className="flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                              Achieved
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-700">
-                      <span className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-blue-200 bg-blue-50 text-blue-700">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                        {formatYmd(e.start_date || e.date)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <button onClick={(ev) => { ev.stopPropagation(); viewDetails(e.id); }} className="inline-flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-3 py-1.5 rounded-md text-xs font-medium hover:from-blue-700 hover:to-purple-700">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        View
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    );
+                  })}
+                </div>
+              </div>
+            </aside>
+
+            {/* Events Section */}
+            <section className="lg:col-span-3">
+              {/* Section Header */}
+              <div className="mb-8">
+                <h2 className="text-3xl font-black text-[#1E40AF] mb-2">Your Events</h2>
+                <p className="text-[#64748B] text-lg">
+                  {events.length === 0 
+                    ? "Start your journey by registering for events!" 
+                    : `You've registered for ${events.length} amazing event${events.length === 1 ? '' : 's'}!`
+                  }
+                </p>
+              </div>
+
+              {/* Events List */}
+              {events.length === 0 ? (
+                <div className="bg-white/90 backdrop-blur-xl border border-[#E2E8F0]/50 rounded-3xl p-16 text-center shadow-xl">
+                  <div className="w-24 h-24 bg-gradient-to-r from-[#3B82F6]/10 to-[#06B6D4]/10 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                    <svg className="w-12 h-12 text-[#3B82F6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-2xl font-bold text-[#1E40AF] mb-2">No Registrations Yet</h3>
+                  <p className="text-[#64748B] mb-6">Start building your event portfolio by registering for exciting events!</p>
+                  <button 
+                    onClick={() => router.push('/main/2')}
+                    className="px-8 py-3 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] text-white rounded-2xl font-semibold hover:from-[#1E40AF] hover:to-[#3B82F6] transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105"
+                  >
+                    Explore Events
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {events.map((event, index) => (
+                    <div 
+                      key={event.id} 
+                      className="group bg-white/90 backdrop-blur-xl border border-[#E2E8F0]/50 rounded-3xl p-6 shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105 cursor-pointer overflow-hidden relative"
+                      onClick={() => viewDetails(event.id)}
+                    >
+                      {/* Hover Effect Background */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-[#3B82F6]/5 to-[#06B6D4]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                      
+                      <div className="relative z-10 flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="w-16 h-16 bg-gradient-to-br from-[#3B82F6] to-[#06B6D4] rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300">
+                            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                          </div>
+                          <div>
+                            <h3 className="text-xl font-bold text-[#1E40AF] group-hover:text-[#3B82F6] transition-colors duration-300 mb-1">
+                              {event.title || 'Untitled Event'}
+                            </h3>
+                            <div className="flex items-center gap-3">
+                              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#EFF6FF] text-[#3B82F6] border border-[#3B82F6]/20 font-medium text-sm">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                {formatYmd(event.start_date || event.date)}
+                              </span>
+                              <span className="text-[#64748B] text-sm">Event #{index + 1}</span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <button 
+                          onClick={(ev) => { ev.stopPropagation(); viewDetails(event.id); }}
+                          className="group/btn relative px-6 py-3 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] text-white rounded-2xl font-semibold hover:from-[#1E40AF] hover:to-[#3B82F6] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 overflow-hidden"
+                        >
+                          <span className="relative z-10 flex items-center gap-2">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            View Details
+                          </span>
+                          <div className="absolute inset-0 bg-gradient-to-r from-[#06B6D4] to-[#3B82F6] opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></div>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
           </div>
-        )}
-          </section>
-        </div>
         )}
       </main>
     </div>

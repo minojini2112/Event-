@@ -337,7 +337,7 @@ function AdminMainPageContent() {
     return [
       {
         icon: (
-          <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-[#3B82F6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
           </svg>
         ),
@@ -346,7 +346,7 @@ function AdminMainPageContent() {
       },
       {
         icon: (
-          <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-[#3B82F6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
           </svg>
         ),
@@ -356,7 +356,7 @@ function AdminMainPageContent() {
       },
       {
         icon: (
-          <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-[#3B82F6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
           </svg>
         ),
@@ -366,8 +366,8 @@ function AdminMainPageContent() {
       },
       {
         icon: (
-          <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <svg className="w-5 h-5 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 0 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         ),
         label: 'Help & Support',
@@ -408,7 +408,7 @@ function AdminMainPageContent() {
           <div className="flex items-center relative" ref={profileRef}>
             <button 
               onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+              className="w-12 h-12 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] rounded-full flex items-center justify-center hover:from-[#1E40AF] hover:to-[#3B82F6] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
             >
               <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -417,11 +417,11 @@ function AdminMainPageContent() {
 
             {/* Profile Dropdown */}
             {isProfileOpen && (
-              <div className="absolute top-14 right-0 w-[22rem] bg-white/95 backdrop-blur rounded-xl shadow-xl ring-1 ring-gray-200 z:[99999] overflow-hidden">
+              <div className="absolute top-14 right-0 w-[22rem] bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-[#E2E8F0]/50 z-[99999] overflow-hidden">
                 {/* Header Section */}
-                <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-6">
+                <div className="bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] p-6">
                   <div className="flex items-center space-x-4">
-                    <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+                    <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center border border-white/30">
                       <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                       </svg>
@@ -443,26 +443,26 @@ function AdminMainPageContent() {
                         onClick={() => { setActiveMenu(option.route); handleProfileNavigation(option.route); }}
                         onMouseEnter={() => setActiveMenu((prev) => prev ?? option.route)}
                         onMouseLeave={() => setActiveMenu((prev) => (prev === option.route ? null : prev))}
-                        className={`group w-full text-left px-4 py-3 rounded-md transition-all duration-150 flex items-center space-x-3 border-l-4 ${
+                        className={`group w-full text-left px-4 py-3 rounded-lg transition-all duration-200 flex items-center space-x-3 border-l-4 ${
                           isActive
-                            ? 'bg-indigo-50 border-indigo-500'
-                            : 'border-transparent hover:bg-indigo-50 hover:border-indigo-400'
+                            ? 'bg-[#EFF6FF] border-[#3B82F6]'
+                            : 'border-transparent hover:bg-[#EFF6FF] hover:border-[#3B82F6]/50'
                         }`}
                         aria-current={isActive ? 'page' : undefined}
                       >
                         {option.icon}
-                        <span className={`font-medium ${isActive ? 'text-indigo-700' : option.highlight ? 'text-blue-700' : 'text-gray-700'} group-hover:text-indigo-700`}>
+                        <span className={`font-medium ${isActive ? 'text-[#1E40AF]' : option.highlight ? 'text-[#3B82F6]' : 'text-[#64748B]'} group-hover:text-[#1E40AF]`}>
                           {option.label}
                         </span>
                       </button>
                     );
                   })}
 
-                  <hr className="my-2 border-gray-200" />
+                  <hr className="my-2 border-[#E2E8F0]" />
 
                   <button 
                     onClick={() => handleProfileNavigation('/logout')}
-                    className="w-full text-left px-4 py-3 hover:bg-red-50 rounded-md transition-colors duration-150 flex items-center space-x-3 text-red-600"
+                    className="w-full text-left px-4 py-3 hover:bg-red-50 rounded-lg transition-all duration-200 flex items-center space-x-3 text-red-600 hover:bg-red-100"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />

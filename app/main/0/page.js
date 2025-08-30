@@ -658,7 +658,7 @@ function GlobalAdminMainPageContent() {
                className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105 border border-[#E2E8F0]/30 overflow-hidden relative z-10 hover:border-[#3B82F6]/50 group"
              >
               {/* Event Image */}
-              <div className="relative h-56 bg-gradient-to-br from-[#1E40AF] via-[#3B82F6] to-[#06B6D4] overflow-hidden">
+              <div className="relative h-52 bg-gradient-to-br from-[#1E40AF] via-[#3B82F6] to-[#06B6D4] overflow-hidden">
                 {event.image_url ? (
                   <img 
                     src={event.image_url} 
@@ -712,27 +712,28 @@ function GlobalAdminMainPageContent() {
               </div>
 
               {/* Event Details */}
-              <div className="p-6">
-                <div className="flex justify-between items-start mb-4">
+              <div className="p-4">
+                <div className="flex justify-between items-start mb-3 gap-4">
                   {/* Left side - Title and Date */}
-                  <div className="flex-1">
-                    <h3 className="font-bold text-[#1E40AF] text-xl mb-3 line-clamp-2 group-hover:text-[#3B82F6] transition-colors duration-300">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-[#1E40AF] text-lg mb-2 line-clamp-2 group-hover:text-[#3B82F6] transition-colors duration-300">
                       {event.event_name}
                     </h3>
-                    <div className="flex items-center text-[#64748B] mb-3">
-                      <div className="w-8 h-8 bg-[#3B82F6]/10 rounded-xl flex items-center justify-center mr-3">
-                        <svg className="w-4 h-4 text-[#3B82F6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    {/* Date on first line */}
+                    <div className="flex items-center text-[#64748B] mb-2">
+                      <div className="w-6 h-6 bg-[#3B82F6]/10 rounded-lg flex items-center justify-center mr-2">
+                        <svg className="w-3 h-3 text-[#3B82F6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                       </div>
                       <span className="text-sm font-medium">
                         {formatEventDate(event.start_date, 'long')}
                       </span>
                     </div>
-                    {/* Participant count for admin view */}
-                    <div className="flex items-center text-[#64748B] mb-3">
-                      <div className="w-8 h-8 bg-[#10B981]/10 rounded-xl flex items-center justify-center mr-3">
-                        <svg className="w-4 h-4 text-[#10B981]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    {/* Participants on second line */}
+                    <div className="flex items-center text-[#64748B] mb-2">
+                      <div className="w-6 h-6 bg-[#10B981]/10 rounded-lg flex items-center justify-center mr-2">
+                        <svg className="w-3 h-3 text-[#10B981]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
                       </div>
@@ -743,7 +744,7 @@ function GlobalAdminMainPageContent() {
                   {/* Right side - View More Button */}
                   <button
                     onClick={() => handleViewMore(event.event_id)}
-                    className="ml-4 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] text-white px-6 py-3 rounded-2xl text-sm font-semibold hover:from-[#1E40AF] hover:to-[#3B82F6] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 whitespace-nowrap relative overflow-hidden group/btn"
+                    className="ml-4 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] text-white px-6 py-3 rounded-xl text-sm font-semibold hover:from-[#1E40AF] hover:to-[#3B82F6] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 whitespace-nowrap relative overflow-hidden group/btn flex-shrink-0"
                   >
                     <span className="relative z-10">Manage</span>
                     <div className="absolute inset-0 bg-gradient-to-r from-[#06B6D4] to-[#3B82F6] opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></div>
@@ -751,13 +752,13 @@ function GlobalAdminMainPageContent() {
                 </div>
 
                 {/* Event Caption */}
-                <p className="text-[#334155] text-sm line-clamp-2 mb-4 leading-relaxed">
+                <p className="text-[#334155] text-sm line-clamp-2 mb-3 leading-relaxed">
                   {event.caption || 'No caption available'}
                 </p>
                 
                 {/* Event Status and Info */}
-                <div className="pt-4 border-t border-[#E2E8F0]/50">
-                  <div className="flex items-center justify-between mb-3">
+                <div className="pt-3 border-t border-[#E2E8F0]/50">
+                  <div className="flex items-center justify-between mb-2">
                     <span className="text-[#64748B] text-sm font-medium">
                       Ends: {formatEventDate(event.end_date)}
                     </span>
