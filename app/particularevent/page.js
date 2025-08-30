@@ -814,11 +814,11 @@ export default function ParticularEventPage() {
                         Already Registered
                       </div>
                     ) : (
-                      eventData.registration_link 
-                        ? 'Register Now (External)' 
-                        : 'Register Now (Contact Admin)'
-                    )}
-                  </button>
+                    eventData.registration_link 
+                      ? 'Register Now (External)' 
+                      : 'Register Now (Contact Admin)'
+                  )}
+                </button>
                 )}
                 
                 {/* Success message when already registered */}
@@ -849,24 +849,24 @@ export default function ParticularEventPage() {
                 )}
                 
                 {showParticipantCTAs && (
-                  <button 
-                    onClick={handleWishlist} 
-                    disabled={isWishlistLoading}
-                    className={`px-5 py-2.5 rounded-lg text-sm font-semibold border shadow-md transition-all duration-200 ${
-                      isWishlisted 
-                        ? 'bg-pink-100/30 border-white/40' 
-                        : 'bg-transparent border-white/40 hover:bg-white/10'
-                    } ${isWishlistLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  >
-                    {isWishlistLoading ? (
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                        {isWishlisted ? 'Removing...' : 'Adding...'}
-                      </div>
-                    ) : (
-                      isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'
-                    )}
-                  </button>
+                <button 
+                  onClick={handleWishlist} 
+                  disabled={isWishlistLoading}
+                  className={`px-5 py-2.5 rounded-lg text-sm font-semibold border shadow-md transition-all duration-200 ${
+                    isWishlisted 
+                      ? 'bg-pink-100/30 border-white/40' 
+                      : 'bg-transparent border-white/40 hover:bg-white/10'
+                  } ${isWishlistLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  {isWishlistLoading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      {isWishlisted ? 'Removing...' : 'Adding...'}
+                    </div>
+                  ) : (
+                    isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'
+                  )}
+                </button>
                 )}
 
                 {/* Edit button for event admins with access (only for upcoming/live) */}
@@ -1326,13 +1326,13 @@ export default function ParticularEventPage() {
                 />
               ) : (
                 pastEventDetails.event_details ? (
-                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                    <p className="text-gray-700">{pastEventDetails.event_details}</p>
-                  </div>
-                ) : (
-                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                    <p className="text-gray-500 text-sm italic">Not added</p>
-                  </div>
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <p className="text-gray-700">{pastEventDetails.event_details}</p>
+                </div>
+              ) : (
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <p className="text-gray-500 text-sm italic">Not added</p>
+                </div>
                 )
               )}
             </div>
@@ -1369,32 +1369,32 @@ export default function ParticularEventPage() {
                 )
               ) : (
                 pastEventDetails.winners && pastEventDetails.winners.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {pastEventDetails.winners.map((winner, index) => {
-                      const displayText = typeof winner === 'object' && winner !== null
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {pastEventDetails.winners.map((winner, index) => {
+                    const displayText = typeof winner === 'object' && winner !== null
                         ? (winner.username || winner.name || winner.phone || JSON.stringify(winner))
-                        : String(winner);
-                      return (
-                        <div key={index} className="bg-gradient-to-r from-yellow-50 to-orange-100 rounded-lg p-4 border border-yellow-200">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
-                              <span className="text-white font-bold text-sm">{index + 1}</span>
-                            </div>
-                            <div>
-                              <p className="font-semibold text-yellow-900">{displayText}</p>
-                              <p className="text-yellow-700 text-sm">
-                                {index === 0 ? '1st Place' : index === 1 ? '2nd Place' : index === 2 ? '3rd Place' : `${index + 1}th Place`}
-                              </p>
-                            </div>
+                      : String(winner);
+                    return (
+                      <div key={index} className="bg-gradient-to-r from-yellow-50 to-orange-100 rounded-lg p-4 border border-yellow-200">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
+                            <span className="text-white font-bold text-sm">{index + 1}</span>
+                          </div>
+                          <div>
+                            <p className="font-semibold text-yellow-900">{displayText}</p>
+                            <p className="text-yellow-700 text-sm">
+                              {index === 0 ? '1st Place' : index === 1 ? '2nd Place' : index === 2 ? '3rd Place' : `${index + 1}th Place`}
+                            </p>
                           </div>
                         </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                    <p className="text-gray-500 text-sm italic">Not added</p>
-                  </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <p className="text-gray-500 text-sm italic">Not added</p>
+                </div>
                 )
               )}
             </div>

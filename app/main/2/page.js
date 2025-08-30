@@ -353,15 +353,31 @@ function ParticipantMainPageContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-[#F8FAFC] via-white to-[#EFF6FF] relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 pointer-events-none">
+        {/* Floating Orbs */}
+        <div className="absolute top-20 left-20 w-72 h-72 bg-gradient-to-r from-[#3B82F6]/10 to-[#06B6D4]/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-20 w-96 h-96 bg-gradient-to-r from-[#06B6D4]/10 to-[#3B82F6]/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 right-1/4 w-64 h-64 bg-gradient-to-r from-[#3B82F6]/5 to-[#1E40AF]/5 rounded-full blur-3xl animate-pulse delay-500"></div>
+        
+        {/* Grid Pattern */}
+        <div className="absolute inset-0 opacity-30">
+          <div className="w-full h-full" style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23E2E8F0' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            backgroundSize: '60px 60px'
+          }}></div>
+        </div>
+      </div>
+
       {/* Header */}
-      <header className="w-full px-6 py-6 bg-white/80 backdrop-blur-sm border-b border-gray-200/50 shadow-sm relative z-[10000]">
+      <header className="w-full px-8 py-6 bg-white/80 backdrop-blur-xl border-b border-[#E2E8F0]/50 shadow-lg relative z-50">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <h1 className="text-4xl font-bold text-[#1E40AF]">
               Discover Events
             </h1>
-            <p className="text-gray-600 mt-2">Find and join amazing events happening around you</p>
+            <p className="text-[#64748B] mt-2">Find and join amazing events happening around you</p>
           </div>
           
           {/* Profile Circle */}
@@ -761,7 +777,7 @@ function ParticipantMainPageContent() {
             return (
              <div
                key={event.event_id}
-               className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] border border-gray-200/50 overflow-hidden relative z-10"
+               className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105 border border-[#E2E8F0]/30 overflow-hidden relative z-10 group"
              >
               {/* Event Image */}
               <div className="relative h-48 bg-gradient-to-br from-blue-100 to-purple-100 overflow-hidden">
@@ -816,18 +832,20 @@ function ParticipantMainPageContent() {
               </div>
 
               {/* Event Details */}
-              <div className="p-4">
-                <div className="flex justify-between items-start">
+              <div className="p-6">
+                <div className="flex justify-between items-start mb-4">
                   {/* Left side - Title and Date */}
                   <div className="flex-1">
-                    <h3 className="font-bold text-gray-900 text-lg mb-2 line-clamp-2">
+                    <h3 className="font-bold text-[#1E40AF] text-xl mb-3 line-clamp-2 group-hover:text-[#3B82F6] transition-colors duration-300">
                       {event.event_name}
                     </h3>
-                    <div className="flex items-center text-gray-900 mb-3">
-                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                      <span className="text-sm">
+                    <div className="flex items-center text-[#64748B] mb-3">
+                      <div className="w-8 h-8 bg-[#3B82F6]/10 rounded-xl flex items-center justify-center mr-3">
+                        <svg className="w-4 h-4 text-[#3B82F6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                      <span className="text-sm font-medium">
                         {formatEventDate(event.start_date, 'long')}
                       </span>
                     </div>
@@ -836,36 +854,37 @@ function ParticipantMainPageContent() {
                   {/* Right side - Action Button */}
                   <button
                     onClick={() => handleViewMore(event.event_id)}
-                    className="ml-4 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 whitespace-nowrap bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white"
+                    className="ml-4 px-6 py-3 rounded-2xl text-sm font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 whitespace-nowrap bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] hover:from-[#1E40AF] hover:to-[#3B82F6] text-white relative overflow-hidden group/btn"
                   >
-                    View More
+                    <span className="relative z-10">View More</span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#06B6D4] to-[#3B82F6] opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></div>
                   </button>
                 </div>
 
                 {/* Event Caption */}
-                <p className="text-gray-900 text-sm line-clamp-2 mt-2">
+                <p className="text-[#334155] text-sm line-clamp-2 mb-4 leading-relaxed">
                   {event.caption || 'No caption available'}
                 </p>
                 
                 {/* Event Status and Info */}
-                <div className="mt-3 pt-3 border-t border-gray-100">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-gray-600">
+                <div className="pt-4 border-t border-[#E2E8F0]/50">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[#64748B] text-sm font-medium">
                       Ends: {formatEventDate(event.end_date)}
                     </span>
-                    <span className={`text-xs font-medium px-2 py-1 rounded-full ${eventStatus.bgColor} ${eventStatus.textColor} ${eventStatus.borderColor} border`}>
+                    <span className={`text-xs font-semibold px-3 py-2 rounded-2xl ${eventStatus.bgColor} ${eventStatus.textColor} ${eventStatus.borderColor} border backdrop-blur-sm`}>
                       {eventStatus.label}
                     </span>
                   </div>
                   
                   {/* Event-specific info */}
-                  <div className="mt-2 flex items-center justify-between text-xs">
+                  <div className="flex items-center justify-between text-xs">
                     {eventStatus.status === 'upcoming' && (
                       <>
-                        <span className="text-gray-600">
-                          Available slots: {availableSlots.available}
+                        <span className="text-[#64748B] font-medium">
+                          Available slots: <span className="text-[#10B981] font-bold">{availableSlots.available}</span>
                         </span>
-                        <span className="text-green-600 font-medium">
+                        <span className="text-[#10B981] font-bold">
                           Registration Open
                         </span>
                       </>
@@ -873,10 +892,10 @@ function ParticipantMainPageContent() {
                     
                     {eventStatus.status === 'live' && (
                       <>
-                        <span className="text-gray-600">
+                        <span className="text-[#64748B] font-medium">
                           Event in progress
                         </span>
-                        <span className="text-green-600 font-medium">
+                        <span className="text-[#10B981] font-bold">
                           {event.registered_no || 0} participants
                         </span>
                       </>
@@ -884,10 +903,10 @@ function ParticipantMainPageContent() {
                     
                     {eventStatus.status === 'ended' && (
                       <>
-                        <span className="text-gray-600">
+                        <span className="text-[#64748B] font-medium">
                           Event completed
                         </span>
-                        <span className="text-gray-600 font-medium">
+                        <span className="text-[#64748B] font-bold">
                           {event.registered_no || 0} total participants
                         </span>
                       </>
@@ -902,16 +921,16 @@ function ParticipantMainPageContent() {
 
         {/* Load More Section */}
         <div className="text-center mt-12">
-          <button className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-3 rounded-xl font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02]">
+          <button className="bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] text-white px-8 py-3 rounded-2xl font-semibold hover:from-[#1E40AF] hover:to-[#3B82F6] transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105">
             Load More Events
           </button>
         </div>
       </main>
 
       {/* Background Decorations */}
-      <div className="absolute top-10 left-10 w-20 h-20 bg-blue-200 rounded-full opacity-20 animate-pulse"></div>
-      <div className="absolute bottom-10 right-10 w-16 h-16 bg-purple-200 rounded-full opacity-20 animate-pulse"></div>
-      <div className="absolute top-1/2 right-5 w-12 h-12 bg-pink-200 rounded-full opacity-20 animate-pulse"></div>
+      <div className="absolute top-10 left-10 w-20 h-20 bg-[#3B82F6]/20 rounded-full opacity-30 animate-pulse"></div>
+      <div className="absolute bottom-10 right-10 w-16 h-16 bg-[#06B6D4]/20 rounded-full opacity-30 animate-pulse"></div>
+      <div className="absolute top-1/2 right-5 w-12 h-12 bg-[#1E40AF]/20 rounded-full opacity-30 animate-pulse"></div>
     </div>
   );
 }
