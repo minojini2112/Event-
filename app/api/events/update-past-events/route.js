@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-export async function POST(request) {
+export async function POST() {
   try {
     // Create Supabase client
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -120,7 +120,7 @@ export async function POST(request) {
 }
 
 // Also provide a GET method to check current status
-export async function GET(request) {
+export async function GET() {
   try {
     // Create Supabase client
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;

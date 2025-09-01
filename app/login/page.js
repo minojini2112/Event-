@@ -66,7 +66,7 @@ export default function LoginPage() {
           router.push('/main/2');
         }
       }
-    } catch (error) {
+    } catch (err) {
       setError('An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);

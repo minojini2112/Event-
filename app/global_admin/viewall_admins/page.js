@@ -321,7 +321,7 @@ function AdminsTable() {
                     </td>
                   </tr>
                 )}
-                {!loading && !error && groupedByAdmin.map(([adminName, items], groupIndex) => (
+                {!loading && !error && groupedByAdmin.map(([adminName, items]) => (
                   items.map((r, idx) => (
                     <tr key={r.id} className="group hover:bg-[#F8FAFC] transition-all duration-200">
                       {idx === 0 && (

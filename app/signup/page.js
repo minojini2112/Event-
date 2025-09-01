@@ -78,11 +78,11 @@ export default function SignupPage() {
             // For participants, redirect to profile page to complete their profile
             router.push('/participant/profile');
           }
-        } catch (insertError) {
+        } catch (err) {
           setError('Account created but failed to save additional details. Please contact support.');
         }
       }
-    } catch (error) {
+    } catch (err) {
       setError('An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);

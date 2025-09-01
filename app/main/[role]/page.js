@@ -116,7 +116,7 @@ export default function MainPage() {
     } catch (e) {
       console.error('Failed to load posted events:', e);
     }
-  }, []);
+  }, [initialSampleEvents]);
 
   // Filters state (compact controls: month, day of week, exact date)
   const [filterMonth, setFilterMonth] = useState(''); // '' = All

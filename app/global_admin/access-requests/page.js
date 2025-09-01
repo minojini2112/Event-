@@ -20,7 +20,7 @@ function AccessRequestsContent() {
 
   useEffect(() => {
     fetchRequests();
-  }, [filterStatus]);
+  }, [filterStatus, fetchRequests]);
 
   const fetchRequests = async () => {
     try {

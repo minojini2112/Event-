@@ -160,7 +160,7 @@ export default function ParticipantWishlistPage() {
             </div>
             <div>
               <h1 className="text-4xl font-black text-[#1E40AF]">My Wishlist</h1>
-              <p className="text-[#64748B] mt-1 font-medium">Events you're passionate about</p>
+              <p className="text-[#64748B] mt-1 font-medium">Events you&apos;re passionate about</p>
             </div>
           </div>
           
@@ -323,7 +323,7 @@ export default function ParticipantWishlistPage() {
                 <h2 className="text-3xl font-black text-[#1E40AF] mb-2">Your Wishlist</h2>
                 <p className="text-[#64748B] text-lg">
                   {events.length === 0 
-                    ? "Start building your wishlist by saving events you're interested in!" 
+                    ? "Start building your wishlist by saving events you&apos;re interested in!" 
                     : `You have ${events.length} amazing event${events.length === 1 ? '' : 's'} in your wishlist!`
                   }
                 </p>
@@ -338,7 +338,7 @@ export default function ParticipantWishlistPage() {
                     </svg>
                   </div>
                   <h3 className="text-2xl font-bold text-[#1E40AF] mb-2">No Wishlist Yet</h3>
-                  <p className="text-[#64748B] mb-6">Start saving events you're interested in to build your personal collection!</p>
+                  <p className="text-[#64748B] mb-6">Start saving events you&apos;re interested in to build your personal collection!</p>
                   <button 
                     onClick={() => router.push('/main/2')}
                     className="px-8 py-3 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] text-white rounded-2xl font-semibold hover:from-[#1E40AF] hover:to-[#3B82F6] transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105"

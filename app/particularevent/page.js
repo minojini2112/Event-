@@ -112,23 +112,13 @@ export default function ParticularEventPage() {
 
   // Past event details state
   const [pastEventDetails, setPastEventDetails] = useState({});
-  const [isPastEvent, setIsPastEvent] = useState(false);
   const [pastEventLoading, setPastEventLoading] = useState(false);
   const [showPastEventEditor, setShowPastEventEditor] = useState(false);
   const [pastPhotoFiles, setPastPhotoFiles] = useState([]);
   const [uploadingPastImages, setUploadingPastImages] = useState(false);
-  const [pastWinnersInput, setPastWinnersInput] = useState('');
   const [pastEventSummary, setPastEventSummary] = useState('');
   const [registeredUsers, setRegisteredUsers] = useState([]);
   const [selectedWinners, setSelectedWinners] = useState([]);
-  const isPastDetailsMissing = useMemo(() => {
-    if (eventStatus?.status !== 'ended') return false;
-    if (!pastEventDetails) return true;
-    const photosEmpty = !Array.isArray(pastEventDetails.photos) || pastEventDetails.photos.length === 0;
-    const winnersEmpty = !Array.isArray(pastEventDetails.winners) || pastEventDetails.winners.length === 0;
-    const detailsEmpty = !pastEventDetails.event_details;
-    return photosEmpty || winnersEmpty || detailsEmpty;
-  }, [eventStatus, pastEventDetails]);
 
   // Load registered users for winner selection when admin opens editor
   useEffect(() => {
@@ -254,8 +244,8 @@ export default function ParticularEventPage() {
         })
       );
       return uploadedUrls;
-    } catch (e) {
-      console.error('Image upload failed:', e);
+    } catch (err) {
+      console.error('Image upload failed:', err);
       showToast('Image upload failed');
       return [];
     } finally {
@@ -293,7 +283,7 @@ export default function ParticularEventPage() {
         const err = await res.json();
         showToast(err.error || 'Failed to save details');
       }
-    } catch (e) {
+    } catch (err) {
       showToast('Failed to save details');
     }
   };
@@ -403,17 +393,6 @@ export default function ParticularEventPage() {
       setIsWishlisted(Array.isArray(wish) && wish.includes(idParam));
     } catch {}
   }, [idParam]);
-
-  // Function to validate image URL
-  const isValidImageUrl = (url) => {
-    if (!url || typeof url !== 'string') return false;
-    try {
-      const urlObj = new URL(url);
-      return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
-    } catch {
-      return false;
-    }
-  };
 
   // Check if user is already registered for this event from database and wishlist status
   useEffect(() => {
@@ -568,7 +547,6 @@ export default function ParticularEventPage() {
       });
 
       if (response.ok) {
-        const data = await response.json();
         setIsRegistered(true);
         showToast('Registration confirmed successfully!');
         setShowRegistrationModal(false);
@@ -1075,13 +1053,11 @@ export default function ParticularEventPage() {
                       alt="Test Image" 
                       className="w-full h-full object-cover"
                       style={{ display: 'block', visibility: 'visible', opacity: '1', backgroundColor: 'blue' }}
-                      onLoad={(e) => {
+                      onLoad={() => {
                         console.log('Test SVG loaded successfully');
-                        console.log('Image dimensions:', e.target.naturalWidth, 'x', e.target.naturalHeight);
                       }}
-                      onError={(e) => {
+                      onError={() => {
                         console.log('Test SVG failed to load');
-                        console.log('Error details:', e.target.error);
                       }}
                     />
                   )}
@@ -1366,7 +1342,7 @@ export default function ParticularEventPage() {
                         } else {
                         return <div className="text-base font-bold text-[#065F46]">{String(staff)}</div>;
                         }
-                      } catch (e) {
+                      } catch (err) {
                       return <div className="text-base font-bold text-[#065F46]">{String(eventData.staff_incharge)}</div>;
                       }
                     })() : (
@@ -1783,7 +1759,7 @@ export default function ParticularEventPage() {
       {/* Team Registration Modal */}
       {showTeamRegistrationModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75" onClick={() => setShowTeamRegistrationModal(false)}>
-          <div className="bg-white rounded-lg p-6 shadow-xl max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white rounded-lg p-6 shadow-xl max-w-md w-full mx-4" onClick={(ev) => ev.stopPropagation()}>
             <div className="text-center mb-4">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
                 <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1809,7 +1785,7 @@ export default function ParticularEventPage() {
                   type="text"
                   id="teamName"
                   value={teamName}
-                  onChange={(e) => setTeamName(e.target.value)}
+                  onChange={(ev) => setTeamName(ev.target.value)}
                   placeholder="Enter your team name"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   required
@@ -1843,7 +1819,7 @@ export default function ParticularEventPage() {
       {/* Registration Confirmation Modal */}
       {showRegistrationModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75" onClick={() => setShowRegistrationModal(false)}>
-          <div className="bg-white rounded-lg p-6 shadow-xl max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white rounded-lg p-6 shadow-xl max-w-md w-full mx-4" onClick={(ev) => ev.stopPropagation()}>
             <div className="text-center mb-4">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
                 <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

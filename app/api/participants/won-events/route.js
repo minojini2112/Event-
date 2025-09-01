@@ -233,7 +233,6 @@ export async function GET(request) {
       );
 
       if (userRegistration) {
-        const registrationId = userRegistration.registration_id;
         const registrationType = userRegistration.registrations?.registration_type;
 
         if (registrationType === 'team') {

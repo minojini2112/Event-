@@ -69,7 +69,7 @@ export default function AdminRegistrationsForEvent() {
               </svg>
             </div>
             <h3 className="text-2xl font-semibold text-slate-800 mb-3">No registrations yet</h3>
-            <p className="text-slate-600 text-lg">Students haven't registered for this event yet</p>
+            <p className="text-slate-600 text-lg">Students haven&apos;t registered for this event yet</p>
           </div>
         ) : (
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
