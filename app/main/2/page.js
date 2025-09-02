@@ -371,40 +371,40 @@ function ParticipantMainPageContent() {
       </div>
 
       {/* Header */}
-      <header className="w-full px-8 py-6 bg-white/80 backdrop-blur-xl border-b border-[#E2E8F0]/50 shadow-lg relative z-50">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
+      <header className="w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-6 bg-white/80 backdrop-blur-xl border-b border-[#E2E8F0]/50 shadow-lg relative z-50">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
           <div>
-            <h1 className="text-4xl font-bold text-[#1E40AF]">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1E40AF]">
               Discover Events
             </h1>
-            <p className="text-[#64748B] mt-2">Find and join amazing events happening around you</p>
+            <p className="text-sm sm:text-base text-[#64748B] mt-1 sm:mt-2">Find and join amazing events happening around you</p>
           </div>
           
           {/* Profile Circle */}
           <div className="flex items-center relative" ref={profileRef}>
             <button 
               onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="w-14 h-14 bg-gradient-to-br from-[#3B82F6] to-[#06B6D4] rounded-2xl flex items-center justify-center hover:from-[#1E40AF] hover:to-[#3B82F6] transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105"
+              className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-[#3B82F6] to-[#06B6D4] rounded-2xl flex items-center justify-center hover:from-[#1E40AF] hover:to-[#3B82F6] transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105"
             >
-              <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 sm:w-7 sm:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
             </button>
 
             {/* Profile Dropdown */}
             {isProfileOpen && (
-              <div className="absolute top-16 right-0 w-[22rem] bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-[#E2E8F0]/50 z-50 overflow-hidden">
+              <div className="absolute top-14 sm:top-16 right-0 w-[20rem] sm:w-[22rem] bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-[#E2E8F0]/50 z-50 overflow-hidden">
                 {/* Header Section */}
-                <div className="bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] p-6">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center">
-                      <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] p-4 sm:p-6">
+                  <div className="flex items-center space-x-3 sm:space-x-4">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white/20 rounded-2xl flex items-center justify-center">
+                      <svg className="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                       </svg>
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-white font-semibold text-lg">{userData.username}</h3>
-                      <p className="text-white/80 text-sm">{userData.email}</p>
+                      <h3 className="text-white font-semibold text-base sm:text-lg">{userData.username}</h3>
+                      <p className="text-white/80 text-xs sm:text-sm">{userData.email}</p>
                     </div>
                   </div>
                 </div>
@@ -552,13 +552,13 @@ function ParticipantMainPageContent() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-6 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Compact Filters */}
-        <section className="mb-6 bg-white/90 backdrop-blur-sm border border-gray-200/60 rounded-xl p-5 shadow-sm">
+        <section className="mb-4 sm:mb-6 bg-white/90 backdrop-blur-sm border border-gray-200/60 rounded-xl p-4 sm:p-5 shadow-sm">
           {/* Header Row */}
-          <div className="flex items-center justify-between gap-3 mb-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
             <div>
-              <h2 className="text-base font-semibold text-gray-900">Filters</h2>
+              <h2 className="text-sm sm:text-base font-semibold text-gray-900">Filters</h2>
               <p className="text-xs text-gray-700">Refine events by title, month, day, or exact date.</p>
             </div>
             <div className="flex items-center gap-3">
@@ -566,7 +566,7 @@ function ParticipantMainPageContent() {
               {(filterTitle || filterMonth || filterDay || filterDate) && (
                 <button
                   onClick={clearFilters}
-                  className="text-sm text-blue-700 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-2 rounded-lg"
+                  className="text-xs sm:text-sm text-blue-700 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-2 rounded-lg"
                 >
                   Clear all
                 </button>
@@ -748,7 +748,7 @@ function ParticipantMainPageContent() {
         </section>
 
         {/* Events Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
           {loading && (
             <div className="col-span-full text-center text-gray-900 bg-white rounded-xl border border-gray-200/60 py-10">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
@@ -780,7 +780,7 @@ function ParticipantMainPageContent() {
                className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105 border border-[#E2E8F0]/30 overflow-hidden relative z-10 group"
              >
               {/* Event Image */}
-              <div className="relative h-40 bg-gradient-to-br from-blue-100 to-purple-100 overflow-hidden">
+              <div className="relative h-36 sm:h-40 lg:h-44 bg-gradient-to-br from-blue-100 to-purple-100 overflow-hidden">
                 {event.image_url ? (
                   <img 
                     src={event.image_url} 
@@ -799,14 +799,14 @@ function ParticipantMainPageContent() {
                 
                 {/* Fallback placeholder - always present but hidden when image loads */}
                 <div className={`absolute inset-0 flex items-center justify-center ${event.image_url ? 'hidden' : 'flex'}`}>
-                  <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                    <svg className="w-7 h-7 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                   </div>
                 </div>
                 {/* Event Status Badge */}
-                <div className={`absolute top-2 left-2 ${eventStatus.bgColor} ${eventStatus.textColor} ${eventStatus.borderColor} text-xs px-3 py-1.5 rounded-full font-medium border flex items-center gap-1`}>
+                <div className={`absolute top-2 left-2 ${eventStatus.bgColor} ${eventStatus.textColor} ${eventStatus.borderColor} text-xs px-2 sm:px-3 py-1 sm:py-1.5 rounded-full font-medium border flex items-center gap-1`}>
                   {eventStatus.status === 'live' && (
                     <svg className="w-3 h-3 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M8 5v14l11-7z"/>
@@ -826,26 +826,26 @@ function ParticipantMainPageContent() {
                 </div>
                 
                 {/* Available slots info */}
-                <div className="absolute bottom-2 right-2 bg-black/20 text-white text-xs px-2 py-1 rounded">
+                <div className="absolute bottom-2 right-2 bg-black/20 text-white text-xs px-2 sm:px-3 py-1 sm:py-1.5 rounded">
                   {event.registered_no || 0}/{event.total_participants_allowed || '∞'} spots
                 </div>
               </div>
 
               {/* Event Details */}
-              <div className="p-4">
-                <div className="flex justify-between items-start mb-2">
+              <div className="p-3 sm:p-4">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2">
                   {/* Left side - Title and Date */}
                   <div className="flex-1">
-                    <h3 className="font-bold text-[#1E40AF] text-lg mb-2 line-clamp-2 group-hover:text-[#3B82F6] transition-colors duration-300">
+                    <h3 className="font-bold text-[#1E40AF] text-base sm:text-lg mb-2 line-clamp-2 group-hover:text-[#3B82F6] transition-colors duration-300">
                       {event.event_name}
                     </h3>
                     <div className="flex items-center text-[#64748B] mb-2">
-                      <div className="w-6 h-6 bg-[#3B82F6]/10 rounded-lg flex items-center justify-center mr-2">
-                        <svg className="w-3 h-3 text-[#3B82F6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div className="w-5 h-5 sm:w-6 sm:h-6 bg-[#3B82F6]/10 rounded-lg flex items-center justify-center mr-2">
+                        <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#3B82F6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                       </div>
-                      <span className="text-xs font-medium">
+                      <span className="text-xs sm:text-sm font-medium">
                         {formatEventDate(event.start_date, 'long')}
                       </span>
                     </div>
@@ -854,7 +854,7 @@ function ParticipantMainPageContent() {
                   {/* Right side - Action Button */}
                   <button
                     onClick={() => handleViewMore(event.event_id)}
-                    className="ml-3 px-4 py-2 rounded-xl text-xs font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 whitespace-nowrap bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] hover:from-[#1E40AF] hover:to-[#3B82F6] text-white relative overflow-hidden group/btn"
+                    className="w-full sm:w-auto ml-0 sm:ml-3 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 whitespace-nowrap bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] hover:from-[#1E40AF] hover:to-[#3B82F6] text-white relative overflow-hidden group/btn"
                   >
                     <span className="relative z-10">View More</span>
                     <div className="absolute inset-0 bg-gradient-to-r from-[#06B6D4] to-[#3B82F6] opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></div>
@@ -862,23 +862,23 @@ function ParticipantMainPageContent() {
                 </div>
 
                 {/* Event Caption */}
-                <p className="text-[#334155] text-sm line-clamp-2 mb-2 leading-relaxed">
+                <p className="text-[#334155] text-xs sm:text-sm line-clamp-2 mb-2 leading-relaxed">
                   {event.caption || 'No caption available'}
                 </p>
                 
                 {/* Event Status and Info */}
                 <div className="pt-2 border-t border-[#E2E8F0]/50">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[#64748B] text-xs font-medium">
+                    <span className="text-[#64748B] text-xs sm:text-sm font-medium">
                       Ends: {formatEventDate(event.end_date)}
                     </span>
-                    <span className={`text-xs font-semibold px-2 py-1 rounded-xl ${eventStatus.bgColor} ${eventStatus.textColor} ${eventStatus.borderColor} border backdrop-blur-sm`}>
+                    <span className={`text-xs sm:text-sm font-semibold px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl ${eventStatus.bgColor} ${eventStatus.textColor} ${eventStatus.borderColor} border backdrop-blur-sm`}>
                       {eventStatus.label}
                     </span>
                   </div>
                   
                   {/* Event-specific info */}
-                  <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center justify-between text-xs sm:text-sm">
                     {eventStatus.status === 'upcoming' && (
                       <>
                         <span className="text-[#64748B] font-medium">
@@ -920,8 +920,8 @@ function ParticipantMainPageContent() {
         </div>
 
         {/* Load More Section */}
-        <div className="text-center mt-12">
-          <button className="bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] text-white px-8 py-3 rounded-2xl font-semibold hover:from-[#1E40AF] hover:to-[#3B82F6] transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105">
+        <div className="text-center mt-8 sm:mt-12">
+          <button className="w-full sm:w-auto bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-2xl font-semibold hover:from-[#1E40AF] hover:to-[#3B82F6] transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105 text-sm sm:text-base">
             Load More Events
           </button>
         </div>

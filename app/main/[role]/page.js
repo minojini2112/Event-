@@ -337,47 +337,47 @@ export default function MainPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Header */}
-      <header className="w-full px-6 py-6 bg-white/80 backdrop-blur-sm border-b border-gray-200/50 shadow-sm relative z-[10000]">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+      <header className="w-full px-4 sm:px-6 py-4 sm:py-6 bg-white/80 backdrop-blur-sm border-b border-gray-200/50 shadow-sm relative z-[10000]">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:justify-between sm:items-center">
+          <div className="mb-4 sm:mb-0">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Discover Events
             </h1>
-            <p className="text-gray-600 mt-2">Find and join amazing events happening around you</p>
+            <p className="text-sm sm:text-base text-gray-600 mt-2">Find and join amazing events happening around you</p>
           </div>
           
           {/* Profile Circle */}
           <div className="flex items-center relative" ref={profileRef}>
             <button 
               onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+              className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
             >
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
             </button>
 
             {/* Profile Dropdown */}
             {isProfileOpen && (
-              <div className="absolute top-14 right-0 w-[22rem] bg-white/95 backdrop-blur rounded-xl shadow-xl ring-1 ring-gray-200 z:[99999] overflow-hidden">
+              <div className="absolute top-12 sm:top-14 right-0 w-[20rem] sm:w-[22rem] bg-white/95 backdrop-blur rounded-xl shadow-xl ring-1 ring-gray-200 z:[99999] overflow-hidden">
                 {/* Header Section */}
-                <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-6">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
-                      <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-4 sm:p-6">
+                  <div className="flex items-center space-x-3 sm:space-x-4">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white/20 rounded-full flex items-center justify-center">
+                      <svg className="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                       </svg>
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-white font-semibold text-lg">{userData.username}</h3>
-                      <p className="text-white/80 text-sm">{userData.email}</p>
+                      <h3 className="text-white font-semibold text-base sm:text-lg">{userData.username}</h3>
+                      <p className="text-white/80 text-xs sm:text-sm">{userData.email}</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Participant Badges Summary */}
                 {userData.userType === 'participant' && (
-                  <div className="px-4 py-3 border-b border-gray-200 bg-white/80">
+                  <div className="px-3 sm:px-4 py-2 sm:py-3 border-b border-gray-200 bg-white/80">
                     <div className="text-xs font-semibold text-gray-700 mb-2">Badges</div>
                     <div className="space-y-2">
                       {/* Registered */}
@@ -450,7 +450,7 @@ export default function MainPage() {
                         onClick={() => { setActiveMenu(option.route); handleProfileNavigation(option.route); }}
                         onMouseEnter={() => setActiveMenu((prev) => prev ?? option.route)}
                         onMouseLeave={() => setActiveMenu((prev) => (prev === option.route ? null : prev))}
-                        className={`group w-full text-left px-4 py-3 rounded-md transition-all duration-150 flex items-center space-x-3 border-l-4 ${
+                        className={`group w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 rounded-md transition-all duration-150 flex items-center space-x-2 sm:space-x-3 border-l-4 ${
                           isActive
                             ? 'bg-indigo-50 border-indigo-500'
                             : 'border-transparent hover:bg-indigo-50 hover:border-indigo-400'
@@ -458,7 +458,7 @@ export default function MainPage() {
                         aria-current={isActive ? 'page' : undefined}
                       >
                         {option.icon}
-                        <span className={`font-medium ${isActive ? 'text-indigo-700' : option.highlight ? 'text-blue-700' : 'text-gray-700'} group-hover:text-indigo-700`}>
+                        <span className={`text-xs sm:text-sm font-medium ${isActive ? 'text-indigo-700' : option.highlight ? 'text-blue-700' : 'text-gray-700'} group-hover:text-indigo-700`}>
                           {option.label}
                         </span>
                       </button>
@@ -469,12 +469,12 @@ export default function MainPage() {
 
                   <button 
                     onClick={() => handleProfileNavigation('/logout')}
-                    className="w-full text-left px-4 py-3 hover:bg-red-50 rounded-md transition-colors duration-150 flex items-center space-x-3 text-red-600"
+                    className="w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 hover:bg-red-50 rounded-md transition-colors duration-150 flex items-center space-x-2 sm:space-x-3 text-red-600"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                     </svg>
-                    <span>Sign Out</span>
+                    <span className="text-xs sm:text-sm">Sign Out</span>
                   </button>
                 </div>
               </div>
@@ -484,13 +484,13 @@ export default function MainPage() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-6 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Compact Filters */}
-        <section className="mb-6 bg-white/90 backdrop-blur-sm border border-gray-200/60 rounded-xl p-5 shadow-sm">
+        <section className="mb-6 bg-white/90 backdrop-blur-sm border border-gray-200/60 rounded-xl p-4 sm:p-5 shadow-sm">
           {/* Header Row */}
-          <div className="flex items-center justify-between gap-3 mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
             <div>
-              <h2 className="text-base font-semibold text-gray-900">Filters</h2>
+              <h2 className="text-sm sm:text-base font-semibold text-gray-900">Filters</h2>
               <p className="text-xs text-gray-700">Refine events by title, month, day, or exact date.</p>
             </div>
             <div className="flex items-center gap-3">
@@ -498,7 +498,7 @@ export default function MainPage() {
               {(filterTitle || filterMonth || filterDay || filterDate) && (
                 <button
                   onClick={clearFilters}
-                  className="text-sm text-blue-700 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-2 rounded-lg"
+                  className="text-xs sm:text-sm text-blue-700 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-2 rounded-lg"
                 >
                   Clear all
                 </button>
@@ -507,7 +507,7 @@ export default function MainPage() {
           </div>
 
           {/* Controls Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {/* Title */}
             <div className="flex flex-col">
               <label htmlFor="title" className="text-xs font-medium text-gray-900 mb-1">Title</label>
@@ -647,10 +647,10 @@ export default function MainPage() {
         </section>
 
         {/* Events Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
           {filteredEvents.length === 0 && (
-            <div className="col-span-full text-center text-gray-900 bg-white rounded-xl border border-gray-200/60 py-10">
-              No events found. Try adjusting filters.
+            <div className="col-span-full text-center text-gray-900 bg-white rounded-xl border border-gray-200/60 py-8 sm:py-10">
+              <p className="text-sm sm:text-base">No events found. Try adjusting filters.</p>
             </div>
           )}
           {filteredEvents.map((event) => (
@@ -659,10 +659,10 @@ export default function MainPage() {
                className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] border border-gray-200/50 overflow-hidden relative z-10"
              >
               {/* Event Image */}
-              <div className="relative h-48 bg-gradient-to-br from-blue-100 to-purple-100 overflow-hidden">
+              <div className="relative h-40 sm:h-48 bg-gradient-to-br from-blue-100 to-purple-100 overflow-hidden">
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                    <svg className="w-7 h-7 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                   </div>
@@ -674,32 +674,32 @@ export default function MainPage() {
               </div>
 
               {/* Event Details */}
-              <div className="p-4">
-                <div className="flex justify-between items-start">
+              <div className="p-3 sm:p-4">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start">
                   {/* Left side - Title and Date */}
                   <div className="flex-1">
-                    <h3 className="font-bold text-gray-900 text-lg mb-2 line-clamp-2">
+                    <h3 className="font-bold text-gray-900 text-base sm:text-lg mb-2 line-clamp-2">
                       {event.title}
                     </h3>
                     <div className="flex items-center text-gray-900 mb-3">
                       <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
-                      <span className="text-sm">{event.date}</span>
+                      <span className="text-xs sm:text-sm">{event.date}</span>
                     </div>
                   </div>
 
                   {/* Right side - View More Button */}
                   <button
                     onClick={() => handleViewMore(event.id)}
-                    className="ml-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-full text-sm font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 whitespace-nowrap"
+                    className="w-full sm:w-auto ml-0 sm:ml-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-full text-xs sm:text-sm font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105 whitespace-nowrap"
                   >
                     View More
                   </button>
                 </div>
 
                 {/* Event Description */}
-                <p className="text-gray-900 text-sm line-clamp-2 mt-2">
+                <p className="text-gray-900 text-xs sm:text-sm line-clamp-2 mt-2">
                   {event.description}
                 </p>
               </div>

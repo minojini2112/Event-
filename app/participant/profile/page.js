@@ -402,21 +402,21 @@ function ParticipantProfileContent() {
       </div>
 
       {/* Header */}
-      <header className="relative z-50 w-full px-8 py-6 bg-white/80 backdrop-blur-xl border-b border-[#E2E8F0]/50 shadow-lg sticky top-0">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
+      <header className="relative z-50 w-full px-4 sm:px-8 py-4 sm:py-6 bg-white/80 backdrop-blur-xl border-b border-[#E2E8F0]/50 shadow-lg sticky top-0">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
           {/* Logo/Brand */}
-          <div className="flex items-center space-x-4 group">
+          <div className="flex items-center space-x-3 sm:space-x-4 group">
             <div className="relative">
-              <div className="w-14 h-14 bg-gradient-to-br from-[#3B82F6] to-[#1E40AF] rounded-2xl flex items-center justify-center shadow-2xl group-hover:shadow-[#3B82F6]/25 transition-all duration-500 transform group-hover:scale-110 group-hover:rotate-3">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-[#3B82F6] to-[#1E40AF] rounded-2xl flex items-center justify-center shadow-2xl group-hover:shadow-[#3B82F6]/25 transition-all duration-500 transform group-hover:scale-110 group-hover:rotate-3">
+                <svg className="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </div>
               <div className="absolute -inset-2 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] rounded-2xl blur-xl opacity-0 group-hover:opacity-30 transition-opacity duration-500"></div>
             </div>
             <div>
-              <h1 className="text-4xl font-black text-[#1E40AF]">My Profile</h1>
-              <p className="text-[#64748B] mt-1 font-medium">Track your event participation and achievements</p>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#1E40AF]">My Profile</h1>
+              <p className="text-[#64748B] mt-1 font-medium text-sm sm:text-base">Track your event participation and achievements</p>
             </div>
           </div>
           
@@ -424,27 +424,27 @@ function ParticipantProfileContent() {
           <div className="flex items-center relative" ref={profileRef}>
             <button 
               onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="w-14 h-14 bg-gradient-to-br from-[#3B82F6] to-[#06B6D4] rounded-2xl flex items-center justify-center hover:from-[#1E40AF] hover:to-[#3B82F6] transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105"
+              className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-[#3B82F6] to-[#06B6D4] rounded-2xl flex items-center justify-center hover:from-[#1E40AF] hover:to-[#3B82F6] transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105"
             >
-              <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 sm:w-7 sm:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
             </button>
 
             {/* Profile Dropdown */}
             {isProfileOpen && (
-              <div className="absolute top-16 right-0 w-[22rem] bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-[#E2E8F0]/50 z-50 overflow-hidden">
+              <div className="absolute top-16 right-0 w-[20rem] sm:w-[22rem] bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-[#E2E8F0]/50 z-50 overflow-hidden">
                 {/* Header Section */}
-                <div className="bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] p-6">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center">
-                      <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] p-4 sm:p-6">
+                  <div className="flex items-center space-x-3 sm:space-x-4">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white/20 rounded-2xl flex items-center justify-center">
+                      <svg className="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                       </svg>
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-white font-semibold text-lg">{participantData.username}</h3>
-                      <p className="text-white/80 text-sm">{participantData.email}</p>
+                      <h3 className="text-white font-semibold text-base sm:text-lg">{participantData.username}</h3>
+                      <p className="text-white/80 text-xs sm:text-sm">{participantData.email}</p>
                     </div>
                   </div>
                 </div>
@@ -452,7 +452,7 @@ function ParticipantProfileContent() {
 
 
                 {/* Menu Options */}
-                <div className="p-2">
+                <div className="p-1 sm:p-2">
                   {getProfileOptions().map((option, index) => {
                     const isActive = activeMenu === option.route;
                     return (
@@ -461,7 +461,7 @@ function ParticipantProfileContent() {
                         onClick={() => { setActiveMenu(option.route); handleProfileNavigation(option.route); }}
                         onMouseEnter={() => setActiveMenu((prev) => prev ?? option.route)}
                         onMouseLeave={() => setActiveMenu((prev) => (prev === option.route ? null : prev))}
-                        className={`group w-full text-left px-4 py-3 rounded-md transition-all duration-150 flex items-center space-x-3 border-l-4 ${
+                        className={`group w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 rounded-md transition-all duration-150 flex items-center space-x-2 sm:space-x-3 border-l-4 ${
                           isActive
                             ? 'bg-indigo-50 border-indigo-500'
                             : 'border-transparent hover:bg-indigo-50 hover:border-indigo-400'
@@ -469,23 +469,23 @@ function ParticipantProfileContent() {
                         aria-current={isActive ? 'page' : undefined}
                       >
                         {option.icon}
-                        <span className={`font-medium ${isActive ? 'text-indigo-700' : 'text-gray-700'} group-hover:text-indigo-700`}>
+                        <span className={`font-medium text-sm sm:text-base ${isActive ? 'text-indigo-700' : 'text-gray-700'} group-hover:text-indigo-700`}>
                           {option.label}
                         </span>
                       </button>
                     );
                   })}
 
-                  <hr className="my-2 border-gray-200" />
+                  <hr className="my-1 sm:my-2 border-gray-200" />
 
                   <button 
                     onClick={() => handleProfileNavigation('/logout')}
-                    className="w-full text-left px-4 py-3 hover:bg-red-50 rounded-md transition-colors duration-150 flex items-center space-x-3 text-red-600"
+                    className="w-full text-left px-3 sm:px-4 py-2.5 sm:py-3 hover:bg-red-50 rounded-md transition-colors duration-150 flex items-center space-x-2 sm:space-x-3 text-red-600"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                     </svg>
-                    <span>Sign Out</span>
+                    <span className="text-sm sm:text-base">Sign Out</span>
                   </button>
                 </div>
               </div>
@@ -497,45 +497,45 @@ function ParticipantProfileContent() {
 
 
       {/* Main Content */}
-      <main className="relative z-10 max-w-7xl mx-auto px-8 py-12">
+      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-8 py-8 sm:py-12">
         {/* Error Message */}
         {error && (
-          <div className="mb-8 bg-red-50/80 backdrop-blur-sm border border-red-200/60 rounded-2xl p-6 shadow-lg">
+          <div className="mb-6 sm:mb-8 bg-red-50/80 backdrop-blur-sm border border-red-200/60 rounded-2xl p-4 sm:p-6 shadow-lg">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-red-100 rounded-2xl flex items-center justify-center mr-4">
-                <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-red-100 rounded-2xl flex items-center justify-center mr-3 sm:mr-4">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                 </svg>
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-red-800">Error</h3>
-                <p className="text-red-700">{error}</p>
+                <h3 className="text-base sm:text-lg font-semibold text-red-800">Error</h3>
+                <p className="text-red-700 text-sm sm:text-base">{error}</p>
               </div>
             </div>
           </div>
         )}
 
         {/* Profile Section */}
-        <div className="bg-white/90 backdrop-blur-xl border border-[#E2E8F0]/50 rounded-3xl shadow-xl overflow-hidden mb-8 relative">
+        <div className="bg-white/90 backdrop-blur-xl border border-[#E2E8F0]/50 rounded-3xl shadow-xl overflow-hidden mb-6 sm:mb-8 relative">
           {/* Background decoration */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#3B82F6]/10 to-[#06B6D4]/10 rounded-full -translate-y-16 translate-x-16"></div>
-          <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-br from-[#06B6D4]/10 to-[#3B82F6]/10 rounded-full translate-y-12 -translate-x-12"></div>
+          <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-[#3B82F6]/10 to-[#06B6D4]/10 rounded-full -translate-y-12 sm:-translate-y-16 translate-x-12 sm:translate-x-16"></div>
+          <div className="absolute bottom-0 left-0 w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-[#06B6D4]/10 to-[#3B82F6]/10 rounded-full translate-y-10 sm:translate-y-12 -translate-x-10 sm:-translate-x-12"></div>
           
-          <div className="bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] p-8 relative z-10">
-            <div className="flex items-center space-x-6">
-              <div className="w-24 h-24 bg-white/20 rounded-3xl flex items-center justify-center shadow-2xl">
-                <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] p-6 sm:p-8 relative z-10">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white/20 rounded-3xl flex items-center justify-center shadow-2xl">
+                <svg className="w-10 h-10 sm:w-12 sm:h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </div>
-              <div className="flex-1">
-                <h2 className="text-3xl font-black text-white mb-2">{participantData.username}</h2>
-                <p className="text-white/90 text-lg font-medium mb-1">{participantData.email}</p>
+              <div className="flex-1 text-center sm:text-left">
+                <h2 className="text-2xl sm:text-3xl font-black text-white mb-2">{participantData.username}</h2>
+                <p className="text-white/90 text-base sm:text-lg font-medium mb-1">{participantData.email}</p>
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/20 rounded-xl border border-white/30">
                   <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  <span className="text-white font-medium">{participantData.role}</span>
+                  <span className="text-white font-medium text-sm sm:text-base">{participantData.role}</span>
                 </div>
               </div>
             </div>
@@ -543,38 +543,38 @@ function ParticipantProfileContent() {
         </div>
 
                 {/* Profile Details (editable) */}
-        <div className="bg-white/90 backdrop-blur-xl border border-[#E2E8F0]/50 rounded-3xl p-8 mb-8 relative overflow-hidden shadow-xl">
+        <div className="bg-white/90 backdrop-blur-xl border border-[#E2E8F0]/50 rounded-3xl p-6 sm:p-8 mb-6 sm:mb-8 relative overflow-hidden shadow-xl">
           {/* Background decoration */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#3B82F6]/5 to-[#06B6D4]/5 rounded-full -translate-y-16 translate-x-16"></div>
-          <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-br from-[#06B6D4]/5 to-[#3B82F6]/5 rounded-full translate-y-12 -translate-x-12"></div>
+          <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-br from-[#3B82F6]/5 to-[#06B6D4]/5 rounded-full -translate-y-12 sm:-translate-y-16 translate-x-12 sm:translate-x-16"></div>
+          <div className="absolute bottom-0 left-0 w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-[#06B6D4]/5 to-[#3B82F6]/5 rounded-full translate-y-10 sm:translate-y-12 -translate-x-10 sm:-translate-x-12"></div>
           
           <div className="relative z-10">
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 bg-gradient-to-br from-[#3B82F6] to-[#06B6D4] rounded-2xl flex items-center justify-center shadow-xl">
-                  <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4 sm:gap-0">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-[#3B82F6] to-[#06B6D4] rounded-2xl flex items-center justify-center shadow-xl">
+                  <svg className="w-6 h-6 sm:w-7 sm:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-[#1E40AF]">Personal Information</h3>
-                  <p className="text-[#64748B] text-sm">Keep your information up to date and accurate</p>
+                  <h3 className="text-xl sm:text-2xl font-bold text-[#1E40AF]">Personal Information</h3>
+                  <p className="text-[#64748B] text-xs sm:text-sm">Keep your information up to date and accurate</p>
                 </div>
               </div>
               {isEditingProfile ? (
-                <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
                   <button
                     onClick={saveProfile}
                     disabled={saving}
-                    className="group relative px-6 py-3 bg-gradient-to-r from-[#10B981] to-[#059669] text-white rounded-2xl hover:from-[#059669] hover:to-[#047857] transition-all duration-300 font-semibold shadow-xl hover:shadow-2xl transform hover:scale-105 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="group relative px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-[#10B981] to-[#059669] text-white rounded-2xl hover:from-[#059669] hover:to-[#047857] transition-all duration-300 font-semibold shadow-xl hover:shadow-2xl transform hover:scale-105 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                   >
-                    <span className="relative z-10 flex items-center gap-2">
+                    <span className="relative z-10 flex items-center justify-center gap-2">
                       {saving ? (
-                        <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.001 0 01-15.357-2m15.357 2H15" />
                         </svg>
                       ) : (
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                       )}
@@ -585,7 +585,7 @@ function ParticipantProfileContent() {
                   <button
                     onClick={cancelEdit}
                     disabled={saving}
-                    className="group relative px-6 py-3 bg-gradient-to-r from-[#6B7280] to-[#4B5563] text-white rounded-2xl hover:from-[#4B5563] hover:to-[#374151] transition-all duration-300 font-semibold shadow-xl hover:shadow-2xl transform hover:scale-105 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="group relative px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-[#6B7280] to-[#4B5563] text-white rounded-2xl hover:from-[#4B5563] hover:to-[#374151] transition-all duration-300 font-semibold shadow-xl hover:shadow-2xl transform hover:scale-105 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                   >
                     <span className="relative z-10">Cancel</span>
                     <div className="absolute inset-0 bg-gradient-to-r from-[#4B5563] to-[#6B7280] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -594,10 +594,10 @@ function ParticipantProfileContent() {
               ) : (
                 <button
                   onClick={startEdit}
-                  className="group relative px-6 py-3 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] text-white rounded-2xl hover:from-[#1E40AF] hover:to-[#3B82F6] transition-all duration-300 font-semibold shadow-xl hover:shadow-2xl transform hover:scale-105 overflow-hidden"
+                  className="group relative px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] text-white rounded-2xl hover:from-[#1E40AF] hover:to-[#3B82F6] transition-all duration-300 font-semibold shadow-xl hover:shadow-2xl transform hover:scale-105 overflow-hidden w-full sm:w-auto text-sm sm:text-base"
                 >
-                  <span className="relative z-10 flex items-center gap-2">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <span className="relative z-10 flex items-center justify-center gap-2">
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
                     Edit Profile
@@ -608,11 +608,11 @@ function ParticipantProfileContent() {
             </div>
 
           {isEditingProfile ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mt-6 sm:mt-8">
               <div className="group">
-                <label htmlFor="pf-name" className="text-sm font-semibold text-[#1E40AF] mb-3 block flex items-center gap-3">
-                  <div className="w-8 h-8 bg-[#3B82F6]/10 rounded-xl flex items-center justify-center">
-                    <svg className="w-4 h-4 text-[#3B82F6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <label htmlFor="pf-name" className="text-xs sm:text-sm font-semibold text-[#1E40AF] mb-2 sm:mb-3 block flex items-center gap-2 sm:gap-3">
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 bg-[#3B82F6]/10 rounded-xl flex items-center justify-center">
+                    <svg className="w-3 h-3 sm:w-4 sm:h-4 text-[#3B82F6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                   </div>
@@ -623,7 +623,7 @@ function ParticipantProfileContent() {
                   type="text"
                   value={draftProfile.name}
                   onChange={(e) => setDraftProfile({ ...draftProfile, name: e.target.value })}
-                  className="w-full text-sm text-[#1E40AF] rounded-2xl border-2 border-[#E2E8F0] focus:border-[#3B82F6] focus:outline-none px-4 py-3 bg-white/80 backdrop-blur-sm shadow-sm transition-all duration-300 group-hover:border-[#3B82F6]/50 focus:shadow-lg"
+                  className="w-full text-xs sm:text-sm text-[#1E40AF] rounded-2xl border-2 border-[#E2E8F0] focus:border-[#3B82F6] focus:outline-none px-3 sm:px-4 py-2.5 sm:py-3 bg-white/80 backdrop-blur-sm shadow-sm transition-all duration-300 group-hover:border-[#3B82F6]/50 focus:shadow-lg"
                   placeholder="Enter your full name"
                 />
               </div>
@@ -707,7 +707,7 @@ function ParticipantProfileContent() {
               </div>
             </div>
                     ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mt-4">
               <div className="group bg-white/90 backdrop-blur-xl border border-[#E2E8F0]/50 rounded-xl p-4 hover:shadow-lg transition-all duration-300 hover:scale-105">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-8 h-8 bg-[#3B82F6]/10 rounded-lg flex items-center justify-center">
@@ -773,12 +773,12 @@ function ParticipantProfileContent() {
         </div>
 
         {/* Quick Actions */}
-        <div className="mb-8 flex items-center justify-between">
-          <h3 className="text-2xl font-bold text-[#1E40AF]">Quick Actions</h3>
+        <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0">
+          <h3 className="text-xl sm:text-2xl font-bold text-[#1E40AF]">Quick Actions</h3>
           <button
             onClick={refreshEventCounts}
             disabled={countsLoading}
-            className="group relative px-6 py-3 bg-white/80 backdrop-blur-sm text-[#3B82F6] border-2 border-[#3B82F6] rounded-2xl hover:bg-[#EFF6FF] hover:border-[#1E40AF] transition-all duration-300 font-semibold shadow-xl hover:shadow-2xl transform hover:scale-105 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
+            className="group relative px-4 sm:px-6 py-2.5 sm:py-3 bg-white/80 backdrop-blur-sm text-[#3B82F6] border-2 border-[#3B82F6] rounded-2xl hover:bg-[#EFF6FF] hover:border-[#1E40AF] transition-all duration-300 font-semibold shadow-xl hover:shadow-2xl transform hover:scale-105 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base w-full sm:w-auto"
           >
             {countsLoading ? (
               <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -792,12 +792,12 @@ function ParticipantProfileContent() {
             {countsLoading ? 'Refreshing...' : 'Refresh Counts'}
           </button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {/* Registered Events */}
-          <div className="group bg-white rounded-2xl shadow-lg border border-gray-200/60 p-6 hover:shadow-xl transition-transform duration-300 hover:-translate-y-0.5 ring-1 ring-transparent hover:ring-green-100">
+          <div className="group bg-white rounded-2xl shadow-lg border border-gray-200/60 p-4 sm:p-6 hover:shadow-xl transition-transform duration-300 hover:-translate-y-0.5 ring-1 ring-transparent hover:ring-green-100">
             <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-r from-[#10B981] to-[#06B6D4] rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-[#10B981] to-[#06B6D4] rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                <svg className="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
@@ -818,11 +818,11 @@ function ParticipantProfileContent() {
                   )}
                 </span>
               </div>
-              <h3 className="text-xl font-bold text-gray-800 text-center mb-2">Registered Events</h3>
-              <p className="text-gray-600 mb-4">View all events you&apos;ve registered for</p>
+              <h3 className="text-lg sm:text-xl font-bold text-gray-800 text-center mb-2">Registered Events</h3>
+              <p className="text-gray-600 mb-3 sm:mb-4 text-sm sm:text-base">View all events you&apos;ve registered for</p>
               <button 
                 onClick={() => handleNavigation('/participant/registered')}
-                className="bg-gradient-to-r from-[#10B981] to-[#06B6D4] text-white px-6 py-3 rounded-xl font-medium hover:from-[#059669] hover:to-[#3B82F6] transition-all duration-200 shadow group-hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                className="bg-gradient-to-r from-[#10B981] to-[#06B6D4] text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-medium hover:from-[#059669] hover:to-[#3B82F6] transition-all duration-200 shadow group-hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 text-sm sm:text-base w-full sm:w-auto"
               >
                 View Events ({countsLoading ? '...' : participantData.eventsRegistered})
               </button>
@@ -903,9 +903,9 @@ function ParticipantProfileContent() {
         </div>
 
         {/* Achievements Section with badge tiers */}
-        <div className="mt-10 bg-white rounded-2xl shadow-lg border border-gray-200/60 p-6">
-          <h3 className="text-2xl font-bold text-gray-800 mb-6">Achievements</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="mt-8 sm:mt-10 bg-white rounded-2xl shadow-lg border border-gray-200/60 p-4 sm:p-6">
+          <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">Achievements</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
             {/* Registered count badge */}
             {(() => {
               const { current, next } = getTier(participantData.eventsRegistered);

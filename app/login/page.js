@@ -102,43 +102,44 @@ export default function LoginPage() {
       {/* Back Button */}
       <button
         onClick={handleBackToHome}
-        className="absolute top-8 left-8 z-20 flex items-center text-[#3B82F6] hover:text-[#1E40AF] transition-all duration-300 font-semibold group"
+        className="absolute top-4 left-4 sm:top-8 sm:left-8 z-20 flex items-center text-[#3B82F6] hover:text-[#1E40AF] transition-all duration-300 font-semibold group"
       >
-        <div className="w-12 h-12 bg-white/80 backdrop-blur-xl border border-[#E2E8F0]/50 rounded-2xl flex items-center justify-center mr-3 group-hover:border-[#3B82F6] group-hover:shadow-lg transition-all duration-300 shadow-md">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/80 backdrop-blur-xl border border-[#E2E8F0]/50 rounded-2xl flex items-center justify-center mr-2 sm:mr-3 group-hover:border-[#3B82F6] group-hover:shadow-lg transition-all duration-300 shadow-md">
+          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </div>
-        Back to Home
+        <span className="hidden sm:inline">Back to Home</span>
+        <span className="sm:hidden">Back</span>
       </button>
 
-      <div className={`relative z-10 max-w-md w-full mx-6 transition-all duration-1000 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-        <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-10 border border-[#E2E8F0]/50 relative overflow-hidden">
+      <div className={`relative z-10 max-w-md w-full mx-4 sm:mx-6 transition-all duration-1000 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+        <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-6 sm:p-8 lg:p-10 border border-[#E2E8F0]/50 relative overflow-hidden">
           {/* Background Glow */}
           <div className="absolute inset-0 bg-gradient-to-br from-[#3B82F6]/5 to-[#06B6D4]/5 rounded-3xl blur-2xl"></div>
           
           <div className="relative">
             {/* Header */}
-            <div className="text-center mb-10">
-              <div className="w-24 h-24 bg-gradient-to-br from-[#3B82F6] to-[#06B6D4] rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl">
-                <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="text-center mb-8 sm:mb-10">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-[#3B82F6] to-[#06B6D4] rounded-3xl flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-2xl">
+                <svg className="w-10 h-10 sm:w-12 sm:h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
               </div>
-              <h1 className="text-4xl font-bold text-[#1E40AF] mb-3">EventIA</h1>
-              <h2 className="text-2xl font-bold text-[#334155] mb-2">Welcome Back!</h2>
-              <p className="text-[#64748B]">Sign in to your account</p>
+              <h1 className="text-3xl sm:text-4xl font-bold text-[#1E40AF] mb-2 sm:mb-3">EventIA</h1>
+              <h2 className="text-xl sm:text-2xl font-bold text-[#334155] mb-2">Welcome Back!</h2>
+              <p className="text-[#64748B] text-sm sm:text-base">Sign in to your account</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
               {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-2xl backdrop-blur-sm">
+                <div className="bg-red-50 border border-red-200 text-red-700 px-3 sm:px-4 py-2.5 sm:py-3 rounded-2xl backdrop-blur-sm text-sm sm:text-base">
                   {error}
                 </div>
               )}
               
               <div>
-                <label htmlFor="email" className="block text-sm font-semibold text-[#334155] mb-3">
+                <label htmlFor="email" className="block text-sm font-semibold text-[#334155] mb-2 sm:mb-3">
                   Email Address
                 </label>
                 <input
@@ -148,13 +149,13 @@ export default function LoginPage() {
                   required
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-4 bg-white/60 backdrop-blur-sm border-2 border-[#E2E8F0] rounded-2xl focus:outline-none focus:border-[#3B82F6] focus:ring-2 focus:ring-[#3B82F6]/20 transition-all duration-300 text-[#334155] placeholder-[#64748B] hover:border-[#3B82F6]/50"
+                  className="w-full px-3 sm:px-4 py-3 sm:py-4 bg-white/60 backdrop-blur-sm border-2 border-[#E2E8F0] rounded-2xl focus:outline-none focus:border-[#3B82F6] focus:ring-2 focus:ring-[#3B82F6]/20 transition-all duration-300 text-[#334155] placeholder-[#64748B] hover:border-[#3B82F6]/50 text-sm sm:text-base"
                   placeholder="Enter your email"
                 />
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-semibold text-[#334155] mb-3">
+                <label htmlFor="password" className="block text-sm font-semibold text-[#334155] mb-2 sm:mb-3">
                   Password
                 </label>
                 <input
@@ -164,7 +165,7 @@ export default function LoginPage() {
                   required
                   value={formData.password}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-4 bg-white/60 backdrop-blur-sm border-2 border-[#E2E8F0] rounded-2xl focus:outline-none focus:border-[#3B82F6] focus:ring-2 focus:ring-[#3B82F6]/20 transition-all duration-300 text-[#334155] placeholder-[#64748B] hover:border-[#3B82F6]/50"
+                  className="w-full px-3 sm:px-4 py-3 sm:py-4 bg-white/60 backdrop-blur-sm border-2 border-[#E2E8F0] rounded-2xl focus:outline-none focus:border-[#3B82F6] focus:ring-2 focus:ring-[#3B82F6]/20 transition-all duration-300 text-[#334155] placeholder-[#64748B] hover:border-[#3B82F6]/50 text-sm sm:text-base"
                   placeholder="Enter your password"
                 />
               </div>
@@ -172,13 +173,14 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] text-white py-4 px-6 rounded-2xl hover:from-[#1E40AF] hover:to-[#3B82F6] transition-all duration-500 font-bold text-lg shadow-xl hover:shadow-2xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none overflow-hidden group relative"
+                className="w-full bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] text-white py-3 sm:py-4 px-4 sm:px-6 rounded-2xl hover:from-[#1E40AF] hover:to-[#3B82F6] transition-all duration-500 font-bold text-base sm:text-lg shadow-xl hover:shadow-2xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none overflow-hidden group relative"
               >
                 <span className="relative z-10">
                   {loading ? (
                     <div className="flex items-center justify-center">
-                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
-                      Signing in...
+                      <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
+                      <span className="hidden sm:inline">Signing in...</span>
+                      <span className="sm:hidden">Signing in...</span>
                     </div>
                   ) : (
                     'Login'
@@ -188,8 +190,8 @@ export default function LoginPage() {
               </button>
             </form>
 
-            <div className="text-center mt-8">
-              <p className="text-[#64748B]">
+            <div className="text-center mt-6 sm:mt-8">
+              <p className="text-[#64748B] text-sm sm:text-base">
                 Don&apos;t have an account?{' '}
                 <button
                   onClick={handleSignupRedirect}

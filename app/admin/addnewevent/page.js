@@ -433,20 +433,20 @@ function AddNewEventComponent() {
         </div>
       </div>
 
-      <header className="relative z-50 w-full px-8 py-8 bg-white/80 backdrop-blur-xl border-b border-[#E2E8F0]/50 shadow-lg sticky top-0">
+      <header className="relative z-50 w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 bg-white/80 backdrop-blur-xl border-b border-[#E2E8F0]/50 shadow-lg sticky top-0">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] rounded-2xl flex items-center justify-center shadow-lg">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] rounded-2xl flex items-center justify-center shadow-lg">
+                <svg className="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
               </div>
               <div>
-                <h1 className="text-4xl font-black bg-gradient-to-r from-[#3B82F6] to-[#1E40AF] bg-clip-text text-transparent">
-            {isEditMode ? 'Edit Event' : 'Add New Event'}
-          </h1>
-                <p className="text-[#64748B] mt-2 text-lg font-medium">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black bg-gradient-to-r from-[#3B82F6] to-[#1E40AF] bg-clip-text text-transparent">
+                  {isEditMode ? 'Edit Event' : 'Add New Event'}
+                </h1>
+                <p className="text-[#64748B] mt-1 sm:mt-2 text-sm sm:text-base lg:text-lg font-medium">
                   {isEditMode ? 'Update event information and details' : 'Create and publish a new event'}
                 </p>
               </div>
@@ -456,13 +456,14 @@ function AddNewEventComponent() {
             <div className="flex items-center gap-3">
               <button 
                 onClick={() => router.push('/main/1')} 
-                className="group relative px-6 py-3 text-[#3B82F6] border-2 border-[#3B82F6] rounded-2xl hover:bg-[#EFF6FF] hover:border-[#1E40AF] transition-all duration-300 font-semibold bg-white/80 backdrop-blur-sm overflow-hidden"
+                className="group relative px-4 sm:px-6 py-2 sm:py-3 text-[#3B82F6] border-2 border-[#3B82F6] rounded-2xl hover:bg-[#EFF6FF] hover:border-[#1E40AF] transition-all duration-300 font-semibold bg-white/80 backdrop-blur-sm overflow-hidden text-sm sm:text-base w-full sm:w-auto"
               >
-                <span className="relative z-10 flex items-center gap-2">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                   </svg>
-                  Back to Main
+                  <span className="hidden sm:inline">Back to Main</span>
+                  <span className="sm:hidden">Back</span>
                 </span>
                 <div className="absolute inset-0 bg-gradient-to-r from-[#3B82F6]/10 to-[#06B6D4]/10 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
               </button>
@@ -471,39 +472,39 @@ function AddNewEventComponent() {
         </div>
       </header>
 
-      <main className="relative z-10 max-w-7xl mx-auto px-8 py-12">
+      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         {/* Access gating cards for admins without approval */}
         {!isEditMode && !isNameLocked && !isGlobalAdmin && (
           latestRequest && latestRequest.status === 'pending' ? (
-            <div className="mb-8 bg-gradient-to-br from-[#FEF3C7]/80 to-[#FDE68A]/80 rounded-3xl border border-[#F59E0B]/30 p-8 backdrop-blur-sm shadow-xl">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-r from-[#F59E0B] to-[#D97706] flex items-center justify-center text-white shadow-lg">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="mb-6 sm:mb-8 bg-gradient-to-br from-[#FEF3C7]/80 to-[#FDE68A]/80 rounded-3xl border border-[#F59E0B]/30 p-4 sm:p-6 lg:p-8 backdrop-blur-sm shadow-xl">
+              <div className="flex items-start gap-3 sm:gap-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-r from-[#F59E0B] to-[#D97706] flex items-center justify-center text-white shadow-lg flex-shrink-0">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold text-[#92400E] mb-2">Access request pending</h3>
-                  <p className="text-[#B45309] text-base leading-relaxed">
+                  <h3 className="text-lg sm:text-xl font-bold text-[#92400E] mb-2">Access request pending</h3>
+                  <p className="text-[#B45309] text-sm sm:text-base leading-relaxed">
                     You already have a pending request for <span className="font-bold">{latestRequest.event_name}</span>. Please wait until it is accepted or rejected.
                   </p>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="mb-8 bg-gradient-to-br from-[#FEF3C7]/80 to-[#FDE68A]/80 rounded-3xl border border-[#F59E0B]/30 p-8 backdrop-blur-sm shadow-xl relative overflow-hidden">
+            <div className="mb-6 sm:mb-8 bg-gradient-to-br from-[#FEF3C7]/80 to-[#FDE68A]/80 rounded-3xl border border-[#F59E0B]/30 p-4 sm:p-6 lg:p-8 backdrop-blur-sm shadow-xl relative overflow-hidden">
               {/* Background decoration */}
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-r from-[#F59E0B]/10 to-[#D97706]/10 rounded-full -translate-y-16 translate-x-16"></div>
+              <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-r from-[#F59E0B]/10 to-[#D97706]/10 rounded-full -translate-y-12 sm:-translate-y-16 translate-x-12 sm:translate-x-16"></div>
               
-              <div className="flex items-start gap-4 relative z-10">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-r from-[#F59E0B] to-[#D97706] flex items-center justify-center text-white shadow-lg">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="flex items-start gap-3 sm:gap-4 relative z-10">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-r from-[#F59E0B] to-[#D97706] flex items-center justify-center text-white shadow-lg flex-shrink-0">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold text-[#92400E] mb-2">Request access to create a new event</h3>
-                  <p className="text-[#B45309] text-base leading-relaxed mb-4">Submit your event name for approval. Once approved, the name will be auto-filled and locked in this form.</p>
+                  <h3 className="text-lg sm:text-xl font-bold text-[#92400E] mb-2">Request access to create a new event</h3>
+                  <p className="text-[#B45309] text-sm sm:text-base leading-relaxed mb-4">Submit your event name for approval. Once approved, the name will be auto-filled and locked in this form.</p>
                   
                   {isCheckingAccess && (
                     <div className="mb-4 p-3 bg-white/60 backdrop-blur-sm rounded-2xl border border-white/40 text-[#B45309] font-medium">
@@ -530,22 +531,22 @@ function AddNewEventComponent() {
                     </div>
                   )}
                   
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
+                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-center">
                     <input
                       type="text"
                       value={requestEventName}
                       onChange={(e) => setRequestEventName(e.target.value)}
                       placeholder="Proposed event name"
-                      className="col-span-2 text-base rounded-2xl border-2 border-[#F59E0B]/30 ring-1 ring-[#F59E0B]/20 px-4 py-3 bg-white/80 backdrop-blur-sm text-[#92400E] placeholder-[#B45309]/60 focus:ring-2 focus:ring-[#F59E0B] focus:border-[#F59E0B] transition-all duration-200 font-medium"
+                      className="flex-1 text-sm sm:text-base rounded-2xl border-2 border-[#F59E0B]/30 ring-1 ring-[#F59E0B]/20 px-3 sm:px-4 py-2.5 sm:py-3 bg-white/80 backdrop-blur-sm text-[#92400E] placeholder-[#B45309]/60 focus:ring-2 focus:ring-[#F59E0B] focus:border-[#F59E0B] transition-all duration-200 font-medium"
                     />
                     <button
                       type="button"
                       onClick={handleSubmitAccessRequest}
                       disabled={isSubmittingAccessRequest}
-                      className="group relative px-6 py-3 bg-gradient-to-r from-[#F59E0B] to-[#D97706] text-white rounded-2xl text-base font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 overflow-hidden disabled:opacity-60 disabled:cursor-not-allowed"
+                      className="group relative px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-[#F59E0B] to-[#D97706] text-white rounded-2xl text-sm sm:text-base font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 overflow-hidden disabled:opacity-60 disabled:cursor-not-allowed"
                     >
                       <span className="relative z-10">
-                      {isSubmittingAccessRequest ? 'Submitting...' : 'Request Access'}
+                        {isSubmittingAccessRequest ? 'Submitting...' : 'Request Access'}
                       </span>
                       {!isSubmittingAccessRequest && (
                         <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
@@ -560,12 +561,12 @@ function AddNewEventComponent() {
         {/* Editor (gated until approval for new events, or always visible for global admins) */}
         {(isEditMode || isNameLocked || isGlobalAdmin) ? (
           isEditing ? (
-          <div className="bg-white/90 backdrop-blur-xl border border-[#E2E8F0]/50 rounded-3xl shadow-xl p-8 relative overflow-hidden">
+          <div className="bg-white/90 backdrop-blur-xl border border-[#E2E8F0]/50 rounded-3xl shadow-xl p-4 sm:p-6 lg:p-8 relative overflow-hidden">
             {/* Background decoration */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-r from-[#3B82F6]/5 to-[#06B6D4]/5 rounded-full -translate-y-16 translate-x-16"></div>
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-r from-[#06B6D4]/5 to-[#3B82F6]/5 rounded-full translate-y-12 -translate-x-12"></div>
+            <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-r from-[#3B82F6]/5 to-[#06B6D4]/5 rounded-full -translate-y-12 sm:-translate-y-16 translate-x-12 sm:translate-x-16"></div>
+            <div className="absolute bottom-0 left-0 w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-r from-[#06B6D4]/5 to-[#3B82F6]/5 rounded-full translate-y-10 sm:translate-y-12 -translate-x-10 sm:-translate-x-12"></div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 relative z-10">
               {/* Registered Count (read only dummy for now) */}
               <div className="flex flex-col">
                 <label className="text-sm font-bold text-[#64748B] mb-2 uppercase tracking-wide">Registered Count</label>
@@ -638,7 +639,7 @@ function AddNewEventComponent() {
               </div>
 
               {/* Images Upload */}
-              <div className="flex flex-col md:col-span-2">
+              <div className="flex flex-col lg:col-span-2">
                 <label className="text-sm font-bold text-[#64748B] mb-2 uppercase tracking-wide">Images</label>
                 <div className="relative">
                 <input
@@ -649,10 +650,10 @@ function AddNewEventComponent() {
                     const files = Array.from(e.target.files || []);
                     updateField('images', files);
                   }}
-                    className="w-full text-base rounded-2xl border-2 border-[#E2E8F0]/50 ring-1 ring-[#E2E8F0]/30 px-4 py-3 bg-white/80 backdrop-blur-sm text-[#334155] focus:ring-2 focus:ring-[#3B82F6] focus:border-[#3B82F6] transition-all duration-200 font-medium hover:border-[#3B82F6]/50 cursor-pointer"
+                    className="w-full text-sm sm:text-base rounded-2xl border-2 border-[#E2E8F0]/50 ring-1 ring-[#E2E8F0]/30 px-3 sm:px-4 py-2.5 sm:py-3 bg-white/80 backdrop-blur-sm text-[#334155] focus:ring-2 focus:ring-[#3B82F6] focus:border-[#3B82F6] transition-all duration-200 font-medium hover:border-[#3B82F6]/50 cursor-pointer"
                   />
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
-                    <svg className="w-5 h-5 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 sm:pr-4 pointer-events-none">
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5 text-[#64748B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                   </div>
@@ -668,14 +669,14 @@ function AddNewEventComponent() {
                 )}
                 
                 {form.image_urls && form.image_urls.length > 0 && (
-                  <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                     {form.image_urls.map((url, idx) => (
                       <div key={idx} className="relative group">
-                        <img src={url} alt={`img-${idx}`} className="w-full h-32 object-cover rounded-2xl border-2 border-[#E2E8F0]/50 shadow-lg group-hover:shadow-xl transition-all duration-300" />
+                        <img src={url} alt={`img-${idx}`} className="w-full h-24 sm:h-32 object-cover rounded-2xl border-2 border-[#E2E8F0]/50 shadow-lg group-hover:shadow-xl transition-all duration-300" />
                         <button
                           type="button"
                           onClick={() => updateField('image_urls', form.image_urls.filter((_, i) => i !== idx))}
-                          className="absolute top-2 right-2 bg-red-500/90 backdrop-blur-sm text-white rounded-full px-3 py-1.5 text-xs font-bold shadow-lg hover:bg-red-600 transition-all duration-200 transform hover:scale-110"
+                          className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 bg-red-500/90 backdrop-blur-sm text-white rounded-full px-2 sm:px-3 py-1 sm:py-1.5 text-xs font-bold shadow-lg hover:bg-red-600 transition-all duration-200 transform hover:scale-110"
                         >
                           Remove
                         </button>
@@ -685,14 +686,14 @@ function AddNewEventComponent() {
                 )}
                 
                 {form.images && form.images.length > 0 && (
-                  <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                     {form.images.map((file, idx) => (
                       <div key={idx} className="relative group">
-                        <img src={URL.createObjectURL(file)} alt={`img-${idx}`} className="w-full h-32 object-cover rounded-2xl border-2 border-[#E2E8F0]/50 shadow-lg group-hover:shadow-xl transition-all duration-300" />
+                        <img src={URL.createObjectURL(file)} alt={`img-${idx}`} className="w-full h-24 sm:h-32 object-cover rounded-2xl border-2 border-[#E2E8F0]/50 shadow-lg group-hover:shadow-xl transition-all duration-300" />
                         <button
                           type="button"
                           onClick={() => updateField('images', form.images.filter((_, i) => i !== idx))}
-                          className="absolute top-2 right-2 bg-red-500/90 backdrop-blur-sm text-white rounded-full px-3 py-1.5 text-xs font-bold shadow-lg hover:bg-red-600 transition-all duration-200 transform hover:scale-110"
+                          className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 bg-red-500/90 backdrop-blur-sm text-white rounded-full px-2 sm:px-3 py-1 sm:py-1.5 text-xs font-bold shadow-lg hover:bg-red-600 transition-all duration-200 transform hover:scale-110"
                         >
                           Remove
                         </button>
@@ -703,14 +704,14 @@ function AddNewEventComponent() {
               </div>
 
               {/* Description */}
-              <div className="flex flex-col md:col-span-2">
+              <div className="flex flex-col lg:col-span-2">
                 <label className="text-sm font-bold text-[#64748B] mb-2 uppercase tracking-wide">Description</label>
                 <textarea
                   value={form.description}
                   onChange={(e) => updateField('description', e.target.value)}
                   rows={4}
                   placeholder="Short summary of the event"
-                  className="text-base rounded-2xl border-2 border-[#E2E8F0]/50 ring-1 ring-[#E2E8F0]/30 px-4 py-3 bg-white/80 backdrop-blur-sm text-[#334155] placeholder-[#94A3B8] focus:ring-2 focus:ring-[#3B82F6] focus:border-[#3B82F6] transition-all duration-200 font-medium hover:border-[#3B82F6]/50 resize-none"
+                  className="text-sm sm:text-base rounded-2xl border-2 border-[#E2E8F0]/50 ring-1 ring-[#E2E8F0]/30 px-3 sm:px-4 py-2.5 sm:py-3 bg-white/80 backdrop-blur-sm text-[#334155] placeholder-[#94A3B8] focus:ring-2 focus:ring-[#3B82F6] focus:border-[#3B82F6] transition-all duration-200 font-medium hover:border-[#3B82F6]/50 resize-none"
                 />
               </div>
 
@@ -719,13 +720,13 @@ function AddNewEventComponent() {
                 <label className="text-sm font-bold text-[#64748B] mb-3 uppercase tracking-wide">Student Coordinators</label>
                 <div className="space-y-3">
                   {form.student_coordinators.map((c, i) => (
-                    <div key={i} className="p-4 bg-white/60 backdrop-blur-sm rounded-2xl border border-[#E2E8F0]/30 shadow-sm">
-                      <div className="grid grid-cols-2 gap-3 mb-3">
+                    <div key={i} className="p-3 sm:p-4 bg-white/60 backdrop-blur-sm rounded-2xl border border-[#E2E8F0]/30 shadow-sm">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                       <input
                         value={c.name}
                         onChange={(e) => updateArrayField('student_coordinators', i, 'name', e.target.value)}
                         placeholder="Name"
-                          className={`text-base rounded-xl border-2 px-3 py-2.5 bg-white/80 backdrop-blur-sm ring-1 text-[#334155] placeholder-[#94A3B8] transition-all duration-200 font-medium ${
+                          className={`text-sm sm:text-base rounded-xl border-2 px-3 py-2 sm:py-2.5 bg-white/80 backdrop-blur-sm ring-1 text-[#334155] placeholder-[#94A3B8] transition-all duration-200 font-medium ${
                             errors[`student_${i}`] 
                               ? 'border-red-400 ring-red-300 focus:ring-2 focus:ring-red-500 focus:border-red-500' 
                               : 'border-[#E2E8F0]/50 ring-[#E2E8F0]/30 focus:ring-2 focus:ring-[#3B82F6] focus:border-[#3B82F6]'
@@ -735,7 +736,7 @@ function AddNewEventComponent() {
                         value={c.phone}
                         onChange={(e) => updateArrayField('student_coordinators', i, 'phone', e.target.value)}
                         placeholder="Phone"
-                          className={`text-base rounded-xl border-2 px-3 py-2.5 bg-white/80 backdrop-blur-sm ring-1 text-[#334155] placeholder-[#94A3B8] transition-all duration-200 font-medium ${
+                          className={`text-sm sm:text-base rounded-xl border-2 px-3 py-2 sm:py-2.5 bg-white/80 backdrop-blur-sm ring-1 text-[#334155] placeholder-[#94A3B8] transition-all duration-200 font-medium ${
                             errors[`student_${i}`] 
                               ? 'border-red-400 ring-red-300 focus:ring-2 focus:ring-red-500 focus:border-red-500' 
                               : 'border-[#E2E8F0]/50 ring-[#E2E8F0]/30 focus:ring-2 focus:ring-[#3B82F6] focus:border-[#3B82F6]'
@@ -746,7 +747,7 @@ function AddNewEventComponent() {
                         <button 
                           type="button" 
                           onClick={() => removeRow('student_coordinators', i)} 
-                          className="px-3 py-1.5 bg-red-500/90 backdrop-blur-sm text-white rounded-lg text-sm font-bold hover:bg-red-600 transition-all duration-200 transform hover:scale-105"
+                          className="px-3 py-1.5 bg-red-500/90 backdrop-blur-sm text-white rounded-lg text-xs sm:text-sm font-bold hover:bg-red-600 transition-all duration-200 transform hover:scale-105"
                         >
                           Remove
                         </button>
@@ -756,7 +757,7 @@ function AddNewEventComponent() {
                   <button 
                     type="button" 
                     onClick={() => addRow('student_coordinators', { name: '', phone: '' })} 
-                    className="w-full p-3 bg-[#3B82F6]/10 backdrop-blur-sm text-[#3B82F6] rounded-2xl border-2 border-[#3B82F6]/30 text-base font-bold hover:bg-[#3B82F6]/20 hover:border-[#3B82F6]/50 transition-all duration-200 transform hover:scale-105"
+                    className="w-full p-2.5 sm:p-3 bg-[#3B82F6]/10 backdrop-blur-sm text-[#3B82F6] rounded-2xl border-2 border-[#3B82F6]/30 text-sm sm:text-base font-bold hover:bg-[#3B82F6]/20 hover:border-[#3B82F6]/50 transition-all duration-200 transform hover:scale-105"
                   >
                     + Add Coordinator
                   </button>
@@ -768,13 +769,13 @@ function AddNewEventComponent() {
                 <label className="text-sm font-bold text-[#64748B] mb-3 uppercase tracking-wide">Staff Incharge</label>
                 <div className="space-y-3">
                   {form.staff_incharge.map((s, i) => (
-                    <div key={i} className="p-4 bg-white/60 backdrop-blur-sm rounded-2xl border border-[#E2E8F0]/30 shadow-sm">
-                      <div className="grid grid-cols-2 gap-3 mb-3">
+                    <div key={i} className="p-3 sm:p-4 bg-white/60 backdrop-blur-sm rounded-2xl border border-[#E2E8F0]/30 shadow-sm">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                       <input
                         value={s.name}
                         onChange={(e) => updateArrayField('staff_incharge', i, 'name', e.target.value)}
                         placeholder="Name"
-                          className={`text-base rounded-xl border-2 px-3 py-2.5 bg-white/80 backdrop-blur-sm ring-1 text-[#334155] placeholder-[#94A3B8] transition-all duration-200 font-medium ${
+                          className={`text-sm sm:text-base rounded-xl border-2 px-3 py-2 sm:py-2.5 bg-white/80 backdrop-blur-sm ring-1 text-[#334155] placeholder-[#94A3B8] transition-all duration-200 font-medium ${
                             errors[`staff_${i}`] 
                               ? 'border-red-400 ring-red-300 focus:ring-2 focus:ring-red-500 focus:border-red-500' 
                               : 'border-[#E2E8F0]/50 ring-[#E2E8F0]/30 focus:ring-2 focus:ring-[#3B82F6] focus:border-[#3B82F6]'
@@ -784,7 +785,7 @@ function AddNewEventComponent() {
                         value={s.department}
                         onChange={(e) => updateArrayField('staff_incharge', i, 'department', e.target.value)}
                         placeholder="Department"
-                          className={`text-base rounded-xl border-2 px-3 py-2.5 bg-white/80 backdrop-blur-sm ring-1 text-[#334155] placeholder-[#94A3B8] transition-all duration-200 font-medium ${
+                          className={`text-sm sm:text-base rounded-xl border-2 px-3 py-2 sm:py-2.5 bg-white/80 backdrop-blur-sm ring-1 text-[#334155] placeholder-[#94A3B8] transition-all duration-200 font-medium ${
                             errors[`staff_${i}`] 
                               ? 'border-red-400 ring-red-300 focus:ring-2 focus:ring-red-500 focus:border-red-500' 
                               : 'border-[#E2E8F0]/50 ring-[#E2E8F0]/30 focus:ring-2 focus:ring-[#3B82F6] focus:border-[#3B82F6]'
@@ -795,7 +796,7 @@ function AddNewEventComponent() {
                         <button 
                           type="button" 
                           onClick={() => removeRow('staff_incharge', i)} 
-                          className="px-3 py-1.5 bg-red-500/90 backdrop-blur-sm text-white rounded-lg text-sm font-bold hover:bg-red-600 transition-all duration-200 transform hover:scale-105"
+                          className="px-3 py-1.5 bg-red-500/90 backdrop-blur-sm text-white rounded-lg text-xs sm:text-sm font-bold hover:bg-red-600 transition-all duration-200 transform hover:scale-105"
                         >
                           Remove
                         </button>
@@ -805,7 +806,7 @@ function AddNewEventComponent() {
                   <button 
                     type="button" 
                     onClick={() => addRow('staff_incharge', { name: '', department: '' })} 
-                    className="w-full p-3 bg-[#3B82F6]/10 backdrop-blur-sm text-[#3B82F6] rounded-2xl border-2 border-[#3B82F6]/30 text-base font-bold hover:bg-[#3B82F6]/20 hover:border-[#3B82F6]/50 transition-all duration-200 transform hover:scale-105"
+                    className="w-full p-2.5 sm:p-3 bg-[#3B82F6]/10 backdrop-blur-sm text-[#3B82F6] rounded-2xl border-2 border-[#3B82F6]/30 text-sm sm:text-base font-bold hover:bg-[#3B82F6]/20 hover:border-[#3B82F6]/50 transition-all duration-200 transform hover:scale-105"
                   >
                     + Add Staff
                   </button>
@@ -813,14 +814,14 @@ function AddNewEventComponent() {
               </div>
 
               {/* Total participants */}
-              <div className="flex flex-col md:col-span-2">
+              <div className="flex flex-col lg:col-span-2">
                 <label className="text-sm font-bold text-[#64748B] mb-2 uppercase tracking-wide">Total Participants Allowed</label>
                 <input
                   type="number"
                   value={form.total_participants_allowed}
                   onChange={(e) => updateField('total_participants_allowed', e.target.value)}
                   placeholder="e.g., 100"
-                  className={`text-base rounded-2xl border-2 px-4 py-3 bg-white/80 backdrop-blur-sm ring-1 text-[#334155] placeholder-[#94A3B8] transition-all duration-200 font-medium ${
+                  className={`text-sm sm:text-base rounded-2xl border-2 px-3 sm:px-4 py-2.5 sm:py-3 bg-white/80 backdrop-blur-sm ring-1 text-[#334155] placeholder-[#94A3B8] transition-all duration-200 font-medium ${
                     errors.total_participants_allowed 
                       ? 'border-red-400 ring-red-300 focus:ring-2 focus:ring-red-500 focus:border-red-500' 
                       : 'border-[#E2E8F0]/50 ring-[#E2E8F0]/30 focus:ring-2 focus:ring-[#3B82F6] focus:border-[#3B82F6]'
@@ -860,24 +861,26 @@ function AddNewEventComponent() {
               </div>
             </div>
 
-            <div className="flex items-center gap-4 mt-8 pt-6 border-t border-[#E2E8F0]/30">
+            <div className="flex items-center gap-4 mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-[#E2E8F0]/30">
               <button 
                 onClick={handleSave} 
-                className="group relative px-8 py-4 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] text-white rounded-2xl font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 overflow-hidden disabled:opacity-60 disabled:cursor-not-allowed" 
+                className="group relative px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] text-white rounded-2xl font-bold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 overflow-hidden disabled:opacity-60 disabled:cursor-not-allowed text-sm sm:text-base w-full sm:w-auto" 
                 disabled={saveStatus === 'saving'}
               >
-                <span className="relative z-10 flex items-center gap-2">
+                <span className="relative z-10 flex items-center justify-center gap-2">
                   {saveStatus === 'saving' ? (
                     <>
-                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                      Saving...
+                      <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <span className="hidden sm:inline">Saving...</span>
+                      <span className="sm:hidden">Save</span>
                     </>
                   ) : (
                     <>
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      Save Event
+                      <span className="hidden sm:inline">Save Event</span>
+                      <span className="sm:hidden">Save</span>
                     </>
                   )}
                 </span>
@@ -889,24 +892,24 @@ function AddNewEventComponent() {
           </div>
           ) : (
           // View mode with edit option
-          <div className="bg-white/90 backdrop-blur-xl border border-[#E2E8F0]/50 rounded-3xl shadow-xl p-8 relative overflow-hidden">
+          <div className="bg-white/90 backdrop-blur-xl border border-[#E2E8F0]/50 rounded-3xl shadow-xl p-4 sm:p-6 lg:p-8 relative overflow-hidden">
             {/* Background decoration */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-r from-[#3B82F6]/5 to-[#06B6D4]/5 rounded-full -translate-y-16 translate-x-16"></div>
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-r from-[#06B6D4]/5 to-[#3B82F6]/5 rounded-full translate-y-12 -translate-x-12"></div>
+            <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-gradient-to-r from-[#3B82F6]/5 to-[#06B6D4]/5 rounded-full -translate-y-12 sm:-translate-y-16 translate-x-12 sm:translate-x-16"></div>
+            <div className="absolute bottom-0 left-0 w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-r from-[#06B6D4]/5 to-[#3B82F6]/5 rounded-full translate-y-10 sm:translate-y-12 -translate-x-10 sm:-translate-x-12"></div>
             
-            <div className="flex items-center justify-between mb-6 relative z-10">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 relative z-10">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] rounded-2xl flex items-center justify-center shadow-lg">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] rounded-2xl flex items-center justify-center shadow-lg">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
-                <h2 className="text-2xl font-black text-[#1E40AF]">Event Details</h2>
+                <h2 className="text-xl sm:text-2xl font-black text-[#1E40AF]">Event Details</h2>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                 <button 
                   onClick={() => setIsEditing(true)} 
-                  className="group relative px-6 py-3 text-[#3B82F6] border-2 border-[#3B82F6] rounded-2xl hover:bg-[#EFF6FF] hover:border-[#1E40AF] transition-all duration-300 font-semibold bg-white/80 backdrop-blur-sm overflow-hidden"
+                  className="group relative px-4 sm:px-6 py-2.5 sm:py-3 text-[#3B82F6] border-2 border-[#3B82F6] rounded-2xl hover:bg-[#EFF6FF] hover:border-[#1E40AF] transition-all duration-300 font-semibold bg-white/80 backdrop-blur-sm overflow-hidden text-sm sm:text-base w-full sm:w-auto"
                 >
                   <span className="relative z-10">Edit</span>
                   <div className="absolute inset-0 bg-gradient-to-r from-[#3B82F6]/10 to-[#06B6D4]/10 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
@@ -914,7 +917,7 @@ function AddNewEventComponent() {
                 {isGlobalAdmin && isEditMode && (
                   <button 
                     onClick={() => handleDeleteEvent(eventId)}
-                    className="group relative px-6 py-3 bg-red-500/90 text-white rounded-2xl font-semibold shadow-lg hover:bg-red-600 transition-all duration-300 transform hover:scale-105 overflow-hidden"
+                    className="group relative px-4 sm:px-6 py-2.5 sm:py-3 bg-red-500/90 text-white rounded-2xl font-semibold shadow-lg hover:bg-red-600 transition-all duration-300 transform hover:scale-105 overflow-hidden text-sm sm:text-base w-full sm:w-auto"
                   >
                     <span className="relative z-10">Delete Event</span>
                   </button>
@@ -923,10 +926,10 @@ function AddNewEventComponent() {
                   <button 
                     onClick={handleConfirmPost} 
                     disabled={postStatus === 'posting' || postStatus === 'posted'} 
-                    className="group relative px-6 py-3 bg-gradient-to-r from-[#10B981] to-[#059669] text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 overflow-hidden disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="group relative px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-[#10B981] to-[#059669] text-white rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 overflow-hidden disabled:opacity-60 disabled:cursor-not-allowed text-sm sm:text-base w-full sm:w-auto"
                   >
                     <span className="relative z-10">
-                    {postStatus === 'posted' ? (isEditMode ? 'Updated' : 'Posted') : postStatus === 'posting' ? (isEditMode ? 'Updating...' : 'Posting...') : (isEditMode ? 'Confirm & Update' : 'Confirm & Post')}
+                      {postStatus === 'posted' ? (isEditMode ? 'Updated' : 'Posted') : postStatus === 'posting' ? (isEditMode ? 'Updating...' : 'Posting...') : (isEditMode ? 'Confirm & Update' : 'Confirm & Post')}
                     </span>
                     {postStatus !== 'posting' && postStatus !== 'posted' && (
                       <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
@@ -936,7 +939,7 @@ function AddNewEventComponent() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 relative z-10">
               <Detail label="Registration Number" value={form.registration_number} />
               <Detail label="Event Name" value={form.event_name} />
               <Detail label="Caption" value={form.caption || '-'} />
@@ -945,38 +948,38 @@ function AddNewEventComponent() {
               <Detail label="Total Allowed" value={form.total_participants_allowed || '-'} />
               <Detail label="Description" value={form.description || '-'} wide />
               
-              <div className="md:col-span-2 bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-[#E2E8F0]/30 shadow-sm">
+              <div className="lg:col-span-2 bg-white/60 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-[#E2E8F0]/30 shadow-sm">
                 <div className="text-sm font-bold text-[#64748B] uppercase tracking-wide mb-3">Images</div>
                 {form.images && form.images.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
                     {form.images.map((file, idx) => (
-                      <img key={idx} src={URL.createObjectURL(file)} alt={`img-${idx}`} className="w-full h-32 object-cover rounded-2xl border-2 border-[#E2E8F0]/50 shadow-lg" />
+                      <img key={idx} src={URL.createObjectURL(file)} alt={`img-${idx}`} className="w-full h-24 sm:h-32 object-cover rounded-2xl border-2 border-[#E2E8F0]/50 shadow-lg" />
                     ))}
                   </div>
                 ) : (
-                  <div className="text-[#64748B] text-base font-medium">No images uploaded</div>
+                  <div className="text-[#64748B] text-sm sm:text-base font-medium">No images uploaded</div>
                 )}
               </div>
               
-              <div className="md:col-span-2 bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-[#E2E8F0]/30 shadow-sm">
+              <div className="lg:col-span-2 bg-white/60 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-[#E2E8F0]/30 shadow-sm">
                 <div className="text-sm font-bold text-[#64748B] uppercase tracking-wide mb-3">Student Coordinators</div>
                 <ul className="space-y-2">
                   {form.student_coordinators.filter(c => c.name || c.phone).map((c, i) => (
-                    <li key={i} className="flex items-center gap-3 p-3 bg-white/80 backdrop-blur-sm rounded-xl border border-[#E2E8F0]/30">
-                      <div className="w-2 h-2 bg-[#3B82F6] rounded-full"></div>
-                      <span className="text-[#334155] font-medium">{c.name} {c.phone && `• ${c.phone}`}</span>
+                    <li key={i} className="flex items-center gap-3 p-2.5 sm:p-3 bg-white/80 backdrop-blur-sm rounded-xl border border-[#E2E8F0]/30">
+                      <div className="w-2 h-2 bg-[#3B82F6] rounded-full flex-shrink-0"></div>
+                      <span className="text-[#334155] font-medium text-sm sm:text-base">{c.name} {c.phone && `• ${c.phone}`}</span>
                     </li>
                   ))}
                 </ul>
               </div>
               
-              <div className="md:col-span-2 bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-[#E2E8F0]/30 shadow-sm">
+              <div className="lg:col-span-2 bg-white/60 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-[#E2E8F0]/30 shadow-sm">
                 <div className="text-sm font-bold text-[#64748B] uppercase tracking-wide mb-3">Staff Incharge</div>
                 <ul className="space-y-2">
                   {form.staff_incharge.filter(s => s.name || s.department).map((s, i) => (
-                    <li key={i} className="flex items-center gap-3 p-3 bg-white/80 backdrop-blur-sm rounded-xl border border-[#E2E8F0]/30">
-                      <div className="w-2 h-2 bg-[#06B6D4] rounded-full"></div>
-                      <span className="text-[#334155] font-medium">{s.name} {s.department && `• ${s.department}`}</span>
+                    <li key={i} className="flex items-center gap-3 p-2.5 sm:p-3 bg-white/80 backdrop-blur-sm rounded-xl border border-[#E2E8F0]/30">
+                      <div className="w-2 h-2 bg-[#06B6D4] rounded-full flex-shrink-0"></div>
+                      <span className="text-[#334155] font-medium text-sm sm:text-base">{s.name} {s.department && `• ${s.department}`}</span>
                     </li>
                   ))}
                 </ul>
@@ -1019,21 +1022,21 @@ function AddNewEventComponent() {
 
       {/* Post success popup */}
       {isPostPopupOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-[#E2E8F0]/50 p-8 w-[90%] max-w-md text-center relative overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-[#E2E8F0]/50 p-6 sm:p-8 w-full max-w-md text-center relative overflow-hidden">
             {/* Background decoration */}
-            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-r from-[#10B981]/10 to-[#059669]/10 rounded-full -translate-y-12 translate-x-12"></div>
+            <div className="absolute top-0 right-0 w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-r from-[#10B981]/10 to-[#059669]/10 rounded-full -translate-y-10 sm:-translate-y-12 translate-x-10 sm:translate-x-12"></div>
             
             <div className="relative z-10">
-              <div className="mx-auto mb-6 w-20 h-20 rounded-2xl bg-gradient-to-r from-[#10B981] to-[#059669] flex items-center justify-center shadow-lg">
-                <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="mx-auto mb-4 sm:mb-6 w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-r from-[#10B981] to-[#059669] flex items-center justify-center shadow-lg">
+                <svg className="w-8 h-8 sm:w-10 sm:h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-              <div className="text-2xl font-black text-[#065F46] mb-2">
+              <div className="text-xl sm:text-2xl font-black text-[#065F46] mb-2">
                 Event {isEditMode ? 'Updated' : 'Posted'}
             </div>
-              <div className="text-[#047857] text-lg font-medium">Redirecting to Admin Main...</div>
+              <div className="text-[#047857] text-sm sm:text-base lg:text-lg font-medium">Redirecting to Admin Main...</div>
             </div>
           </div>
         </div>
@@ -1044,15 +1047,15 @@ function AddNewEventComponent() {
 
 function Detail({ label, value, wide = false, isCode = false }) {
   return (
-    <div className={`${wide ? 'md:col-span-2' : ''} bg-white/80 backdrop-blur-sm border border-[#E2E8F0]/50 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 group relative overflow-hidden`}>
+    <div className={`${wide ? 'lg:col-span-2' : ''} bg-white/80 backdrop-blur-sm border border-[#E2E8F0]/50 rounded-2xl p-4 sm:p-6 shadow-lg hover:shadow-xl transition-all duration-300 group relative overflow-hidden`}>
       {/* Background decoration */}
-      <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-r from-[#3B82F6]/5 to-[#06B6D4]/5 rounded-full -translate-y-8 translate-x-8"></div>
+      <div className="absolute top-0 right-0 w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-[#3B82F6]/5 to-[#06B6D4]/5 rounded-full -translate-y-6 sm:-translate-y-8 translate-x-6 sm:translate-x-8"></div>
       
-      <div className="text-sm font-bold text-[#64748B] uppercase tracking-wide mb-2 relative z-10">{label}</div>
+      <div className="text-xs sm:text-sm font-bold text-[#64748B] uppercase tracking-wide mb-2 relative z-10">{label}</div>
       {isCode ? (
-        <pre className="text-sm text-[#1E40AF] whitespace-pre-wrap break-words font-mono font-semibold relative z-10">{value}</pre>
+        <pre className="text-xs sm:text-sm text-[#1E40AF] whitespace-pre-wrap break-words font-mono font-semibold relative z-10">{value}</pre>
       ) : (
-        <div className="text-base font-semibold text-[#334155] relative z-10">{value}</div>
+        <div className="text-sm sm:text-base font-semibold text-[#334155] relative z-10">{value}</div>
       )}
     </div>
   );

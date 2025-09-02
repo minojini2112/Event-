@@ -793,18 +793,18 @@ function ParticularEventComponent() {
         </div>
       )}
 
-      <header className="relative z-50 w-full px-8 py-6 bg-white/80 backdrop-blur-xl border-b border-[#E2E8F0]/50 shadow-lg sticky top-0">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-black bg-gradient-to-r from-[#3B82F6] to-[#1E40AF] bg-clip-text text-transparent">{title}</h1>
-            <p className="text-[#64748B] mt-2 font-medium">Full event information and details</p>
+      <header className="relative z-50 w-full px-4 sm:px-8 py-4 sm:py-6 bg-white/80 backdrop-blur-xl border-b border-[#E2E8F0]/50 shadow-lg sticky top-0">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div className="mb-4 sm:mb-0">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black bg-gradient-to-r from-[#3B82F6] to-[#1E40AF] bg-clip-text text-transparent">{title}</h1>
+            <p className="text-sm sm:text-base text-[#64748B] mt-2 font-medium">Full event information and details</p>
           </div>
-          <div className="flex items-center gap-3">
-            <button onClick={() => router.back()} className="group relative px-6 py-3 text-[#3B82F6] border-2 border-[#3B82F6] rounded-2xl hover:bg-[#EFF6FF] hover:border-[#1E40AF] transition-all duration-300 font-semibold bg-white/80 backdrop-blur-sm overflow-hidden">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+            <button onClick={() => router.back()} className="group relative px-4 sm:px-6 py-2.5 sm:py-3 text-[#3B82F6] border-2 border-[#3B82F6] rounded-2xl hover:bg-[#EFF6FF] hover:border-[#1E40AF] transition-all duration-300 font-semibold bg-white/80 backdrop-blur-sm overflow-hidden text-sm sm:text-base">
               <span className="relative z-10">Back</span>
               <div className="absolute inset-0 bg-gradient-to-r from-[#3B82F6]/10 to-[#06B6D4]/10 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
             </button>
-            <button onClick={() => router.push('/main/2')} className="group relative px-6 py-3 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] text-white rounded-2xl hover:from-[#1E40AF] hover:to-[#3B82F6] transition-all duration-300 font-semibold shadow-xl hover:shadow-2xl transform hover:scale-105 overflow-hidden">
+            <button onClick={() => router.push('/main/2')} className="group relative px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] text-white rounded-2xl hover:from-[#1E40AF] hover:to-[#3B82F6] transition-all duration-300 font-semibold shadow-xl hover:shadow-2xl transform hover:scale-105 overflow-hidden text-sm sm:text-base">
               <span className="relative z-10">Browse Events</span>
               <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
             </button>
@@ -812,25 +812,25 @@ function ParticularEventComponent() {
         </div>
       </header>
 
-      <main className="relative z-10 max-w-7xl mx-auto px-8 py-12">
+      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-8 py-8 sm:py-12">
         {/* Motivational Hero */}
-        <section className="mb-12 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] text-white rounded-3xl shadow-2xl overflow-hidden relative">
+        <section className="mb-8 sm:mb-12 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] text-white rounded-3xl shadow-2xl overflow-hidden relative">
           {/* Background decoration */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
-          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-12 -translate-x-12"></div>
+          <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-white/10 rounded-full -translate-y-12 sm:-translate-y-16 translate-x-12 sm:translate-x-16"></div>
+          <div className="absolute bottom-0 left-0 w-20 h-20 sm:w-24 sm:h-24 bg-white/10 rounded-full translate-y-8 sm:translate-y-12 -translate-x-8 sm:-translate-x-12"></div>
           
-          <div className="p-8 md:p-12 relative z-10">
+          <div className="p-6 sm:p-8 md:p-12 relative z-10">
             <div className="max-w-4xl">
-              <h2 className="text-3xl md:text-4xl font-black tracking-tight mb-4">Level up your skills. Meet mentors. Win prizes.</h2>
-              <p className="text-xl text-white/90 mb-8 leading-relaxed">{eventData.caption || 'Join a vibrant community of builders and creators. Hands-on workshops, exclusive swag, and certificates to boost your portfolio.'}</p>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight mb-3 sm:mb-4">Level up your skills. Meet mentors. Win prizes.</h2>
+              <p className="text-base sm:text-lg md:text-xl text-white/90 mb-6 sm:mb-8 leading-relaxed">{eventData.caption || 'Join a vibrant community of builders and creators. Hands-on workshops, exclusive swag, and certificates to boost your portfolio.'}</p>
               
-              <div className="flex flex-wrap items-center gap-4 mb-6">
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
                 {/* Registration Button - Only for participants (not admins) and upcoming events */}
                 {showParticipantCTAs && eventStatus?.showRegistration && (
                   <button 
                     onClick={handleRegister} 
                     disabled={isRegistered} 
-                    className={`group relative px-8 py-4 rounded-2xl text-base font-bold shadow-xl transition-all duration-300 transform hover:scale-105 overflow-hidden ${
+                    className={`group relative px-6 sm:px-8 py-3 sm:py-4 rounded-2xl text-sm sm:text-base font-bold shadow-xl transition-all duration-300 transform hover:scale-105 overflow-hidden ${
                       isRegistered 
                         ? 'bg-white/20 border-2 border-white/30 text-white cursor-not-allowed' 
                         : 'bg-white text-[#3B82F6] hover:bg-[#F8FAFC] hover:shadow-2xl'
@@ -860,7 +860,7 @@ function ParticularEventComponent() {
                 
                 {/* Event Status Badge */}
                 {eventStatus && (
-                  <div className={`px-6 py-3 rounded-2xl text-base font-bold border-2 shadow-lg backdrop-blur-sm ${
+                  <div className={`px-4 sm:px-6 py-2.5 sm:py-3 rounded-2xl text-sm sm:text-base font-bold border-2 shadow-lg backdrop-blur-sm ${
                     eventStatus.status === 'upcoming' 
                       ? 'bg-white/20 border-white/30 text-white' 
                       : eventStatus.status === 'live'
@@ -875,7 +875,7 @@ function ParticularEventComponent() {
                 <button 
                   onClick={handleWishlist} 
                   disabled={isWishlistLoading}
-                    className={`group relative px-6 py-4 rounded-2xl text-base font-bold border-2 shadow-lg transition-all duration-300 transform hover:scale-105 overflow-hidden ${
+                    className={`group relative px-4 sm:px-6 py-3 sm:py-4 rounded-2xl text-sm sm:text-base font-bold border-2 shadow-lg transition-all duration-300 transform hover:scale-105 overflow-hidden ${
                     isWishlisted 
                         ? 'bg-pink-500/20 border-pink-400/30 text-pink-100' 
                         : 'bg-white/20 border-white/30 hover:bg-white/30'
@@ -1006,29 +1006,29 @@ function ParticularEventComponent() {
 
 
         {/* Event Details */}
-        <div className="bg-white/90 backdrop-blur-xl border border-[#E2E8F0]/50 rounded-3xl shadow-xl p-8 relative overflow-hidden">
+        <div className="bg-white/90 backdrop-blur-xl border border-[#E2E8F0]/50 rounded-3xl shadow-xl p-6 sm:p-8 relative overflow-hidden">
           {/* Background decoration */}
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-r from-[#3B82F6]/5 to-[#06B6D4]/5 rounded-full -translate-y-16 translate-x-16"></div>
           <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-r from-[#06B6D4]/5 to-[#3B82F6]/5 rounded-full translate-y-12 -translate-x-12"></div>
           
           {/* Section Header */}
-          <div className="flex items-center gap-4 mb-8 relative z-10">
-            <div className="w-14 h-14 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] rounded-2xl flex items-center justify-center shadow-lg">
-              <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8 relative z-10">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] rounded-2xl flex items-center justify-center shadow-lg">
+              <svg className="w-6 h-6 sm:w-7 sm:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
             <div>
-              <h3 className="text-3xl font-black bg-gradient-to-r from-[#3B82F6] to-[#1E40AF] bg-clip-text text-transparent">Event Details</h3>
-              <p className="text-[#64748B] text-base font-medium">Complete information about this event</p>
+              <h3 className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-[#3B82F6] to-[#1E40AF] bg-clip-text text-transparent">Event Details</h3>
+              <p className="text-[#64748B] text-sm sm:text-base font-medium">Complete information about this event</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
             {/* Left: Event Image */}
             <div className="lg:col-span-1">
               <div className="relative w-full overflow-hidden rounded-3xl border-2 border-[#E2E8F0]/30 bg-gradient-to-br from-[#F8FAFC] to-[#EFF6FF] cursor-pointer hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] group" onClick={() => eventData.image_url && setShowImageModal(true)}>
-                <div className="aspect-[3/4] w-full h-auto min-h-[400px]">
+                <div className="aspect-[3/4] w-full h-auto min-h-[300px] sm:min-h-[400px]">
                   {/* Main event image */}
                   {eventData.image_url ? (
                     <img 
@@ -1092,7 +1092,7 @@ function ParticularEventComponent() {
             {/* Right: Details Grid */}
             <div className="lg:col-span-2">
               {/* Main Info Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
                 <Detail label="Event Name" value={eventData.event_name || 'N/A'} />
                 <Detail label="Start Date" value={eventData.start_date ? formatEventDate(eventData.start_date, 'long') : 'N/A'} />
                 <Detail label="End Date" value={eventData.end_date ? formatEventDate(eventData.end_date, 'long') : 'N/A'} />
@@ -1104,39 +1104,39 @@ function ParticularEventComponent() {
               </div>
 
               {/* Description Card */}
-              <div className="mb-6">
+              <div className="mb-4 sm:mb-6">
                 <Detail label="Description" value={eventData.description || eventData.caption || 'No description available'} wide />
               </div>
               
               {/* Registration Link Card */}
               {eventData.registration_link && (
-                <div className="mb-6">
+                <div className="mb-4 sm:mb-6">
                   <Detail label="Registration Link" value={eventData.registration_link} wide isCode />
                 </div>
               )}
               
               {/* Enhanced Event Status Card */}
-              <div className={`rounded-3xl p-8 border-2 shadow-xl backdrop-blur-sm ${
+              <div className={`rounded-3xl p-6 sm:p-8 border-2 shadow-xl backdrop-blur-sm ${
                 eventStatus?.status === 'upcoming' 
                   ? 'bg-gradient-to-r from-[#3B82F6]/10 to-[#06B6D4]/10 border-[#3B82F6]/30' 
                   : eventStatus?.status === 'live'
                   ? 'bg-gradient-to-r from-[#10B981]/10 to-[#059669]/10 border-[#10B981]/30'
                   : 'bg-gradient-to-r from-[#6B7280]/10 to-[#4B5563]/10 border-[#6B7280]/30'
               }`}>
-                <div className="flex items-center gap-4 mb-6">
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg ${
+                <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+                  <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center shadow-lg ${
                     eventStatus?.status === 'upcoming' 
                       ? 'bg-gradient-to-r from-[#3B82F6] to-[#06B6D4]' 
                       : eventStatus?.status === 'live'
                       ? 'bg-gradient-to-r from-[#10B981] to-[#059669]'
                       : 'bg-gradient-to-r from-[#6B7280] to-[#4B5563]'
                   }`}>
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
                   <div>
-                    <div className={`text-sm font-bold uppercase tracking-wide ${
+                    <div className={`text-xs sm:text-sm font-bold uppercase tracking-wide ${
                       eventStatus?.status === 'upcoming' 
                         ? 'text-[#3B82F6]' 
                         : eventStatus?.status === 'live'
@@ -1145,7 +1145,7 @@ function ParticularEventComponent() {
                     }`}>
                       Event Status
                     </div>
-                    <div className={`text-xl font-black ${
+                    <div className={`text-lg sm:text-xl font-black ${
                       eventStatus?.status === 'upcoming' 
                         ? 'text-[#1E40AF]' 
                         : eventStatus?.status === 'live'
@@ -1158,16 +1158,16 @@ function ParticularEventComponent() {
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                   {eventStatus?.status === 'upcoming' && (
                     <>
-                      <div className="flex items-center gap-3 p-4 bg-white/60 backdrop-blur-sm rounded-2xl border border-white/40 shadow-sm">
-                        <div className="w-3 h-3 bg-[#3B82F6] rounded-full shadow-sm"></div>
-                        <span className="text-sm font-bold text-[#1E40AF]">Registration Open</span>
+                      <div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-white/60 backdrop-blur-sm rounded-2xl border border-white/40 shadow-sm">
+                        <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-[#3B82F6] rounded-full shadow-sm"></div>
+                        <span className="text-xs sm:text-sm font-bold text-[#1E40AF]">Registration Open</span>
                       </div>
-                      <div className="flex items-center gap-3 p-4 bg-white/60 backdrop-blur-sm rounded-2xl border border-white/40 shadow-sm">
-                        <div className="w-3 h-3 bg-[#10B981] rounded-full shadow-sm"></div>
-                        <span className="text-sm font-bold text-[#065F46]">
+                      <div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-white/60 backdrop-blur-sm rounded-2xl border border-white/40 shadow-sm">
+                        <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-[#10B981] rounded-full shadow-sm"></div>
+                        <span className="text-xs sm:text-sm font-bold text-[#065F46]">
                           {availableSlots?.available} spots available
                         </span>
                       </div>
@@ -1206,36 +1206,36 @@ function ParticularEventComponent() {
         </div>
 
         {/* Student Coordinators & Staff Incharge */}
-        <div className="bg-white/90 backdrop-blur-xl border border-[#E2E8F0]/50 rounded-3xl shadow-xl p-8 mb-12 relative overflow-hidden">
+        <div className="bg-white/90 backdrop-blur-xl border border-[#E2E8F0]/50 rounded-3xl shadow-xl p-6 sm:p-8 mb-8 sm:mb-12 relative overflow-hidden">
           {/* Background decoration */}
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#3B82F6]/5 to-[#06B6D4]/5 rounded-full -translate-y-16 translate-x-16"></div>
           <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-br from-[#06B6D4]/5 to-[#3B82F6]/5 rounded-full translate-y-12 -translate-x-12"></div>
           
           <div className="relative z-10">
-            <div className="flex items-center gap-4 mb-8">
-              <div className="w-14 h-14 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] rounded-2xl flex items-center justify-center shadow-xl">
-                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] rounded-2xl flex items-center justify-center shadow-xl">
+                <svg className="w-6 h-6 sm:w-7 sm:h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
               <div>
-                <h3 className="text-3xl font-black text-[#1E40AF]">Event Team</h3>
-                <p className="text-[#64748B] text-lg font-medium">Meet the organizers and coordinators</p>
+                <h3 className="text-2xl sm:text-3xl font-black text-[#1E40AF]">Event Team</h3>
+                <p className="text-[#64748B] text-base sm:text-lg font-medium">Meet the organizers and coordinators</p>
               </div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
             {/* Student Coordinators */}
-              <div className="bg-gradient-to-br from-[#3B82F6]/10 to-[#06B6D4]/10 rounded-3xl p-8 border border-[#3B82F6]/20 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] rounded-2xl flex items-center justify-center shadow-lg">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="bg-gradient-to-br from-[#3B82F6]/10 to-[#06B6D4]/10 rounded-3xl p-6 sm:p-8 border border-[#3B82F6]/20 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]">
+                <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] rounded-2xl flex items-center justify-center shadow-lg">
+                    <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
                   </svg>
                 </div>
-                  <h4 className="text-2xl font-black text-[#1E40AF]">Student Coordinators</h4>
+                  <h4 className="text-xl sm:text-2xl font-black text-[#1E40AF]">Student Coordinators</h4>
               </div>
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                     {eventData.student_coordinators ? (() => {
                       try {
                         const coordinators = typeof eventData.student_coordinators === 'string' 
@@ -1289,16 +1289,16 @@ function ParticularEventComponent() {
             </div>
 
             {/* Staff Incharge */}
-              <div className="bg-gradient-to-br from-[#10B981]/10 to-[#059669]/10 rounded-3xl p-8 border border-[#10B981]/20 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 bg-gradient-to-r from-[#10B981] to-[#059669] rounded-2xl flex items-center justify-center shadow-lg">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="bg-gradient-to-br from-[#10B981]/10 to-[#059669]/10 rounded-3xl p-6 sm:p-8 border border-[#10B981]/20 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]">
+                <div className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-[#10B981] to-[#059669] rounded-2xl flex items-center justify-center shadow-lg">
+                    <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2V8a2 2 0 012-2z" />
                   </svg>
                 </div>
-                  <h4 className="text-2xl font-black text-[#065F46]">Staff Incharge</h4>
+                  <h4 className="text-xl sm:text-2xl font-black text-[#065F46]">Staff Incharge</h4>
               </div>
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                     {eventData.staff_incharge ? (() => {
                       try {
                         const staff = typeof eventData.staff_incharge === 'string' 

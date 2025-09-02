@@ -146,31 +146,31 @@ export default function ParticipantWishlistPage() {
       )}
 
       {/* Header */}
-      <header className="relative z-50 w-full px-8 py-6 bg-white/80 backdrop-blur-xl border-b border-[#E2E8F0]/50 shadow-lg sticky top-0">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
+      <header className="relative z-50 w-full px-4 sm:px-8 py-4 sm:py-6 bg-white/80 backdrop-blur-xl border-b border-[#E2E8F0]/50 shadow-lg sticky top-0">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
           {/* Logo/Brand */}
-          <div className="flex items-center space-x-4 group">
+          <div className="flex items-center space-x-3 sm:space-x-4 group">
             <div className="relative">
-              <div className="w-14 h-14 bg-gradient-to-br from-[#3B82F6] to-[#1E40AF] rounded-2xl flex items-center justify-center shadow-2xl group-hover:shadow-[#3B82F6]/25 transition-all duration-500 transform group-hover:scale-110 group-hover:rotate-3">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-[#3B82F6] to-[#1E40AF] rounded-2xl flex items-center justify-center shadow-2xl group-hover:shadow-[#3B82F6]/25 transition-all duration-500 transform group-hover:scale-110 group-hover:rotate-3">
+                <svg className="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
               </div>
               <div className="absolute -inset-2 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] rounded-2xl blur-xl opacity-0 group-hover:opacity-30 transition-opacity duration-500"></div>
             </div>
             <div>
-              <h1 className="text-4xl font-black text-[#1E40AF]">My Wishlist</h1>
-              <p className="text-[#64748B] mt-1 font-medium">Events you&apos;re passionate about</p>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#1E40AF]">My Wishlist</h1>
+              <p className="text-[#64748B] mt-1 font-medium text-sm sm:text-base">Events you&apos;re passionate about</p>
             </div>
           </div>
           
           {/* Back Button */}
           <button 
             onClick={() => router.back()} 
-            className="group relative px-6 py-3 bg-white/80 backdrop-blur-sm text-[#3B82F6] border-2 border-[#3B82F6] rounded-2xl hover:bg-[#EFF6FF] hover:border-[#1E40AF] transition-all duration-300 font-semibold shadow-xl hover:shadow-2xl transform hover:scale-105 overflow-hidden"
+            className="group relative px-4 sm:px-6 py-2.5 sm:py-3 bg-white/80 backdrop-blur-sm text-[#3B82F6] border-2 border-[#3B82F6] rounded-2xl hover:bg-[#EFF6FF] hover:border-[#1E40AF] transition-all duration-300 font-semibold shadow-xl hover:shadow-2xl transform hover:scale-105 overflow-hidden w-full sm:w-auto text-sm sm:text-base"
           >
-            <span className="relative z-10 flex items-center gap-2">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <span className="relative z-10 flex items-center justify-center gap-2">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
               Back
@@ -181,7 +181,7 @@ export default function ParticipantWishlistPage() {
       </header>
 
       {/* Main Content */}
-      <main className="relative z-10 max-w-7xl mx-auto px-8 py-12">
+      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-8 py-8 sm:py-12">
         {/* Error Message */}
         {error && (
           <div className="mb-8 bg-red-50/80 backdrop-blur-sm border border-red-200/60 rounded-2xl p-6 shadow-lg">
@@ -219,9 +219,9 @@ export default function ParticipantWishlistPage() {
         )}
 
         {!loading && !error && (
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 sm:gap-8">
             {/* Badge Journey Sidebar */}
-            <aside className="lg:col-span-2 space-y-6">
+            <aside className="lg:col-span-2 space-y-4 sm:space-y-6">
               {/* Stats Card */}
               <div className="bg-white/90 backdrop-blur-xl border border-[#E2E8F0]/50 rounded-3xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105">
                 <div className="text-center mb-6">
@@ -319,9 +319,9 @@ export default function ParticipantWishlistPage() {
             {/* Events Section */}
             <section className="lg:col-span-3">
               {/* Section Header */}
-              <div className="mb-8">
-                <h2 className="text-3xl font-black text-[#1E40AF] mb-2">Your Wishlist</h2>
-                <p className="text-[#64748B] text-lg">
+              <div className="mb-6 sm:mb-8">
+                <h2 className="text-2xl sm:text-3xl font-black text-[#1E40AF] mb-2">Your Wishlist</h2>
+                <p className="text-[#64748B] text-base sm:text-lg">
                   {events.length === 0 
                     ? "Start building your wishlist by saving events you&apos;re interested in!" 
                     : `You have ${events.length} amazing event${events.length === 1 ? '' : 's'} in your wishlist!`
@@ -331,62 +331,62 @@ export default function ParticipantWishlistPage() {
 
               {/* Events List */}
               {events.length === 0 ? (
-                <div className="bg-white/90 backdrop-blur-xl border border-[#E2E8F0]/50 rounded-3xl p-16 text-center shadow-xl">
-                  <div className="w-24 h-24 bg-gradient-to-r from-[#3B82F6]/10 to-[#06B6D4]/10 rounded-3xl flex items-center justify-center mx-auto mb-6">
-                    <svg className="w-12 h-12 text-[#3B82F6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="bg-white/90 backdrop-blur-xl border border-[#E2E8F0]/50 rounded-3xl p-8 sm:p-16 text-center shadow-xl">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-r from-[#3B82F6]/10 to-[#06B6D4]/10 rounded-3xl flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                    <svg className="w-10 h-10 sm:w-12 sm:h-12 text-[#3B82F6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                     </svg>
                   </div>
-                  <h3 className="text-2xl font-bold text-[#1E40AF] mb-2">No Wishlist Yet</h3>
-                  <p className="text-[#64748B] mb-6">Start saving events you&apos;re interested in to build your personal collection!</p>
+                  <h3 className="text-xl sm:text-2xl font-bold text-[#1E40AF] mb-2">No Wishlist Yet</h3>
+                  <p className="text-[#64748B] mb-4 sm:mb-6 text-sm sm:text-base">Start saving events you&apos;re interested in to build your personal collection!</p>
                   <button 
                     onClick={() => router.push('/main/2')}
-                    className="px-8 py-3 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] text-white rounded-2xl font-semibold hover:from-[#1E40AF] hover:to-[#3B82F6] transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105"
+                    className="px-6 sm:px-8 py-2.5 sm:py-3 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] text-white rounded-2xl font-semibold hover:from-[#1E40AF] hover:to-[#3B82F6] transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105 text-sm sm:text-base"
                   >
                     Explore Events
                   </button>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   {events.map((event, index) => (
                     <div 
                       key={event.id} 
-                      className="group bg-white/90 backdrop-blur-xl border border-[#E2E8F0]/50 rounded-3xl p-6 shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105 cursor-pointer overflow-hidden relative"
+                      className="group bg-white/90 backdrop-blur-xl border border-[#E2E8F0]/50 rounded-3xl p-4 sm:p-6 shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105 cursor-pointer overflow-hidden relative"
                       onClick={() => viewDetails(event.id)}
                     >
                       {/* Hover Effect Background */}
                       <div className="absolute inset-0 bg-gradient-to-r from-[#3B82F6]/5 to-[#06B6D4]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                       
-                      <div className="relative z-10 flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className="w-16 h-16 bg-gradient-to-br from-[#EC4899] to-[#BE185D] rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300">
-                            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0">
+                        <div className="flex items-center gap-3 sm:gap-4">
+                          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-[#EC4899] to-[#BE185D] rounded-2xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300">
+                            <svg className="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                             </svg>
                           </div>
                           <div>
-                            <h3 className="text-xl font-bold text-[#1E40AF] group-hover:text-[#3B82F6] transition-colors duration-300 mb-1">
+                            <h3 className="text-lg sm:text-xl font-bold text-[#1E40AF] group-hover:text-[#3B82F6] transition-colors duration-300 mb-1">
                               {event.title || 'Untitled Event'}
                             </h3>
-                            <div className="flex items-center gap-3">
-                              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#FDF2F8] text-[#BE185D] border border-[#EC4899]/20 font-medium text-sm">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
+                              <span className="inline-flex items-center gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full bg-[#FDF2F8] text-[#BE185D] border border-[#EC4899]/20 font-medium text-xs sm:text-sm">
+                                <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
                                 {formatYmd(event.start_date || event.date)}
                               </span>
-                              <span className="text-[#64748B] text-sm">Wishlist #{index + 1}</span>
+                              <span className="text-[#64748B] text-xs sm:text-sm">Wishlist #{index + 1}</span>
                             </div>
                           </div>
                         </div>
                         
-                        <div className="flex items-center gap-3">
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
                           <button 
                             onClick={(ev) => { ev.stopPropagation(); viewDetails(event.id); }}
-                            className="group/btn relative px-6 py-3 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] text-white rounded-2xl font-semibold hover:from-[#1E40AF] hover:to-[#3B82F6] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 overflow-hidden"
+                            className="group/btn relative px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] text-white rounded-2xl font-semibold hover:from-[#1E40AF] hover:to-[#3B82F6] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 overflow-hidden text-sm sm:text-base"
                           >
-                            <span className="relative z-10 flex items-center gap-2">
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <span className="relative z-10 flex items-center justify-center gap-2">
+                              <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                               </svg>
                               View Details
@@ -396,10 +396,10 @@ export default function ParticipantWishlistPage() {
                           
                           <button 
                             onClick={(ev) => { ev.stopPropagation(); removeFromWishlist(event.id); }}
-                            className="group/remove relative px-4 py-3 bg-gradient-to-r from-[#EF4444] to-[#DC2626] text-white rounded-2xl font-semibold hover:from-[#DC2626] hover:to-[#B91C1C] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 overflow-hidden"
+                            className="group/remove relative px-4 py-2.5 sm:py-3 bg-gradient-to-r from-[#EF4444] to-[#DC2626] text-white rounded-2xl font-semibold hover:from-[#DC2626] hover:to-[#B91C1C] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 overflow-hidden text-sm sm:text-base"
                           >
-                            <span className="relative z-10 flex items-center gap-2">
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <span className="relative z-10 flex items-center justify-center gap-2">
+                              <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                               </svg>
                               Remove
