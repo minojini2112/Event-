@@ -46,8 +46,8 @@ export default function HomePage() {
             <p className="text-sm sm:text-base text-[#64748B] mt-1 sm:mt-2">Your Event Management Platform</p>
           </div>
           
-          {/* Login/Signup Buttons */}
-          <div className="absolute top-0 right-0 flex flex-col sm:flex-row gap-3 sm:gap-4">
+          {/* Login/Signup Buttons - Hidden on mobile */}
+          <div className="absolute top-0 right-0 hidden sm:flex flex-col sm:flex-row gap-3 sm:gap-4">
             <button 
               onClick={handleLogin}
               className="relative px-6 sm:px-8 py-2.5 sm:py-3 text-[#3B82F6] border-2 border-[#3B82F6] rounded-2xl hover:bg-[#EFF6FF] hover:border-[#1E40AF] transition-all duration-300 font-semibold bg-white/80 backdrop-blur-sm overflow-hidden group text-sm sm:text-base w-full sm:w-auto"
@@ -88,7 +88,7 @@ export default function HomePage() {
               Experience the future of event management with our cutting-edge platform that brings communities together.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 lg:gap-8 justify-center px-4">
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 lg:gap-8 justify-center px-4 mt-8 sm:mt-0">
               <button 
                 onClick={handleSignup}
                 className="group relative px-8 sm:px-12 lg:px-16 py-3 sm:py-4 lg:py-5 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] text-white rounded-2xl hover:from-[#1E40AF] hover:to-[#3B82F6] transition-all duration-500 font-bold text-lg sm:text-xl lg:text-2xl shadow-2xl hover:shadow-[#3B82F6]/25 transform hover:scale-105 overflow-hidden w-full sm:w-auto"
