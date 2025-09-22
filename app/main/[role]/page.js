@@ -338,8 +338,8 @@ export default function MainPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Header */}
       <header className="w-full px-4 sm:px-6 py-4 sm:py-6 bg-white/80 backdrop-blur-sm border-b border-gray-200/50 shadow-sm relative z-[10000]">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:justify-between sm:items-center">
-          <div className="mb-4 sm:mb-0">
+        <div className="max-w-7xl mx-auto relative">
+          <div className="text-center">
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Discover Events
             </h1>
@@ -347,7 +347,7 @@ export default function MainPage() {
           </div>
           
           {/* Profile Circle */}
-          <div className="flex items-center relative" ref={profileRef}>
+          <div className="absolute top-0 right-0 flex items-center relative" ref={profileRef}>
             <button 
               onClick={() => setIsProfileOpen(!isProfileOpen)}
               className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"

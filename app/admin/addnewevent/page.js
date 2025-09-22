@@ -435,25 +435,18 @@ function AddNewEventComponent() {
 
       <header className="relative z-50 w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 bg-white/80 backdrop-blur-xl border-b border-[#E2E8F0]/50 shadow-lg sticky top-0">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-            <div className="flex items-center gap-3 sm:gap-4">
-              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] rounded-2xl flex items-center justify-center shadow-lg">
-                <svg className="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-              </div>
-              <div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black bg-gradient-to-r from-[#3B82F6] to-[#1E40AF] bg-clip-text text-transparent">
-                  {isEditMode ? 'Edit Event' : 'Add New Event'}
-                </h1>
-                <p className="text-[#64748B] mt-1 sm:mt-2 text-sm sm:text-base lg:text-lg font-medium">
-                  {isEditMode ? 'Update event information and details' : 'Create and publish a new event'}
-                </p>
-              </div>
+          <div className="relative">
+            <div className="text-center">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black bg-gradient-to-r from-[#3B82F6] to-[#1E40AF] bg-clip-text text-transparent">
+                {isEditMode ? 'Edit Event' : 'Add New Event'}
+              </h1>
+              <p className="text-[#64748B] mt-1 sm:mt-2 text-sm sm:text-base lg:text-lg font-medium">
+                {isEditMode ? 'Update event information and details' : 'Create and publish a new event'}
+              </p>
             </div>
             
             {/* Back Navigation Button */}
-            <div className="flex items-center gap-3">
+            <div className="absolute top-0 right-0 flex items-center gap-3">
               <button 
                 onClick={() => router.push('/main/1')} 
                 className="group relative px-4 sm:px-6 py-2 sm:py-3 text-[#3B82F6] border-2 border-[#3B82F6] rounded-2xl hover:bg-[#EFF6FF] hover:border-[#1E40AF] transition-all duration-300 font-semibold bg-white/80 backdrop-blur-sm overflow-hidden text-sm sm:text-base w-full sm:w-auto"

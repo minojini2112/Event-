@@ -29,12 +29,12 @@ export default function AdminRegistrationsForEvent() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
       {/* Modern Header */}
       <header className="w-full px-4 sm:px-6 py-6 sm:py-8 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="space-y-1 sm:space-y-2">
+        <div className="max-w-7xl mx-auto relative">
+          <div className="text-center">
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-slate-800 tracking-tight">
               Event Registrations
             </h1>
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 justify-center mt-2">
               <p className="text-slate-600 text-sm sm:text-base lg:text-lg font-medium">
                 {eventTitle}
               </p>

@@ -794,12 +794,12 @@ function ParticularEventComponent() {
       )}
 
       <header className="relative z-50 w-full px-4 sm:px-8 py-4 sm:py-6 bg-white/80 backdrop-blur-xl border-b border-[#E2E8F0]/50 shadow-lg sticky top-0">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between">
-          <div className="mb-4 sm:mb-0">
+        <div className="max-w-7xl mx-auto relative">
+          <div className="text-center">
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black bg-gradient-to-r from-[#3B82F6] to-[#1E40AF] bg-clip-text text-transparent">{title}</h1>
             <p className="text-sm sm:text-base text-[#64748B] mt-2 font-medium">Full event information and details</p>
           </div>
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+          <div className="absolute top-0 right-0 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
             <button onClick={() => router.back()} className="group relative px-4 sm:px-6 py-2.5 sm:py-3 text-[#3B82F6] border-2 border-[#3B82F6] rounded-2xl hover:bg-[#EFF6FF] hover:border-[#1E40AF] transition-all duration-300 font-semibold bg-white/80 backdrop-blur-sm overflow-hidden text-sm sm:text-base">
               <span className="relative z-10">Back</span>
               <div className="absolute inset-0 bg-gradient-to-r from-[#3B82F6]/10 to-[#06B6D4]/10 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>

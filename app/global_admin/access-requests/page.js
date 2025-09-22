@@ -120,23 +120,16 @@ function AccessRequestsContent() {
       {/* Header */}
       <header className="sticky top-0 z-50 w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-6 bg-white border-b border-[#E2E8F0] shadow-sm">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-            <div className="flex items-center space-x-3 sm:space-x-4">
-              <div className="p-2 sm:p-3 bg-[#3B82F6] rounded-xl shadow-lg">
-                <svg className="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <div>
+          <div className="relative">
+            <div className="text-center">
                 <h1 className="text-2xl sm:text-3xl lg:text-[2.5rem] font-semibold text-[#334155] leading-tight">
                 Access Requests
               </h1>
                 <p className="text-[#64748B] mt-1 sm:mt-2 text-sm sm:text-base lg:text-lg">Review and manage admin access requests</p>
             </div>
-          </div>
           <button
             onClick={() => router.push('/main/0')}
-              className="bg-[#3B82F6] hover:bg-[#1E40AF] text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-medium transition-all duration-200 shadow-sm hover:shadow-md text-sm sm:text-base w-full sm:w-auto"
+              className="absolute top-0 right-0 bg-[#3B82F6] hover:bg-[#1E40AF] text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-medium transition-all duration-200 shadow-sm hover:shadow-md text-sm sm:text-base w-full sm:w-auto"
           >
             Back to Dashboard
           </button>

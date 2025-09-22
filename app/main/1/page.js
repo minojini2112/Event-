@@ -391,8 +391,8 @@ function AdminMainPageContent() {
 
       {/* Header */}
       <header className="w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-6 bg-white/80 backdrop-blur-xl border-b border-[#E2E8F0]/50 shadow-lg relative z-50">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
-          <div>
+        <div className="max-w-7xl mx-auto relative">
+          <div className="text-center">
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1E40AF]">
               Admin Dashboard
             </h1>
@@ -400,7 +400,7 @@ function AdminMainPageContent() {
           </div>
           
           {/* Profile Circle */}
-          <div className="flex items-center relative" ref={profileRef}>
+          <div className="absolute top-0 right-0 flex items-center relative" ref={profileRef}>
             <button 
               onClick={() => setIsProfileOpen(!isProfileOpen)}
               className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] rounded-full flex items-center justify-center hover:from-[#1E40AF] hover:to-[#3B82F6] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"

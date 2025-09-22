@@ -38,24 +38,16 @@ export default function HomePage() {
 
       {/* Header */}
       <header className="relative z-50 w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-6 bg-white/80 backdrop-blur-xl border-b border-[#E2E8F0]/50 shadow-lg sticky top-0">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-          {/* Logo/Brand */}
-          <div className="flex items-center space-x-3 sm:space-x-4 group">
-            <div className="relative">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-gradient-to-br from-[#3B82F6] to-[#1E40AF] rounded-2xl flex items-center justify-center shadow-2xl group-hover:shadow-[#3B82F6]/25 transition-all duration-500 transform group-hover:scale-110 group-hover:rotate-3">
-                <svg className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <div className="absolute -inset-2 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] rounded-2xl blur-xl opacity-0 group-hover:opacity-30 transition-opacity duration-500"></div>
-            </div>
+        <div className="max-w-7xl mx-auto relative">
+          <div className="text-center">
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#1E40AF]">
               EventIA
             </h1>
+            <p className="text-sm sm:text-base text-[#64748B] mt-1 sm:mt-2">Your Event Management Platform</p>
           </div>
           
           {/* Login/Signup Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+          <div className="absolute top-0 right-0 flex flex-col sm:flex-row gap-3 sm:gap-4">
             <button 
               onClick={handleLogin}
               className="relative px-6 sm:px-8 py-2.5 sm:py-3 text-[#3B82F6] border-2 border-[#3B82F6] rounded-2xl hover:bg-[#EFF6FF] hover:border-[#1E40AF] transition-all duration-300 font-semibold bg-white/80 backdrop-blur-sm overflow-hidden group text-sm sm:text-base w-full sm:w-auto"

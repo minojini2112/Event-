@@ -82,23 +82,16 @@ function AdminsTable() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Header Section */}
         <div className="mb-6 sm:mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-            <div className="flex items-center space-x-3 sm:space-x-4">
-              <div className="p-2 sm:p-3 bg-[#3B82F6] rounded-xl shadow-lg">
-                <svg className="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-              </div>
-              <div>
+          <div className="relative">
+            <div className="text-center">
                 <h1 className="text-2xl sm:text-3xl lg:text-[2.5rem] font-semibold text-[#334155] leading-tight">
                   Admins & Event Access
                 </h1>
                 <p className="text-[#64748B] text-sm sm:text-base lg:text-lg mt-1 sm:mt-2">Overview of admins, requested/created events, and their status.</p>
-              </div>
             </div>
             <button
               onClick={() => window.history.back()}
-              className="bg-[#3B82F6] hover:bg-[#1E40AF] text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-medium transition-all duration-200 shadow-sm hover:shadow-md text-sm sm:text-base w-full sm:w-auto"
+              className="absolute top-0 right-0 bg-[#3B82F6] hover:bg-[#1E40AF] text-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl font-medium transition-all duration-200 shadow-sm hover:shadow-md text-sm sm:text-base w-full sm:w-auto"
             >
               Back
             </button>

@@ -85,27 +85,16 @@ export default function ParticipantRegisteredPage() {
 
       {/* Header */}
       <header className="relative z-50 w-full px-4 sm:px-8 py-4 sm:py-6 bg-white/80 backdrop-blur-xl border-b border-[#E2E8F0]/50 shadow-lg sticky top-0">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
-          {/* Logo/Brand */}
-          <div className="flex items-center space-x-3 sm:space-x-4 group">
-            <div className="relative">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-[#3B82F6] to-[#1E40AF] rounded-2xl flex items-center justify-center shadow-2xl group-hover:shadow-[#3B82F6]/25 transition-all duration-500 transform group-hover:scale-110 group-hover:rotate-3">
-                <svg className="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <div className="absolute -inset-2 bg-gradient-to-r from-[#3B82F6] to-[#06B6D4] rounded-2xl blur-xl opacity-0 group-hover:opacity-30 transition-opacity duration-500"></div>
-            </div>
-            <div>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#1E40AF]">My Registrations</h1>
-              <p className="text-[#64748B] mt-1 font-medium text-sm sm:text-base">Track your event journey and achievements</p>
-            </div>
+        <div className="max-w-7xl mx-auto relative">
+          <div className="text-center">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#1E40AF]">My Registrations</h1>
+            <p className="text-[#64748B] mt-1 font-medium text-sm sm:text-base">Track your event journey and achievements</p>
           </div>
           
           {/* Back Button */}
           <button 
             onClick={() => router.back()} 
-            className="group relative px-4 sm:px-6 py-2.5 sm:py-3 bg-white/80 backdrop-blur-sm text-[#3B82F6] border-2 border-[#3B82F6] rounded-2xl hover:bg-[#EFF6FF] hover:border-[#1E40AF] transition-all duration-300 font-semibold shadow-xl hover:shadow-2xl transform hover:scale-105 overflow-hidden w-full sm:w-auto text-sm sm:text-base"
+            className="absolute top-0 right-0 group relative px-4 sm:px-6 py-2.5 sm:py-3 bg-white/80 backdrop-blur-sm text-[#3B82F6] border-2 border-[#3B82F6] rounded-2xl hover:bg-[#EFF6FF] hover:border-[#1E40AF] transition-all duration-300 font-semibold shadow-xl hover:shadow-2xl transform hover:scale-105 overflow-hidden w-full sm:w-auto text-sm sm:text-base"
           >
             <span className="relative z-10 flex items-center justify-center gap-2">
               <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
